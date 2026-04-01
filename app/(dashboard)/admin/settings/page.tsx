@@ -57,14 +57,6 @@ function SettingsCard({ children, dark }: { children: React.ReactNode; dark: boo
     <div
       className="rounded-2xl p-5 relative overflow-hidden admin-panel"
     >
-      {/* Sheen */}
-      <div aria-hidden style={{
-        position: "absolute", top: 0, left: 0, right: 0, height: "40%",
-        background: dark
-          ? "linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, transparent 100%)"
-          : "linear-gradient(to bottom, rgba(255,255,255,0.70) 0%, transparent 100%)",
-        pointerEvents: "none", borderRadius: "inherit",
-      }} />
       <div className="relative z-10">{children}</div>
     </div>
   );
@@ -198,14 +190,11 @@ export default function AdminSettings() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
+      <div
         className="max-w-4xl mx-auto space-y-5"
       >
         {/* Page Header */}
-        <motion.div variants={item}>
+        <div>
           <h1
             className="text-2xl font-bold"
             style={{ color: textMain, fontFamily: FONT_DISPLAY, fontWeight: 800 }}
@@ -218,7 +207,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Glass Frost Mode ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={Paintbrush} title="Glass Frost Mode" subtitle="Control the visual design of your interface" dark={dark} />
             <SettingsRow label="Glass Frost Effect" description="Enable the frosted glass transparency effect across all panels" dark={dark}>
@@ -250,7 +239,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Profile Details ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={User} title="Profile Details" subtitle="Manage your personal information" dark={dark} />
             <div className="space-y-3">
@@ -301,7 +290,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Two-Step Verification ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={Shield} title="Two-Step Verification" subtitle="Add an extra layer of security to your account" dark={dark} />
             <SettingsRow label="Enable 2FA" description="Require a verification code on login" dark={dark}>
@@ -372,7 +361,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Shift Reminders & Active Period ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={Bell} title="Shift Reminders" subtitle="Configure notification preferences" dark={dark} />
             <SettingsRow label="Shift Reminders" description="Get notified before your shifts start" dark={dark}>
@@ -440,7 +429,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Background Settings ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={ImageIcon} title="Background Settings" subtitle="Customize the portal background" dark={dark} />
             <SettingsRow label="Auto-Change Background" description="Randomly rotate background effects every minute" dark={dark}>
@@ -530,7 +519,7 @@ export default function AdminSettings() {
         </motion.div>
 
         {/* ── Notes with Calendar ── */}
-        <motion.div variants={item}>
+        <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={StickyNote} title="Notes & Reminders" subtitle="Keep track of important dates and information" dark={dark} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -654,8 +643,8 @@ export default function AdminSettings() {
               </div>
             </div>
           </SettingsCard>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

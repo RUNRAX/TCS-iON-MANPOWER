@@ -182,19 +182,6 @@ export default function AdminDashboard() {
                     willChange:           "transform, box-shadow",
                   }}
                 >
-                  {/* Inner top sheen */}
-                  <div
-                    aria-hidden
-                    style={{
-                      position: "absolute", top: 0, left: 0, right: 0,
-                      height:   "45%",
-                      background: dark
-                        ? "linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, transparent 100%)"
-                        : "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 100%)",
-                      pointerEvents: "none",
-                      borderRadius:  "inherit",
-                    }}
-                  />
                   {/* Hover glow sweep */}
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
@@ -262,19 +249,6 @@ export default function AdminDashboard() {
           boxShadow:            makeEdge(dark),
         }}
       >
-        {/* Panel inner sheen */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute", top: 0, left: 0, right: 0,
-            height:   "24%",
-            background: dark
-              ? "linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, transparent 100%)"
-              : "linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, transparent 100%)",
-            pointerEvents: "none",
-          }}
-        />
-
         {/* Panel header */}
         <div
           className="px-5 py-4 flex items-center justify-between relative z-10"
