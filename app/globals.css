@@ -129,9 +129,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-outfit),
     'Outfit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--theme-bg-color);
-  background-size: 250% 250%;
   background-attachment: fixed;
-  animation: ambientBgMove 24s ease infinite alternate;
   color: var(--foreground);
   overflow-x: hidden;
   transition:

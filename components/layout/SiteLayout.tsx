@@ -225,21 +225,21 @@ const LiquidBackground = () => (
       top: "-15%", left: "-5%",
       width: "55vmax", height: "55vmax",
       boxShadow: "inset -20px -30px 120px var(--orb-edge-1), inset -2px -4px 12px var(--orb-edge-2), 0 40px 120px rgba(0,0,0,0.7)",
-      animation: "floatOrb1 32s ease-in-out infinite, wobbleDrop 14s ease-in-out infinite alternate",
+      animation: "floatOrb1 32s ease-in-out infinite",
     }} />
     {/* Bottom-Right Droplet */}
     <div className="glowing-orb" style={{
       bottom: "-15%", right: "-5%",
       width: "60vmax", height: "60vmax",
       boxShadow: "inset 20px 30px 120px var(--orb-edge-2), inset 2px 4px 12px var(--orb-edge-3), 0 -40px 120px rgba(0,0,0,0.7)",
-      animation: "floatOrb2 40s ease-in-out infinite, wobbleDrop 18s ease-in-out infinite alternate-reverse",
+      animation: "floatOrb2 40s ease-in-out infinite",
     }} />
     {/* Mid-Left Overlapping Droplet */}
     <div className="glowing-orb" style={{
       top: "20%", left: "-15%",
       width: "45vmax", height: "45vmax",
       boxShadow: "inset -15px 25px 100px var(--orb-edge-3), inset -2px 3px 10px var(--orb-edge-1), 0 20px 100px rgba(0,0,0,0.6)",
-      animation: "floatOrb3 35s ease-in-out infinite, wobbleDrop 12s ease-in-out infinite alternate",
+      animation: "floatOrb3 35s ease-in-out infinite",
     }} />
   </div>
 );
