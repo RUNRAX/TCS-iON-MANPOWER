@@ -1,0 +1,549 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   globals.css — iOS 26.4 "Liquid Glass" System (v26.4)
+   Apple-grade glassmorphism, spring physics, 3D edge lighting
+   @import rules must come first (CSS spec + Turbopack rule)
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Google Fonts ────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 1  CSS Custom Properties
+───────────────────────────────────────────────────────────────────────────── */
+:root {
+  --tc-primary:   #6366f1;
+  --tc-secondary: #8b5cf6;
+  --tc-accent:    #06b6d4;
+
+  /* shadcn/ui bridge — dark by default */
+  --background:          240 10% 2.8%;
+  --foreground:          0 0% 98%;
+  --card:                240 10% 3.9%;
+  --card-foreground:     0 0% 98%;
+  --popover:             240 10% 3.9%;
+  --popover-foreground:  0 0% 98%;
+  --primary:             0 0% 98%;
+  --primary-foreground:  240 5.9% 10%;
+  --secondary:           240 3.7% 15.9%;
+  --secondary-foreground:0 0% 98%;
+  --muted:               240 3.7% 15.9%;
+  --muted-foreground:    240 5% 64.9%;
+  --accent:              240 3.7% 15.9%;
+  --accent-foreground:   0 0% 98%;
+  --destructive:         0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border:              240 3.7% 15.9%;
+  --input:               240 3.7% 15.9%;
+  --ring:                240 4.9% 83.9%;
+
+  /* iOS radius system — nested squircle ratios */
+  --radius-xs:  8px;   /* inner chips */
+  --radius-sm:  12px;  /* buttons, tags */
+  --radius-md:  16px;  /* inputs, small cards */
+  --radius-lg:  24px;  /* cards, panels */
+  --radius-xl:  32px;  /* modals, sheets */
+  --radius-2xl: 44px;  /* full-sheet containers */
+  --radius: 1.5rem;    /* shadcn compat */
+
+  /* Glass material tokens */
+  --glass-blur-sm:    blur(20px)  saturate(180%) brightness(1.04);
+  --glass-blur-md:    blur(40px)  saturate(200%) brightness(1.06);
+  --glass-blur-lg:    blur(64px)  saturate(220%) brightness(1.08);
+  --glass-blur-xl:    blur(100px) saturate(240%) brightness(1.10);
+
+  /* Timing — Apple spring system */
+  --spring-snappy:    cubic-bezier(0.25, 1, 0.5, 1);
+  --spring-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-smooth:    cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-decel:     cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+/* ── shadcn light mode ───────────────────────────────────────────────────── */
+.tc-light {
+  --background:          0 0% 100%;
+  --foreground:          240 10% 3.9%;
+  --card:                0 0% 100%;
+  --card-foreground:     240 10% 3.9%;
+  --popover:             0 0% 100%;
+  --popover-foreground:  240 10% 3.9%;
+  --primary:             240 5.9% 10%;
+  --primary-foreground:  0 0% 98%;
+  --secondary:           240 4.8% 95.9%;
+  --secondary-foreground:240 5.9% 10%;
+  --muted:               240 4.8% 95.9%;
+  --muted-foreground:    240 3.8% 46.1%;
+  --accent:              240 4.8% 95.9%;
+  --accent-foreground:   240 5.9% 10%;
+  --destructive:         0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border:              240 5.9% 90%;
+  --input:               240 5.9% 90%;
+  --ring:                240 10% 3.9%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 2  Base Reset
+───────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #06060e;
+  color: #f0eeff;
+  /* Prevent FOUC */
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-outfit),
+               'Outfit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: inherit;
+  color: inherit;
+  overflow-x: hidden;
+  transition:
+    background 0.45s var(--spring-decel),
+    color      0.35s var(--spring-decel);
+}
+
+/* Disable ALL transitions during hydration to prevent any flash */
+html.no-transition,
+html.no-transition *,
+html.no-transition *::before,
+html.no-transition *::after {
+  transition:       none !important;
+  animation-duration: 0.001ms !important;
+  animation-delay:    0ms    !important;
+}
+
+/* ── Theme body overrides ────────────────────────────────────────────────── */
+html.tc-dark  body { background: #06060e; color: #f0eeff; }
+html.tc-light body { background: #f0f0fa; color: #0f0a2e; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 3  iOS 26 Glassmorphism Utilities
+   The Apple "Liquid Glass" material system — layered blur + edge lighting
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Base glass — light frosted chrome */
+.glass {
+  backdrop-filter:         var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* 3D Apple Edge: top-light specular + soft drop shadow */
+  box-shadow:
+    /* ① Inner top-light — catches the "glass edge" */
+    inset 0 1px 0      rgba(255,255,255,0.18),
+    /* ② Inner bottom-shadow — adds physical depth */
+    inset 0 -1px 0     rgba(0,0,0,0.10),
+    /* ③ Lateral rim highlight */
+    inset 1px 0 0      rgba(255,255,255,0.08),
+    inset -1px 0 0     rgba(255,255,255,0.04),
+    /* ④ Outer diffuse drop */
+    0 8px 32px -4px    rgba(0,0,0,0.28),
+    0 2px 8px  -2px    rgba(0,0,0,0.15);
+}
+
+/* Elevated glass — panels, cards */
+.glass-panel {
+  backdrop-filter:         var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  box-shadow:
+    inset 0 1.5px 0    rgba(255,255,255,0.22),
+    inset 0 -1px  0    rgba(0,0,0,0.12),
+    inset 1px 0   0    rgba(255,255,255,0.10),
+    inset -1px 0  0    rgba(255,255,255,0.05),
+    0 16px 48px -8px   rgba(0,0,0,0.36),
+    0 4px  16px -4px   rgba(0,0,0,0.18);
+}
+
+/* Ultra-heavy — modals, sheets */
+.glass-panel-strong {
+  backdrop-filter:         var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl);
+  box-shadow:
+    inset 0 2px   0    rgba(255,255,255,0.28),
+    inset 0 -1px  0    rgba(0,0,0,0.14),
+    inset 1px 0   0    rgba(255,255,255,0.14),
+    inset -1px 0  0    rgba(255,255,255,0.07),
+    0 24px 72px -8px   rgba(0,0,0,0.45),
+    0 6px  24px -4px   rgba(0,0,0,0.22);
+}
+
+/* Light-mode glass overrides */
+html.tc-light .glass,
+html.tc-light .glass-panel,
+html.tc-light .glass-panel-strong {
+  box-shadow:
+    inset 0 1.5px 0    rgba(255,255,255,0.95),
+    inset 0 -1px  0    rgba(0,0,0,0.04),
+    inset 1px 0   0    rgba(255,255,255,0.80),
+    inset -1px 0  0    rgba(255,255,255,0.60),
+    0 8px 32px -4px    rgba(0,0,0,0.10),
+    0 2px 8px  -2px    rgba(0,0,0,0.06);
+}
+
+/* ── Glossy border ───────────────────────────────────────────────────────── */
+.glossy-border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+html.tc-dark  .glossy-border { border-color: rgba(255,255,255,0.10); }
+html.tc-light .glossy-border { border-color: rgba(255,255,255,0.80); }
+
+/* ── Gradient text ───────────────────────────────────────────────────────── */
+.tc-gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--tc-primary),
+    var(--tc-secondary),
+    var(--tc-accent)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 4  GPU Layer Promotion
+───────────────────────────────────────────────────────────────────────────── */
+.gpu {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 5  Ambient Orb Animations
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1.00); }
+  33%       { transform: translate( 3%, -4%) scale(1.08); }
+  66%       { transform: translate(-2%,  3%) scale(0.95); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1.00); }
+  40%       { transform: translate(-4%,  3%) scale(1.06); }
+  70%       { transform: translate( 3%, -2%) scale(0.97); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1.00); }
+  50%       { transform: translate(-3%, -3%) scale(1.05); }
+}
+@keyframes orbFloat4 {
+  0%, 100% { transform: translate(0, 0) scale(1.00) rotate(0deg); }
+  25%       { transform: translate( 2%, -2%) scale(1.04) rotate(3deg); }
+  75%       { transform: translate(-3%,  2%) scale(0.98) rotate(-2deg); }
+}
+
+.orb-1 { animation: orbFloat1 20s ease-in-out infinite; }
+.orb-2 { animation: orbFloat2 26s ease-in-out infinite; }
+.orb-3 { animation: orbFloat3 18s ease-in-out infinite; }
+.orb-4 { animation: orbFloat4 24s ease-in-out infinite; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 6  Core Keyframes
+───────────────────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1.00); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1.00); }
+}
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1.00); }
+  50%       { opacity: 1.0; transform: scale(1.04); }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--tc-primary) 30%, transparent); }
+  50%       { box-shadow: 0 0 48px color-mix(in srgb, var(--tc-primary) 55%, transparent),
+                          0 0 72px color-mix(in srgb, var(--tc-secondary) 25%, transparent); }
+}
+@keyframes gradientSlide {
+  0%   { background-position: 0%   50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes fetchPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
+  40%            { transform: scale(1);   opacity: 1; }
+}
+@keyframes starFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 7  Page Transitions (Next.js view transitions)
+───────────────────────────────────────────────────────────────────────────── */
+::view-transition-old(root) {
+  animation: 220ms var(--spring-decel) both pageFadeOut;
+}
+::view-transition-new(root) {
+  animation: 320ms var(--spring-smooth) both pageFadeIn;
+}
+@keyframes pageFadeOut {
+  from { opacity: 1; transform: translateY(0)   scale(1.00); filter: blur(0);   }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.99); filter: blur(3px); }
+}
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0)    scale(1.00); filter: blur(0);   }
+}
+
+/* ── Layout chrome transitions ───────────────────────────────────────────── */
+aside, header, nav, main {
+  transition:
+    background    0.42s var(--spring-decel),
+    border-color  0.42s var(--spring-decel),
+    box-shadow    0.42s var(--spring-decel),
+    color         0.30s var(--spring-decel);
+}
+
+/* ── Glossy flash on theme switch ────────────────────────────────────────── */
+@keyframes glossyFlash {
+  0%   { box-shadow: none; }
+  30%  { box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 0 1px rgba(255,255,255,0.18); }
+  100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 0 0 1px transparent; }
+}
+html.tc-dark  aside,
+html.tc-dark  header { animation: glossyFlash 0.6s var(--spring-smooth) forwards; }
+html.tc-light aside,
+html.tc-light header { animation: glossyFlash 0.6s var(--spring-smooth) forwards; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 8  Scrollbar — invisible but functional
+───────────────────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar         { width: 0; height: 0; background: transparent; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: transparent; }
+*                           { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 9  Input / Form System
+───────────────────────────────────────────────────────────────────────────── */
+/* Autofill override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(10,10,30,0.95) inset !important;
+  -webkit-text-fill-color: #e8eeff !important;
+  caret-color: #e8eeff;
+}
+
+/* iOS-style input */
+.tc-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", 'Outfit', sans-serif;
+  font-weight: 400;
+  outline: none;
+  box-sizing: border-box;
+
+  /* Glass material */
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #e8eeff;
+
+  /* Apple Edge on inputs */
+  box-shadow:
+    inset 0 1px 0   rgba(255,255,255,0.10),
+    inset 0 -1px 0  rgba(0,0,0,0.12),
+    0 2px 8px -2px  rgba(0,0,0,0.20);
+
+  backdrop-filter:         blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+
+  transition:
+    border-color 0.22s var(--spring-smooth),
+    box-shadow   0.22s var(--spring-smooth),
+    background   0.22s var(--spring-smooth) !important;
+}
+.tc-input::placeholder { color: rgba(255,255,255,0.22); }
+.tc-input:focus {
+  border-color: var(--tc-primary);
+  background: rgba(255,255,255,0.09);
+  box-shadow:
+    inset 0 1px 0   rgba(255,255,255,0.12),
+    inset 0 -1px 0  rgba(0,0,0,0.10),
+    0 0 0 3px       color-mix(in srgb, var(--tc-primary) 18%, transparent),
+    0 4px 16px -4px rgba(0,0,0,0.24);
+}
+.tc-input:hover:not(:focus) {
+  border-color: rgba(255,255,255,0.20);
+  background:   rgba(255,255,255,0.08);
+}
+
+/* Light mode inputs */
+html.tc-light .tc-input,
+.tc-light .tc-input {
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(0,0,0,0.10);
+  color: #0f0a2e;
+  box-shadow:
+    inset 0 1px 0   rgba(255,255,255,0.95),
+    inset 0 -1px 0  rgba(0,0,0,0.04),
+    0 2px 6px -2px  rgba(0,0,0,0.08);
+}
+html.tc-light .tc-input::placeholder,
+.tc-light .tc-input::placeholder { color: rgba(15,10,46,0.30); }
+html.tc-light .tc-input:focus,
+.tc-light .tc-input:focus {
+  background: rgba(255,255,255,0.96);
+  box-shadow:
+    inset 0 1.5px 0  rgba(255,255,255,1.00),
+    inset 0 -1px  0  rgba(0,0,0,0.03),
+    0 0 0 3px        color-mix(in srgb, var(--tc-primary) 14%, transparent),
+    0 4px 12px -4px  rgba(0,0,0,0.10);
+}
+
+/* Select arrow */
+select.tc-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.35)' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+select.tc-input option { background: #0d0b22; color: #e8eeff; }
+
+/* Date inputs */
+input[type="date"], input[type="time"] { color-scheme: dark; }
+html.tc-light input[type="date"],
+html.tc-light input[type="time"]      { color-scheme: light; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 10  Interactive Button System
+───────────────────────────────────────────────────────────────────────────── */
+button { -webkit-tap-highlight-color: transparent; }
+
+/* Apple spring press — scale down on tap, bounce on release */
+.btn-press {
+  transition: transform 0.18s var(--spring-bounce), box-shadow 0.18s var(--spring-smooth);
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+.btn-press:hover {
+  transform: scale(1.01);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 11  Loading & Skeleton
+───────────────────────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 37%,
+    rgba(255,255,255,0.04) 63%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+html.tc-light .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.04) 25%,
+    rgba(0,0,0,0.08) 37%,
+    rgba(0,0,0,0.04) 63%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 12  Framer Motion
+───────────────────────────────────────────────────────────────────────────── */
+[data-framer-motion] { will-change: transform, opacity; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 13  Selection Colour
+───────────────────────────────────────────────────────────────────────────── */
+::selection {
+  background: color-mix(in srgb, var(--tc-primary) 32%, transparent);
+  color: inherit;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 14  iOS Status Bar / Notch safe-area support
+───────────────────────────────────────────────────────────────────────────── */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-top    { padding-top:    env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-left   { padding-left:   env(safe-area-inset-left); }
+  .safe-right  { padding-right:  env(safe-area-inset-right); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 15  Reduce Motion
+───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:   0.01ms !important;
+    transition-duration:  0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 16  Utility Classes
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Glass strong shorthand */
+.glass-strong {
+  backdrop-filter:         var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl);
+}
+
+/* Neon glow helpers */
+.glow-primary   { box-shadow: 0 0 24px color-mix(in srgb, var(--tc-primary)   40%, transparent); }
+.glow-secondary { box-shadow: 0 0 24px color-mix(in srgb, var(--tc-secondary) 35%, transparent); }
+.glow-accent    { box-shadow: 0 0 24px color-mix(in srgb, var(--tc-accent)    35%, transparent); }
+
+/* Dot grid overlay */
+.dot-grid {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--tc-primary) 40%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 40px 40px;
+}
+
+/* Continuous squircle approximation */
+.squircle-sm  { border-radius: var(--radius-sm);  }
+.squircle-md  { border-radius: var(--radius-md);  }
+.squircle-lg  { border-radius: var(--radius-lg);  }
+.squircle-xl  { border-radius: var(--radius-xl);  }
+.squircle-2xl { border-radius: var(--radius-2xl); }

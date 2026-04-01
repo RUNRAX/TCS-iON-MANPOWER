@@ -1,0 +1,14 @@
+import { createAdminClient } from "@/lib/supabase/server";
+import { withAdmin, ok, serverError } from "@/lib/utils/api";
+
+export const GET = withAdmin(async () => {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("broadcast_logs")
+    .select("id, type, title, target, sent, failed, created_at")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) { console.error("[Broadcast/History]:", error); return serverError(); }
+  return ok({ logs: data ?? [] });
+});
