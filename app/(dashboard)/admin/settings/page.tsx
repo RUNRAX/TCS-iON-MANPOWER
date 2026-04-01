@@ -204,7 +204,7 @@ export default function AdminSettings() {
           <p className="text-sm mt-1" style={{ color: textMuted, fontFamily: FONT_SYSTEM }}>
             Customize your portal experience
           </p>
-        </motion.div>
+        </div>
 
         {/* ── Glass Frost Mode ── */}
         <div>
@@ -236,7 +236,7 @@ export default function AdminSettings() {
               />
             </SettingsRow>
           </SettingsCard>
-        </motion.div>
+        </div>
 
         {/* ── Profile Details ── */}
         <div>
@@ -287,7 +287,7 @@ export default function AdminSettings() {
               ))}
             </div>
           </SettingsCard>
-        </motion.div>
+        </div>
 
         {/* ── Two-Step Verification ── */}
         <div>
@@ -298,9 +298,7 @@ export default function AdminSettings() {
             </SettingsRow>
 
             {showTwoStepSetup && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
+              <div
                 className="mt-3 p-4 rounded-xl"
                 style={{
                   background: dark ? "rgba(16,185,129,0.06)" : "rgba(16,185,129,0.04)",
@@ -348,7 +346,7 @@ export default function AdminSettings() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             <div className="mt-3 flex items-center gap-2">
@@ -358,7 +356,7 @@ export default function AdminSettings() {
               </p>
             </div>
           </SettingsCard>
-        </motion.div>
+        </div>
 
         {/* ── Shift Reminders & Active Period ── */}
         <div>
@@ -426,7 +424,7 @@ export default function AdminSettings() {
               </div>
             </div>
           </SettingsCard>
-        </motion.div>
+        </div>
 
         {/* ── Background Settings ── */}
         <div>
@@ -516,7 +514,7 @@ export default function AdminSettings() {
               )}
             </div>
           </SettingsCard>
-        </motion.div>
+        </div>
 
         {/* ── Notes with Calendar ── */}
         <div>
