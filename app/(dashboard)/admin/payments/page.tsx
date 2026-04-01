@@ -429,7 +429,7 @@ export default function AdminBookingsPage() {
 
       <AnimatePresence mode="wait">
         {!showPayments ? (
-          <motion.div key="attendance" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
+          <motion.div key="attendance">
             <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
 
               {/* ── Left: Calendar ─────────────────────────────────────────── */}
@@ -630,7 +630,7 @@ export default function AdminBookingsPage() {
             </div>
           </motion.div>
         ) : (
-          <motion.div key="payments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}>
+          <motion.div key="payments">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 16, gap: 8 }}>
               {(["", "pending", "cleared"] as const).map(s => (
                 <button key={s} onClick={() => setStatusFilter(s || undefined)}

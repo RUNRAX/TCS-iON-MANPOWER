@@ -194,9 +194,6 @@ export default function AdminBroadcast() {
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.35, ease: [0.4,0,0.2,1] }}
         style={{ marginBottom: 32, position: "relative", zIndex: 1 }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 4 }}>
@@ -212,9 +209,6 @@ export default function AdminBroadcast() {
 
       {/* Main glass card */}
       <motion.div
-        initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.40, delay: 0.08, ease: [0.4,0,0.2,1] }}
         style={{
           maxWidth: 580, position: "relative", zIndex: 1,
           borderRadius: 28, background: glassBg,

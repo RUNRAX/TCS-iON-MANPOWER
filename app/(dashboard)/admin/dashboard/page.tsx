@@ -146,8 +146,8 @@ export default function AdminDashboard() {
     show:   { transition: { staggerChildren: 0.07 } },
   };
   const cardItem = {
-    hidden: { opacity: 0, y: 24, scale: 0.96 },
-    show:   { opacity: 1, y: 0,  scale: 1.00, transition: { type: "spring", stiffness: 320, damping: 28 } },
+    hidden: { opacity: 1 },
+    show:   { opacity: 1 },
   };
 
   return (
@@ -260,9 +260,6 @@ export default function AdminDashboard() {
 
       {/* ── Recent Bookings panel ── */}
       <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        animate={{ opacity: 1,  y: 0  }}
-        transition={{ delay: 0.28, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
         className="rounded-2xl overflow-hidden relative admin-panel"
         style={{
           boxShadow:            makeEdge(dark),
