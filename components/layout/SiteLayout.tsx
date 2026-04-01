@@ -638,10 +638,10 @@ export default function SiteLayout({
             {mounted ? (
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, y: 16, filter: "blur(5px)", scale: 0.99 }}
-                animate={{ opacity: 1, y: 0,  filter: "blur(0px)", scale: 1.00 }}
+                initial={{ opacity: 0, y: 16, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1.00 }}
                 transition={{ duration: 0.30, ease: [0.22, 1, 0.36, 1] }}
-                style={{ willChange: "opacity, transform, filter", minHeight: "100%" }}
+                style={{ willChange: "opacity, transform", minHeight: "100%" }}
               >
                 <ErrorBoundary key={pathname}>
                   {children}
