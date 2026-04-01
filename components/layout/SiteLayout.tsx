@@ -545,7 +545,7 @@ export default function SiteLayout({
       </AnimatePresence>
 
       {/* ── Main area ── */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10" style={{ minWidth: 0 }} suppressHydrationWarning>
+      <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
@@ -641,7 +641,7 @@ export default function SiteLayout({
                 initial={{ opacity: 0, y: 16, scale: 0.99 }}
                 animate={{ opacity: 1, y: 0, scale: 1.00 }}
                 transition={{ duration: 0.30, ease: [0.22, 1, 0.36, 1] }}
-                style={{ willChange: "opacity, transform", minHeight: "100%" }}
+                style={{ minHeight: "100%" }}
               >
                 <ErrorBoundary key={pathname}>
                   {children}

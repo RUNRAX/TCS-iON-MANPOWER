@@ -159,7 +159,6 @@ export default function AdminDashboard() {
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-        style={{ perspective: "1200px" }}
       >
         {cards.map((c, i) => {
           const accent = cardAccents[i % cardAccents.length];
