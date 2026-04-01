@@ -154,11 +154,8 @@ export default function AdminDashboard() {
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
 
       {/* ── Stat cards — 4 columns matching reference ── */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-6 relative z-10"
       >
         {cards.map((c, i) => {
           const accent = cardAccents[i % cardAccents.length];
@@ -256,10 +253,10 @@ export default function AdminDashboard() {
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
 
       {/* ── Recent Bookings panel ── */}
-      <motion.div
+      <div
         className="rounded-2xl overflow-hidden relative admin-panel"
         style={{
           boxShadow:            makeEdge(dark),
@@ -395,7 +392,7 @@ export default function AdminDashboard() {
                 })
           }
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

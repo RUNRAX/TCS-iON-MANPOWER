@@ -220,7 +220,7 @@ export default function AdminExcelPage() {
           { label: "Pending Payments", value: s?.pendingPayments ?? "–", icon: Wallet,   color: "#f59e0b" },
           { label: "Approved",         value: employees.filter(e => e.status === "approved").length || "–", icon: Check, color: "#10b981" },
         ].map(sc => (
-          <div key={sc.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: "16px 18px" }}>
+          <div key={sc.label} className="admin-panel" style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 9, background: `${sc.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <sc.icon size={14} style={{ color: sc.color }} />
@@ -238,7 +238,7 @@ export default function AdminExcelPage() {
         {exports.map(ex => {
           const isLoading = loadingType === ex.type;
           return (
-            <div key={ex.type} style={{ background: card, border: `1px solid ${border}`, borderRadius: 16, padding: 22, display: "flex", flexDirection: "column", gap: 12 }}>
+            <div key={ex.type} className="admin-panel" style={{ background: card, border: `1px solid ${border}`, borderRadius: 16, padding: 22, display: "flex", flexDirection: "column", gap: 12 }}>
               {/* Title row */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 11, background: `${ex.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

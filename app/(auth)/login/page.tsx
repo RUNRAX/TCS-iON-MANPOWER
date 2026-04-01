@@ -95,8 +95,8 @@ export default function LoginPage() {
 
   /* ── Design tokens ── */
   const bg = dark
-    ? "linear-gradient(135deg, #06060e 0%, #090720 40%, #060c18 100%)"
-    : "linear-gradient(135deg, #f0f0fa 0%, #e8e4ff 40%, #eef6ff 100%)";
+    ? "linear-gradient(135deg, #050505 0%, #111111 40%, #0a0a0a 100%)"
+    : "linear-gradient(135deg, #f5f5f5 0%, #eaeaea 40%, #ffffff 100%)";
   const cardBg    = dark ? "rgba(8,6,22,0.86)"  : "rgba(255,255,255,0.88)";
   const textMain  = dark ? "#f0eeff"            : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.44)" : "rgba(30,20,80,0.40)";

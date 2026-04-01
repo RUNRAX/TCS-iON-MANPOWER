@@ -249,9 +249,10 @@ export default function AdminBroadcast() {
                   <motion.button key={g.id} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
                     transition={{ type: "spring", stiffness: 400, damping: 28 }}
                     onClick={() => setTargetGroup(g.id)}
+                    className="admin-panel"
                     style={{
-                      flex: 1, padding: "13px 8px", borderRadius: 14, cursor: "pointer",
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                      flex: 1, padding: "16px 12px", borderRadius: 16, cursor: "pointer",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                       background: isActive ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" : dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
                       border: `1px solid ${isActive ? "transparent" : (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)")}`,
                       boxShadow: isActive ? "0 6px 20px color-mix(in srgb, var(--tc-primary) 32%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)" : dark ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "inset 0 1px 0 rgba(255,255,255,0.80)",
@@ -271,6 +272,7 @@ export default function AdminBroadcast() {
               Custom Message <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, opacity: 0.7 }}>(optional)</span>
             </label>
             <textarea rows={4} value={customMsg} onChange={e => setCustomMsg(e.target.value)}
+              className="admin-panel"
               placeholder="Leave blank to use the default shift notification template…"
               style={inp}
               onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 18%, transparent)"; e.target.style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.96)"; }}

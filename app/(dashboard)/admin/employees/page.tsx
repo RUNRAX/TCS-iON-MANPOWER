@@ -102,9 +102,8 @@ export default function AdminEmployees() {
             value={rawSearch}
             onChange={e => { setRawSearch(e.target.value); setPage(1); }}
             placeholder="Search by name, email or phone…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-all"
-            style={{ background: cardBg, border: `1px solid ${border}`, color: textMain, outline: "none",
-              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-all admin-panel"
+            style={{ border: `1px solid ${border}`, color: textMain, outline: "none",
               boxShadow: rawSearch ? `0 0 20px color-mix(in srgb, var(--tc-primary) 20%, transparent)` : "none" }}
           />
           {/* Live search indicator — three-dot pulse */}
@@ -123,7 +122,7 @@ export default function AdminEmployees() {
         </div>
 
         {/* Status tabs */}
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: cardBg, border: `1px solid ${border}` }}>
+        <div className="flex gap-1 p-1 rounded-xl admin-panel" style={{ border: `1px solid ${border}` }}>
           {tabs.map(tab => (
             <button key={tab} onClick={() => { setStatus(tab); setPage(1); }}
               className="px-4 py-1.5 rounded-lg text-xs font-medium capitalize transition-all"
@@ -138,7 +137,7 @@ export default function AdminEmployees() {
       </div>
 
       {/* Employee list */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: cardBg, border: `1px solid ${border}`, backdropFilter: "blur(32px) saturate(210%)", WebkitBackdropFilter: "blur(32px) saturate(210%)", perspective: "1000px" }}>
+      <div className="rounded-2xl overflow-hidden admin-panel" style={{ border: `1px solid ${border}`, perspective: "1000px" }}>
         {isLoading
           ? Array(5).fill(0).map((_, i) => (
               <div key={i} className="px-5 py-4 flex gap-4" style={{ borderBottom: i < 4 ? `1px solid ${border}` : "none" }}>

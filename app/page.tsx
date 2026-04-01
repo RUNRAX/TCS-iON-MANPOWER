@@ -98,8 +98,8 @@ export default function Home() {
     mouseY.set(e.clientY / window.innerHeight);
   }, [mouseX, mouseY]);
 
-  const darkBg  = "linear-gradient(135deg, #07070f 0%, #0a0820 40%, #060d1a 100%)";
-  const lightBg = "linear-gradient(135deg, #f0f0ff 0%, #e8e4ff 40%, #eef6ff 100%)";
+  const darkBg  = "linear-gradient(135deg, #050505 0%, #111111 40%, #0a0a0a 100%)";
+  const lightBg = "linear-gradient(135deg, #f5f5f5 0%, #eaeaea 40%, #ffffff 100%)";
   const bgMain  = dark ? darkBg : lightBg;
   const textMain  = dark ? "#ffffff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,200,230,0.5)" : "rgba(30,20,80,0.5)";
