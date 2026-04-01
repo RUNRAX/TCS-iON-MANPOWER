@@ -192,7 +192,7 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
         transition: "color 0.22s ease",
         flex:       1,
         letterSpacing: hovered ? "0.01em" : "0",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif",
       }}>
         {item.label}
       </span>
@@ -216,6 +216,33 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
     </motion.div>
   );
 });
+
+/* ── Liquid Background Component (Internal) ──────────────────────────────── */
+const LiquidBackground = () => (
+  <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden" }}>
+    {/* Top-Left Droplet */}
+    <div className="glowing-orb" style={{
+      top: "-15%", left: "-5%",
+      width: "55vmax", height: "55vmax",
+      boxShadow: "inset -20px -30px 120px var(--orb-edge-1), inset -2px -4px 12px var(--orb-edge-2), 0 40px 120px rgba(0,0,0,0.7)",
+      animation: "floatOrb1 32s ease-in-out infinite, wobbleDrop 14s ease-in-out infinite alternate",
+    }} />
+    {/* Bottom-Right Droplet */}
+    <div className="glowing-orb" style={{
+      bottom: "-15%", right: "-5%",
+      width: "60vmax", height: "60vmax",
+      boxShadow: "inset 20px 30px 120px var(--orb-edge-2), inset 2px 4px 12px var(--orb-edge-3), 0 -40px 120px rgba(0,0,0,0.7)",
+      animation: "floatOrb2 40s ease-in-out infinite, wobbleDrop 18s ease-in-out infinite alternate-reverse",
+    }} />
+    {/* Mid-Left Overlapping Droplet */}
+    <div className="glowing-orb" style={{
+      top: "20%", left: "-15%",
+      width: "45vmax", height: "45vmax",
+      boxShadow: "inset -15px 25px 100px var(--orb-edge-3), inset -2px 3px 10px var(--orb-edge-1), 0 20px 100px rgba(0,0,0,0.6)",
+      animation: "floatOrb3 35s ease-in-out infinite, wobbleDrop 12s ease-in-out infinite alternate",
+    }} />
+  </div>
+);
 
 /* ── Main SiteLayout ─────────────────────────────────────────────────────── */
 interface SiteLayoutProps {
@@ -254,18 +281,19 @@ export default function SiteLayout({
      Read dynamic opacity directly from the ThemeContext integers 
   */
   const alphaVal  = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
-  const bgMain    = dark ? "#06060e" : "#f0f0fa";
-  const sidebarBg = dark ? `rgba(7,5,18,${alphaVal})`   : `rgba(252,251,255,${alphaVal})`;
+  // Set transparent so the <body> background image is visible
+  const bgMain    = dark ? "transparent" : "#f0f0fa";
+  const sidebarBg = dark ? `rgba(30,30,35,0.4)`    : `rgba(252,251,255,${alphaVal})`;
   // Header: transparent background — blur alone provides the frosted effect
   const headerBg = "transparent";
   const borderCol = dark
-    ? "color-mix(in srgb, var(--tc-primary) 14%, rgba(255,255,255,0.07))"
+    ? "rgba(255,255,255,0.10)"
     : "color-mix(in srgb, var(--tc-primary) 12%, rgba(255,255,255,0.85))";
   const edgeShadow = dark
-    ? "inset 0 1.5px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.15), inset 1px 0 0 rgba(255,255,255,0.07)"
+    ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 24px 48px rgba(0,0,0,0.4)"
     : "inset 0 1.5px 0 rgba(255,255,255,0.96), inset 0 -1px 0 rgba(0,0,0,0.03), inset 1px 0 0 rgba(255,255,255,0.80)";
-  const textMain  = dark ? "#f0eeff" : "#0f0a2e";
-  const textMuted = dark ? "rgba(200,195,240,0.50)" : "rgba(30,20,80,0.44)";
+  const textMain  = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
+  const textMuted = dark ? "rgba(255,255,255,0.6)"  : "rgba(30,20,80,0.44)";
 
   const navItems = role === "admin" ? adminNav : employeeNav;
   const displayName = userFullName ?? "Admin";
@@ -276,8 +304,9 @@ export default function SiteLayout({
   };
 
   const actualBlur = glassFrost ? glassBlur : 0;
-  const BLUR_SIDEBAR = `blur(${actualBlur}px) saturate(220%) brightness(1.07)`;
-  // Header blur: 0 at scroll-top, full frosted glass when scrolled
+  // Sidebar: NO blur — background stays sharp
+  const BLUR_SIDEBAR = "none";
+  // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
   const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
   const BLUR_HEADER  = headerBlurPx > 0
     ? `blur(${headerBlurPx}px)`
@@ -291,88 +320,10 @@ export default function SiteLayout({
         color:      textMain,
         transition: "background 0.5s cubic-bezier(0.22,1,0.36,1), color 0.4s ease",
       }}
+      suppressHydrationWarning
     >
-      {/* ── iOS-Inspired Mesh Gradient Background ── */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        {/* Base gradient layer — iOS mesh foundation */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: dark
-            ? "linear-gradient(135deg, #0a0618 0%, #0d0b1e 25%, #0f0a2a 50%, #0a0d20 75%, #06060e 100%)"
-            : "linear-gradient(135deg, #f8f6ff 0%, #eef0ff 25%, #f0eaff 50%, #e8f4ff 75%, #f0f0fa 100%)",
-        }} />
-
-        {/* iOS Mesh Blob 1 — Top-left indigo */}
-        <div className="ios-mesh-blob" style={{
-          top: "-12%",
-          left: "-8%",
-          width: "55vw",
-          height: "55vw",
-          background: dark
-            ? "radial-gradient(ellipse at center, rgba(99, 102, 241, 0.18) 0%, transparent 65%)"
-            : "radial-gradient(ellipse at center, rgba(99, 102, 241, 0.12) 0%, transparent 65%)",
-          animation: "iosMesh1 22s ease-in-out infinite",
-        }} />
-
-        {/* iOS Mesh Blob 2 — Bottom-right violet */}
-        <div className="ios-mesh-blob" style={{
-          bottom: "-15%",
-          right: "-10%",
-          width: "50vw",
-          height: "50vw",
-          background: dark
-            ? "radial-gradient(ellipse at center, rgba(139, 92, 246, 0.16) 0%, transparent 60%)"
-            : "radial-gradient(ellipse at center, rgba(139, 92, 246, 0.10) 0%, transparent 60%)",
-          animation: "iosMesh2 26s ease-in-out infinite",
-        }} />
-
-        {/* iOS Mesh Blob 3 — Center-right teal */}
-        <div className="ios-mesh-blob" style={{
-          top: "30%",
-          right: "5%",
-          width: "40vw",
-          height: "40vw",
-          background: dark
-            ? "radial-gradient(ellipse at center, rgba(6, 182, 212, 0.10) 0%, transparent 60%)"
-            : "radial-gradient(ellipse at center, rgba(6, 182, 212, 0.08) 0%, transparent 60%)",
-          animation: "iosMesh3 20s ease-in-out infinite",
-        }} />
-
-        {/* iOS Mesh Blob 4 — Mid-left pink accent */}
-        <div className="ios-mesh-blob" style={{
-          top: "55%",
-          left: "15%",
-          width: "35vw",
-          height: "35vw",
-          background: dark
-            ? "radial-gradient(ellipse at center, rgba(236, 72, 153, 0.08) 0%, transparent 60%)"
-            : "radial-gradient(ellipse at center, rgba(236, 72, 153, 0.06) 0%, transparent 60%)",
-          animation: "iosMesh4 24s ease-in-out infinite",
-        }} />
-
-        {/* iOS Mesh Blob 5 — Top-right warm glow */}
-        <div className="ios-mesh-blob" style={{
-          top: "5%",
-          right: "20%",
-          width: "30vw",
-          height: "30vw",
-          background: dark
-            ? "radial-gradient(ellipse at center, rgba(251, 146, 60, 0.06) 0%, transparent 60%)"
-            : "radial-gradient(ellipse at center, rgba(251, 146, 60, 0.05) 0%, transparent 60%)",
-          animation: "iosMesh5 18s ease-in-out infinite",
-        }} />
-
-        {/* Subtle noise-like texture overlay for depth */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: dark
-            ? "radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.015) 0%, transparent 50%)"
-            : "radial-gradient(ellipse at 70% 20%, rgba(0,0,0,0.01) 0%, transparent 50%)",
-          pointerEvents: "none",
-        }} />
-      </div>
+      {/* ── Premium Realistic 3D Liquid Orbs Background (Client-only) ── */}
+      {mounted && <LiquidBackground />}
 
       {/* ── Sidebar ── */}
       <aside
@@ -390,7 +341,7 @@ export default function SiteLayout({
           transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* ── Live animated blurred color orbs ── */}
+        {/* ── Sidebar color orbs (no blur — sharp defined circles) ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
           {/* Purple orb */}
           <div style={{
@@ -400,8 +351,8 @@ export default function SiteLayout({
             width: "160px",
             height: "160px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(139, 92, 246, 0.45) 0%, transparent 70%)",
-            filter: "blur(40px)",
+            background: "radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%)",
+            filter: "none",
             animation: "sidebarOrb1 8s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
@@ -414,8 +365,8 @@ export default function SiteLayout({
             width: "140px",
             height: "140px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(6, 182, 212, 0.40) 0%, transparent 70%)",
-            filter: "blur(35px)",
+            background: "radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, transparent 70%)",
+            filter: "none",
             animation: "sidebarOrb2 10s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
@@ -428,8 +379,8 @@ export default function SiteLayout({
             width: "120px",
             height: "120px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, transparent 70%)",
-            filter: "blur(38px)",
+            background: "radial-gradient(circle, rgba(236, 72, 153, 0.20) 0%, transparent 70%)",
+            filter: "none",
             animation: "sidebarOrb3 12s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
@@ -442,8 +393,8 @@ export default function SiteLayout({
             width: "100px",
             height: "100px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(99, 102, 241, 0.38) 0%, transparent 70%)",
-            filter: "blur(32px)",
+            background: "radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, transparent 70%)",
+            filter: "none",
             animation: "sidebarOrb4 9s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
@@ -495,7 +446,7 @@ export default function SiteLayout({
             }}
           >
             <Search className="w-3.5 h-3.5" style={{ color: textMuted }} />
-            <span className="text-[12px]" style={{ color: textMuted, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif" }}>Search...</span>
+            <span className="text-[12px]" style={{ color: textMuted, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif" }}>Search...</span>
           </div>
         </div>
 
@@ -594,9 +545,9 @@ export default function SiteLayout({
       </AnimatePresence>
 
       {/* ── Main area ── */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10" style={{ minWidth: 0 }}>
+      <div className="flex-1 flex flex-col min-w-0 relative z-10" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative">
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
             <header
@@ -639,13 +590,19 @@ export default function SiteLayout({
               </motion.button>
 
               {/* Greeting — Good Morning, Admin + Date */}
-              <div className="hidden md:block relative z-10">
-                <h2 className="text-[15px] font-bold" style={{ color: textMain, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif" }}>
-                  {getGreeting()}, {displayName}
-                </h2>
-                <p className="text-[11px]" style={{ color: textMuted }}>
-                  {getDateString()}
-                </p>
+              <div className="hidden md:block relative z-10" suppressHydrationWarning>
+                {mounted ? (
+                  <>
+                    <h2 className="text-[15px] font-bold" style={{ color: textMain, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif" }}>
+                      {getGreeting()}, {displayName}
+                    </h2>
+                    <p className="text-[11px]" style={{ color: textMuted }}>
+                      {getDateString()}
+                    </p>
+                  </>
+                ) : (
+                  <div className="h-10 w-32" /> // Placeholder to match layout
+                )}
               </div>
 
               {/* Actions — Only notification bell + ThemePanel + user */}
@@ -676,24 +633,26 @@ export default function SiteLayout({
             </header>
           </div>
 
-          {/* Page content */}
-          {mounted ? (
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 16, filter: "blur(5px)", scale: 0.99 }}
-              animate={{ opacity: 1, y: 0,  filter: "blur(0px)", scale: 1.00 }}
-              transition={{ duration: 0.30, ease: [0.22, 1, 0.36, 1] }}
-              style={{ willChange: "opacity, transform, filter", minHeight: "100%" }}
-            >
-              <ErrorBoundary key={pathname}>
+          {/* Page content — always render same DOM structure to avoid hydration mismatch */}
+          <div style={{ minHeight: "100%" }} suppressHydrationWarning>
+            {mounted ? (
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 16, filter: "blur(5px)", scale: 0.99 }}
+                animate={{ opacity: 1, y: 0,  filter: "blur(0px)", scale: 1.00 }}
+                transition={{ duration: 0.30, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: "opacity, transform, filter", minHeight: "100%" }}
+              >
+                <ErrorBoundary key={pathname}>
+                  {children}
+                </ErrorBoundary>
+              </motion.div>
+            ) : (
+              <div style={{ minHeight: "100%", opacity: 0 }}>
                 {children}
-              </ErrorBoundary>
-            </motion.div>
-          ) : (
-            <div style={{ minHeight: "100%", opacity: 0 }}>
-              {children}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </main>
       </div>
     </div>

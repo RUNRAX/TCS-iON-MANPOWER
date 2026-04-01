@@ -25,12 +25,8 @@ import {
 const makeEdge = (dark: boolean) =>
   dark
     ? [
-        "inset 0 1.5px 0 rgba(255,255,255,0.12)",
-        "inset 0 -1px 0 rgba(0,0,0,0.16)",
-        "inset 1px 0 0 rgba(255,255,255,0.06)",
-        "inset -1px 0 0 rgba(255,255,255,0.03)",
-        "0 12px 40px -8px rgba(0,0,0,0.40)",
-        "0 4px 12px -4px rgba(0,0,0,0.20)",
+        "inset 0 1px 0 rgba(255,255,255,0.15)",
+        "0 24px 48px rgba(0,0,0,0.4)",
       ].join(", ")
     : [
         "inset 0 2px 0 rgba(255,255,255,0.96)",
@@ -44,11 +40,9 @@ const makeEdge = (dark: boolean) =>
 const makeHoverEdge = (dark: boolean) =>
   dark
     ? [
-        "inset 0 2px 0 rgba(255,255,255,0.18)",
-        "inset 0 -1px 0 rgba(0,0,0,0.18)",
-        "0 28px 72px -8px rgba(0,0,0,0.50)",
-        "0 8px 24px -4px rgba(0,0,0,0.30)",
-        "0 0 0 1px rgba(255,255,255,0.08)",
+        "inset 0 1.5px 0 rgba(255,255,255,0.20)",
+        "0 32px 80px rgba(0,0,0,0.55)",
+        "0 0 0 1px rgba(255,255,255,0.10)",
       ].join(", ")
     : [
         "inset 0 2px 0 rgba(255,255,255,1.00)",
@@ -77,7 +71,7 @@ const cardAccents = [
 ];
 
 const FONT_DISPLAY = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
-const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Text',    'Outfit', sans-serif";
+const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
 const BLUR = "blur(36px) saturate(200%) brightness(1.06)";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -86,11 +80,11 @@ const BLUR = "blur(36px) saturate(200%) brightness(1.06)";
 export default function AdminDashboard() {
   const { dark } = useTheme();
 
-  const textMain  = dark ? "#f0eeff" : "#0f0a2e";
-  const textMuted = dark ? "rgba(200,195,240,0.50)" : "rgba(30,20,80,0.44)";
-  const cardBg    = dark ? "rgba(14,12,30,0.55)"    : "rgba(255,255,255,0.62)";
-  const panelBg   = dark ? "rgba(10,8,24,0.46)"     : "rgba(255,255,255,0.58)";
-  const borderCol = dark ? "rgba(255,255,255,0.08)"  : "rgba(0,0,0,0.07)";
+  const textMain  = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
+  const textMuted = dark ? "rgba(255,255,255,0.6)"  : "rgba(30,20,80,0.44)";
+  const cardBg    = dark ? "rgba(30,30,35,0.4)"     : "rgba(255,255,255,0.62)";
+  const panelBg   = dark ? "rgba(30,30,35,0.35)"    : "rgba(255,255,255,0.58)";
+  const borderCol = dark ? "rgba(255,255,255,0.10)"  : "rgba(0,0,0,0.07)";
 
   const { data: statsData, isLoading: statsLoading }  = useAdminStats();
   const { data: assignData, isLoading: assignLoading } = useAdminAssignments({ page: 1 });
@@ -189,7 +183,6 @@ export default function AdminDashboard() {
                   }}
                   style={{
                     boxShadow:            makeEdge(dark),
-                    transformStyle:       "preserve-3d",
                     willChange:           "transform, box-shadow",
                   }}
                 >
