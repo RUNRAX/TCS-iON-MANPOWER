@@ -25,7 +25,7 @@ export default function EmployeeDashboard() {
   const { theme: t, dark } = useTheme();
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.5)" : "rgba(30,20,80,0.45)";
-  const cardBg    = dark ? "rgba(12,10,28,0.82)" : "rgba(255,255,255,0.92)";
+  const cardBg    = dark ? "rgba(12,10,28,0.82)" : "rgba(255,255,255,0.35)";
   const borderCol = dark ? `color-mix(in srgb, var(--tc-primary) 15%, transparent)` : `color-mix(in srgb, var(--tc-primary) 16%, transparent)`;
 
   const { data: profileData, isLoading } = useEmployeeProfile();

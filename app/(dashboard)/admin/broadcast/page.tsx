@@ -31,7 +31,7 @@ function GlassSelect({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const glassBg    = dark ? "rgba(10, 8, 26, 0.88)" : "rgba(252,251,255,0.94)";
+  const glassBg    = dark ? "rgba(10, 8, 26, 0.88)" : "rgba(252,251,255,0.35)";
   const glassBlur  = "blur(72px) saturate(210%) brightness(1.06)";
   const borderCol  = dark ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.90)";
   const shadowDrop = dark
@@ -133,7 +133,7 @@ export default function AdminBroadcast() {
   const { dark } = useTheme();
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.52)" : "rgba(30,20,80,0.45)";
-  const glassBg      = dark ? "rgba(10, 8, 26, 0.80)" : "rgba(255,255,255,0.82)";
+  const glassBg      = dark ? "rgba(10, 8, 26, 0.80)" : "rgba(255,255,255,0.35)";
   const glassBlur    = "blur(72px) saturate(210%) brightness(1.06)";
   const glassBorder  = dark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.90)";
   const glassShadow  = dark

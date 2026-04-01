@@ -97,10 +97,10 @@ export default function LoginPage() {
   const bg = dark
     ? "linear-gradient(135deg, #050505 0%, #111111 40%, #0a0a0a 100%)"
     : "linear-gradient(135deg, #f5f5f5 0%, #eaeaea 40%, #ffffff 100%)";
-  const cardBg    = dark ? "rgba(8,6,22,0.86)"  : "rgba(255,255,255,0.88)";
+  const cardBg    = dark ? "rgba(8,6,22,0.86)"  : "rgba(255,255,255,0.30)";
   const textMain  = dark ? "#f0eeff"            : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.44)" : "rgba(30,20,80,0.40)";
-  const inputBg   = dark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.68)";
+  const inputBg   = dark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.25)";
   const inputBorder = dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.09)";
 
   const FONT_SYSTEM = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif";

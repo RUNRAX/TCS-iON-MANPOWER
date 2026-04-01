@@ -82,7 +82,7 @@ export default function AdminDashboard() {
 
   const textMain  = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
   const textMuted = dark ? "rgba(255,255,255,0.6)"  : "rgba(30,20,80,0.44)";
-  const cardBg    = dark ? "rgba(30,30,35,0.4)"     : "rgba(255,255,255,0.62)";
+  const cardBg    = dark ? "rgba(30,30,35,0.4)"     : "rgba(255,255,255,0.35)";
   const panelBg   = dark ? "rgba(30,30,35,0.35)"    : "rgba(255,255,255,0.58)";
   const borderCol = dark ? "rgba(255,255,255,0.10)"  : "rgba(0,0,0,0.07)";
 
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
                       height:   "45%",
                       background: dark
                         ? "linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, transparent 100%)"
-                        : "linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, transparent 100%)",
+                        : "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 100%)",
                       pointerEvents: "none",
                       borderRadius:  "inherit",
                     }}
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
             height:   "24%",
             background: dark
               ? "linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, transparent 100%)"
-              : "linear-gradient(to bottom, rgba(255,255,255,0.78) 0%, transparent 100%)",
+              : "linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, transparent 100%)",
             pointerEvents: "none",
           }}
         />

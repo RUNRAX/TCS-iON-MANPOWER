@@ -103,8 +103,8 @@ export default function Home() {
   const bgMain  = dark ? darkBg : lightBg;
   const textMain  = dark ? "#ffffff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,200,230,0.5)" : "rgba(30,20,80,0.5)";
-  const cardBg    = dark ? "rgba(12,10,30,0.7)"   : "rgba(255,255,255,0.85)";
-  const navBg     = dark ? "rgba(7,7,18,0.75)"    : "rgba(240,238,255,0.85)";
+  const cardBg    = dark ? "rgba(12,10,30,0.7)"   : "rgba(255,255,255,0.45)";
+  const navBg     = dark ? "rgba(7,7,18,0.75)"    : "rgba(240,238,255,0.40)";
 
   return (
     <div

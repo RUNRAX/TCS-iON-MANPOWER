@@ -33,7 +33,7 @@ function makeStyles(primary: string, dark: boolean) {
   const textMuted = dark ? "rgba(200,195,240,0.45)"     : "rgba(30,20,80,0.4)";
   const inpBg     = dark ? "rgba(255,255,255,0.05)"     : "rgba(0,0,0,0.04)";
   const inpBorder = dark ? "rgba(255,255,255,0.1)"      : "rgba(0,0,0,0.1)";
-  const cardBg    = dark ? "rgba(255,255,255,0.03)"     : "rgba(255,255,255,0.9)";
+  const cardBg    = dark ? "rgba(255,255,255,0.03)"     : "rgba(255,255,255,0.35)";
   const cardBorder= dark ? `${primary}22`               : `${primary}25`;
   const optBg     = dark ? "#0d0b22"                    : "#fff";
 
