@@ -104,6 +104,26 @@ function applyToDom(theme: ThemeColors, dark: boolean, glassFrost: boolean, blur
   // Values for .admin-panel usage
   r.style.setProperty("--glass-blur-val", glassFrost ? `${blur}px` : "0px");
   r.style.setProperty("--glass-opacity-val", glassFrost ? `${opacity}%` : "100%");
+
+  // Spatial glass vars consumed by .admin-panel CSS class
+  const opVal = glassFrost ? (opacity / 100) : 1;
+  if (dark) {
+    r.style.setProperty("--spatial-glass-bg",     glassFrost ? `rgba(30,30,35,${(0.4 * opVal).toFixed(2)})` : "rgba(30,30,35,0.95)");
+    r.style.setProperty("--spatial-glass-blur",   glassFrost ? `blur(${blur}px) saturate(200%) brightness(1.06)` : "none");
+    r.style.setProperty("--spatial-glass-border", glassFrost ? "1px solid rgba(255,255,255,0.10)" : "1px solid rgba(255,255,255,0.08)");
+    r.style.setProperty("--spatial-glass-shadow", glassFrost
+      ? "inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 40px rgba(0,0,0,0.35)"
+      : "0 4px 16px rgba(0,0,0,0.25)");
+  } else {
+    r.style.setProperty("--spatial-glass-bg",     glassFrost ? `rgba(255,255,255,${(0.20 * opVal).toFixed(2)})` : "rgba(255,255,255,0.92)");
+    r.style.setProperty("--spatial-glass-blur",   glassFrost ? `blur(${blur}px) saturate(220%)` : "none");
+    r.style.setProperty("--spatial-glass-border", glassFrost ? "1px solid rgba(255,255,255,0.85)" : "1px solid rgba(0,0,0,0.08)");
+    r.style.setProperty("--spatial-glass-shadow", glassFrost
+      ? "inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 16px -2px rgba(0,0,0,0.06)"
+      : "0 2px 8px rgba(0,0,0,0.06)");
+  }
+  r.style.setProperty("--spatial-glass-radius", "16px");
+
   r.classList.toggle("tc-dark",  dark);
   r.classList.toggle("tc-light", !dark);
   r.setAttribute("data-theme", dark ? "dark" : "light");

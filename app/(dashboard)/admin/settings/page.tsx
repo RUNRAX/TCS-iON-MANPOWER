@@ -19,7 +19,7 @@ import {
   User, Shield, Bell, Clock, StickyNote, Calendar,
   ImageIcon, ChevronRight, Check, Upload, Trash2,
   Smartphone, Eye, EyeOff, Lock, Mail,
-  Sun, Moon, Paintbrush, X,
+  Sun, Moon, Paintbrush, X, ChevronLeft,
 } from "lucide-react";
 
 const FONT_DISPLAY = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
@@ -527,19 +527,63 @@ export default function AdminSettings() {
                   <Calendar className="w-4 h-4" style={{ color: "var(--tc-primary)" }} />
                   <p className="text-[12px] font-semibold" style={{ color: textMain }}>Select Date</p>
                 </div>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={e => setSelectedDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-[13px]"
-                  style={{
-                    background: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-                    border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)"}`,
-                    color: textMain,
-                    outline: "none",
-                    colorScheme: dark ? "dark" : "light",
-                  }}
-                />
+                {(() => {
+                  const viewD = selectedDate ? new Date(selectedDate + "T00:00:00") : new Date();
+                  const yr = viewD.getFullYear();
+                  const mo = viewD.getMonth();
+                  const dim = new Date(yr, mo + 1, 0).getDate();
+                  const fd = new Date(yr, mo, 1).getDay();
+                  const moName = viewD.toLocaleString("default", { month: "long" });
+                  const cells: (number | null)[] = [];
+                  for (let i = 0; i < fd; i++) cells.push(null);
+                  for (let d = 1; d <= dim; d++) cells.push(d);
+                  const todayStr = new Date().toISOString().split("T")[0];
+                  const prevM = () => { const d = new Date(yr, mo - 1, 1); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`); };
+                  const nextM = () => { const d = new Date(yr, mo + 1, 1); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`); };
+                  return (
+                    <div className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 14 }}>
+                      {/* Month nav */}
+                      <div className="flex items-center justify-between mb-3">
+                        <button onClick={prevM} className="admin-panel" style={{ position: "relative", width: 26, height: 26, borderRadius: 8, border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}>
+                          <ChevronLeft size={14} />
+                        </button>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: textMain }}>{moName} {yr}</span>
+                        <button onClick={nextM} className="admin-panel" style={{ position: "relative", width: 26, height: 26, borderRadius: 8, border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}>
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                      {/* Day headers */}
+                      <div className="grid grid-cols-7 gap-0.5 mb-1">
+                        {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+                          <div key={d} className="text-center" style={{ fontSize: 10, fontWeight: 700, color: textMuted, padding: "2px 0" }}>{d}</div>
+                        ))}
+                      </div>
+                      {/* Day cells */}
+                      <div className="grid grid-cols-7 gap-0.5">
+                        {cells.map((day, idx) => {
+                          if (!day) return <div key={`b-${idx}`} />;
+                          const dateStr = `${yr}-${String(mo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                          const isSel = dateStr === selectedDate;
+                          const isToday = dateStr === todayStr;
+                          return (
+                            <motion.button key={dateStr} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                              onClick={() => setSelectedDate(dateStr)}
+                              style={{
+                                width: "100%", aspectRatio: "1", borderRadius: 8, border: isToday && !isSel ? "1px solid var(--tc-primary)" : "none",
+                                cursor: "pointer", fontSize: 12, fontWeight: isSel ? 700 : 400,
+                                background: isSel ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" : isToday ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "transparent",
+                                color: isSel ? "#fff" : isToday ? "var(--tc-primary)" : textMain,
+                                boxShadow: isSel ? "0 4px 12px color-mix(in srgb, var(--tc-primary) 30%, transparent)" : "none",
+                                display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s",
+                              }}>
+                              {day}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {/* Quick dates */}
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {["Today", "Tomorrow", "+1 Week"].map(label => {

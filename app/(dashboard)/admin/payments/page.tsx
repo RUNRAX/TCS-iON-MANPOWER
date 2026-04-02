@@ -12,7 +12,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminPayments, useClearPayment } from "@/hooks/use-api";
 import {
   Calendar, ChevronLeft, ChevronRight, RefreshCw,
-  Wallet, Check, Clock, Download, FileSpreadsheet, Users, X, UserPlus, Search, Trash2, Plus
+  Wallet, Check, Clock, Download, FileSpreadsheet, Users, X, UserPlus, Search, Trash2, Plus, Save, Edit3
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -624,6 +624,21 @@ export default function AdminBookingsPage() {
                           <span style={{ marginLeft: "auto", fontSize: 10, color: saving ? "#f59e0b" : "#10b981" }}>
                             {saving ? "● Saving…" : "✓ Saved"}
                           </span>
+                        </div>
+                        {/* Action buttons — Save / Modify / Remove */}
+                        <div style={{ padding: "12px 16px", borderTop: `1px solid ${border}`, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                            <Save size={13} /> Save
+                          </motion.button>
+                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                            <Edit3 size={13} /> Modify
+                          </motion.button>
+                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                            <Trash2 size={13} /> Remove
+                          </motion.button>
                         </div>
                       </div>
                     )}

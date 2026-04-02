@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminShifts } from "@/hooks/use-api";
-import { Send, Clock, ChevronDown, Check, Zap, Users, Radio } from "lucide-react";
+import { Send, Clock, ChevronDown, Check, Zap, Users, Radio, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 // ── Custom glass dropdown ─────────────────────────────────────────────────────
@@ -198,22 +198,21 @@ export default function AdminBroadcast() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 4 }}>
           <div style={{ width: 48, height: 48, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)" }}>
-            <Radio size={22} color="#fff" />
+            <Mail size={22} color="#fff" />
           </div>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>WhatsApp Broadcast</h1>
-            <p style={{ fontSize: 13, color: textMuted, marginTop: 2 }}>Send shift notifications to employees instantly</p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>Email Broadcast</h1>
+            <p style={{ fontSize: 13, color: textMuted, marginTop: 2 }}>Send shift notifications to employees via email · <span style={{ color: "var(--tc-primary)", cursor: "pointer" }}>WhatsApp</span></p>
           </div>
         </div>
       </motion.div>
 
       {/* Main glass card */}
       <motion.div
+        className="admin-panel"
         style={{
           maxWidth: 580, position: "relative", zIndex: 1,
-          borderRadius: 28, background: glassBg,
-          backdropFilter: glassBlur, WebkitBackdropFilter: glassBlur,
-          border: `1px solid ${glassBorder}`, boxShadow: glassShadow, overflow: "hidden",
+          borderRadius: 28, overflow: "hidden",
         }}
       >
         {/* Top gradient bar */}
@@ -279,7 +278,7 @@ export default function AdminBroadcast() {
               onBlur={e => { e.target.style.borderColor = inputBorder; e.target.style.boxShadow = "none"; e.target.style.background = inputBg; }}
             />
             <p style={{ fontSize: 11, color: textMuted, marginTop: 7, paddingLeft: 2 }}>
-              {customMsg.length > 0 ? `${customMsg.length} characters` : "Default WhatsApp template will be used"}
+              {customMsg.length > 0 ? `${customMsg.length} characters` : "Default email template will be used"}
             </p>
           </motion.div>
 

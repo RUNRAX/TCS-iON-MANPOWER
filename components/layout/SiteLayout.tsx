@@ -327,14 +327,12 @@ export default function SiteLayout({
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-4 left-4 z-40 w-[220px] rounded-2xl flex flex-col transition-transform duration-300
+        className={`admin-panel fixed inset-y-4 left-4 z-40 w-[220px] rounded-2xl flex flex-col transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
-          background:           sidebarBg,
+          position: "relative",
           borderRight:          `1px solid ${borderCol}`,
-          backdropFilter:       BLUR_SIDEBAR,
-          WebkitBackdropFilter: BLUR_SIDEBAR,
           boxShadow:            edgeShadow,
           willChange:           "transform, opacity",
           overflow:             "hidden",
