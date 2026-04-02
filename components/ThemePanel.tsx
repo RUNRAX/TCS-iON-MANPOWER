@@ -16,22 +16,32 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
   const iconSize   = size === "sm" ? 14 : 16;
   const topOffset  = size === "sm" ? 60 : 68;
 
-  // All button colours use CSS vars — same string on server & client, no hydration mismatch
+  // Glass frost button style — premium frosted glass with edge lighting
   const btnBase: React.CSSProperties = {
     ...btnSize,
-    background: "color-mix(in srgb, var(--tc-primary) 9%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)",
+    background: dark
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(255,255,255,0.30)",
+    border: `1px solid ${dark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.65)"}`,
     cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
     color: "var(--tc-primary)",
-    backdropFilter: "blur(12px)",
-    transition: "background 0.2s, outline 0.2s",
+    backdropFilter: "blur(20px) saturate(180%)",
+    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+    boxShadow: dark
+      ? "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -0.5px 0 rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.25)"
+      : "inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -0.5px 0 rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.06)",
+    transition: "background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease",
   };
 
   const paletteActive: React.CSSProperties = open ? {
-    background: "color-mix(in srgb, var(--tc-primary) 20%, transparent)",
-    outline: "2px solid color-mix(in srgb, var(--tc-primary) 40%, transparent)",
-    outlineOffset: "1px",
+    background: dark
+      ? "rgba(255,255,255,0.14)"
+      : "rgba(255,255,255,0.45)",
+    borderColor: dark ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.80)",
+    boxShadow: dark
+      ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.30), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 30%, transparent)"
+      : "inset 0 1px 0 rgba(255,255,255,0.90), 0 4px 12px rgba(0,0,0,0.08), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 20%, transparent)",
   } : {};
 
   return (
@@ -79,9 +89,12 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                 borderRadius: 20,
                 padding: 18,
                 background: panelBg,
-                border: "1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)",
-                backdropFilter: "blur(32px)",
-                boxShadow: "0 28px 80px rgba(0,0,0,0.5), 0 0 0 1px color-mix(in srgb, var(--tc-primary) 6%, transparent)",
+                border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.80)"}`,
+                backdropFilter: "blur(32px) saturate(180%)",
+                WebkitBackdropFilter: "blur(32px) saturate(180%)",
+                boxShadow: dark
+                  ? "0 28px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05)"
+                  : "0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 1px rgba(255,255,255,0.60)",
               }}
             >
               {/* Preset swatches */}
@@ -113,16 +126,16 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
               </div>
 
               {/* Custom theme */}
-              <div style={{ borderTop: "1px solid color-mix(in srgb, var(--tc-primary) 9%, transparent)", paddingTop: 14 }}>
+              <div style={{ borderTop: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`, paddingTop: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                   <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, color: textMuted, textTransform: "uppercase" }}>CUSTOM</p>
                   <button
                     onClick={() => setThemeKey("custom")}
                     style={{
                       fontSize: 9, padding: "3px 10px", borderRadius: 7,
-                      background: themeKey === "custom" ? "var(--tc-primary)" : "color-mix(in srgb, var(--tc-primary) 9%, transparent)",
+                      background: themeKey === "custom" ? "var(--tc-primary)" : `color-mix(in srgb, var(--tc-primary) 9%, transparent)`,
                       color: themeKey === "custom" ? "#fff" : "var(--tc-primary)",
-                      border: "1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)",
+                      border: `1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
                       cursor: "pointer", fontWeight: 700, letterSpacing: 1, transition: "all 0.2s",
                     }}>
                     {themeKey === "custom" ? "✓ ACTIVE" : "USE"}
@@ -138,7 +151,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                         type="color"
                         value={customTheme[field]}
                         onChange={e => { setCustomTheme({ [field]: e.target.value }); if (themeKey !== "custom") setThemeKey("custom"); }}
-                        style={{ flex: 1, height: 30, borderRadius: 8, border: "1px solid color-mix(in srgb, var(--tc-primary) 16%, transparent)", cursor: "pointer", padding: 2, background: "transparent" }}
+                        style={{ flex: 1, height: 30, borderRadius: 8, border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`, cursor: "pointer", padding: 2, background: "transparent" }}
                       />
                       <span style={{ fontSize: 9, color: textMuted, fontFamily: "monospace", width: 52, letterSpacing: 0.5, flexShrink: 0 }}>
                         {customTheme[field]}

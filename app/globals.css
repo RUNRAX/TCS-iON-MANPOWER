@@ -15,9 +15,9 @@
    § 1  CSS Custom Properties
 ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --tc-primary: #6366f1;
-  --tc-secondary: #8b5cf6;
-  --tc-accent: #06b6d4;
+  --tc-primary: #f97316;
+  --tc-secondary: #fb923c;
+  --tc-accent: #fdba74;
 
   /* ── Spatial UI — Swappable environment background ── */
   --theme-bg-image: none;
@@ -139,18 +139,18 @@ body {
 
 html.tc-dark body { 
   --orb-core: #0f141e;
-  --orb-edge-1: rgba(255, 87, 65, 0.95);
-  --orb-edge-2: rgba(255, 87, 65, 0.85);
-  --orb-edge-3: rgba(255, 87, 65, 0.75);
+  --orb-edge-1: var(--tc-primary);
+  --orb-edge-2: var(--tc-secondary);
+  --orb-edge-3: var(--tc-accent);
   background-image: linear-gradient(135deg, rgba(8,8,12,1) 0%, rgba(18,14,30,1) 40%, rgba(20,12,18,1) 80%, rgba(10,14,24,1) 100%);
   color: rgba(255,255,255,0.95); 
 }
 
 html.tc-light body { 
   --orb-core: #cbd5e1;
-  --orb-edge-1: rgba(65, 87, 255, 0.65);
-  --orb-edge-2: rgba(65, 140, 255, 0.55);
-  --orb-edge-3: rgba(65, 200, 255, 0.45);
+  --orb-edge-1: var(--tc-primary);
+  --orb-edge-2: var(--tc-secondary);
+  --orb-edge-3: var(--tc-accent);
   background-image: linear-gradient(135deg, rgba(230,234,245,1) 0%, rgba(240,230,245,1) 50%, rgba(235,245,240,1) 100%);
   color: #0f0a2e; 
 }
@@ -1078,4 +1078,84 @@ html.tc-light .admin-panel {
 
 html.tc-light .admin-panel::after {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 18  Mobile Performance Optimizations
+   Reduce GPU load: simpler blur, fewer animations, lighter transitions
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Reduce glass blur intensity on mobile */
+  :root {
+    --glass-blur-sm: blur(10px) saturate(130%);
+    --glass-blur-md: blur(16px) saturate(140%);
+    --glass-blur-lg: blur(20px) saturate(140%);
+    --glass-blur-xl: blur(24px) saturate(150%);
+    --spatial-glass-blur: blur(16px) saturate(150%);
+  }
+
+  /* Simplify glass panels on mobile */
+  .glass,
+  .glass-panel,
+  .glass-panel-strong {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .admin-panel {
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+  }
+
+  /* Disable sidebar orb animations on mobile — static glow is enough */
+  @keyframes sidebarOrb1 { 0%, 100% { transform: translateZ(0); } }
+  @keyframes sidebarOrb2 { 0%, 100% { transform: translateZ(0); } }
+  @keyframes sidebarOrb3 { 0%, 100% { transform: translateZ(0); } }
+  @keyframes sidebarOrb4 { 0%, 100% { transform: translateZ(0); } }
+
+  /* Simplify glowing orbs on mobile (reduce movement) */
+  .glowing-orb {
+    will-change: auto;
+  }
+
+  @keyframes floatOrb1 {
+    0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
+    50%  { transform: translate(4%, 4%) scale(1.03) translateZ(0); }
+  }
+  @keyframes floatOrb2 {
+    0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
+    50%  { transform: translate(-4%, -4%) scale(0.97) translateZ(0); }
+  }
+  @keyframes floatOrb3 {
+    0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
+    50%  { transform: translate(3%, -3%) scale(1.02) translateZ(0); }
+  }
+
+  /* Faster, cheaper layout transitions on mobile */
+  aside,
+  header,
+  nav,
+  main {
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      color 0.2s ease;
+  }
+
+  /* Disable glossy flash animation on mobile */
+  html.tc-dark aside,
+  html.tc-dark header,
+  html.tc-light aside,
+  html.tc-light header {
+    animation: none;
+  }
+
+  /* View transition simplified on mobile */
+  ::view-transition-old(root) {
+    animation: 150ms ease both pageFadeOut;
+  }
+  ::view-transition-new(root) {
+    animation: 200ms ease both pageFadeIn;
+  }
 }

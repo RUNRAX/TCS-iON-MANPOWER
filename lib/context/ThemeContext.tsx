@@ -7,21 +7,25 @@ export interface ThemeColors {
   name: string; swatch: [string, string, string];
 }
 
+/* ── Theme catalog — warm tones first, then cool tones ─────────────────────── */
 export const THEMES: Record<string, ThemeColors> = {
-  violet:   { primary: "#6366f1", secondary: "#8b5cf6", accent: "#06b6d4", name: "Violet",   swatch: ["#6366f1","#8b5cf6","#06b6d4"] },
-  emerald:  { primary: "#10b981", secondary: "#059669", accent: "#34d399", name: "Emerald",  swatch: ["#10b981","#059669","#34d399"] },
-  rose:     { primary: "#f43f5e", secondary: "#e11d48", accent: "#fb7185", name: "Rose",     swatch: ["#f43f5e","#e11d48","#fb7185"] },
+  // ── Warm Palette ──
+  orange:   { primary: "#f97316", secondary: "#fb923c", accent: "#fdba74", name: "Orange",   swatch: ["#f97316","#fb923c","#fdba74"] },
   amber:    { primary: "#f59e0b", secondary: "#d97706", accent: "#fbbf24", name: "Amber",    swatch: ["#f59e0b","#d97706","#fbbf24"] },
-  cyan:     { primary: "#06b6d4", secondary: "#0891b2", accent: "#67e8f9", name: "Cyan",     swatch: ["#06b6d4","#0891b2","#67e8f9"] },
-  aurora:   { primary: "#a855f7", secondary: "#06b6d4", accent: "#34d399", name: "Aurora",   swatch: ["#a855f7","#06b6d4","#34d399"] },
   sunset:   { primary: "#f97316", secondary: "#ec4899", accent: "#fbbf24", name: "Sunset",   swatch: ["#f97316","#ec4899","#fbbf24"] },
-  ocean:    { primary: "#3b82f6", secondary: "#06b6d4", accent: "#a855f7", name: "Ocean",    swatch: ["#3b82f6","#06b6d4","#a855f7"] },
-  neon:     { primary: "#22c55e", secondary: "#a855f7", accent: "#06b6d4", name: "Neon",     swatch: ["#22c55e","#a855f7","#06b6d4"] },
+  rose:     { primary: "#f43f5e", secondary: "#e11d48", accent: "#fb7185", name: "Rose",     swatch: ["#f43f5e","#e11d48","#fb7185"] },
   fire:     { primary: "#ef4444", secondary: "#f97316", accent: "#f59e0b", name: "Fire",     swatch: ["#ef4444","#f97316","#f59e0b"] },
-  galaxy:   { primary: "#7c3aed", secondary: "#2563eb", accent: "#ec4899", name: "Galaxy",   swatch: ["#7c3aed","#2563eb","#ec4899"] },
   tropical: { primary: "#10b981", secondary: "#f59e0b", accent: "#06b6d4", name: "Tropical", swatch: ["#10b981","#f59e0b","#06b6d4"] },
   candy:    { primary: "#ec4899", secondary: "#a855f7", accent: "#6366f1", name: "Candy",    swatch: ["#ec4899","#a855f7","#6366f1"] },
+  // ── Cool Palette ──
+  violet:   { primary: "#6366f1", secondary: "#8b5cf6", accent: "#06b6d4", name: "Violet",   swatch: ["#6366f1","#8b5cf6","#06b6d4"] },
+  emerald:  { primary: "#10b981", secondary: "#059669", accent: "#34d399", name: "Emerald",  swatch: ["#10b981","#059669","#34d399"] },
+  cyan:     { primary: "#06b6d4", secondary: "#0891b2", accent: "#67e8f9", name: "Cyan",     swatch: ["#06b6d4","#0891b2","#67e8f9"] },
+  ocean:    { primary: "#3b82f6", secondary: "#06b6d4", accent: "#a855f7", name: "Ocean",    swatch: ["#3b82f6","#06b6d4","#a855f7"] },
   arctic:   { primary: "#67e8f9", secondary: "#818cf8", accent: "#a78bfa", name: "Arctic",   swatch: ["#67e8f9","#818cf8","#a78bfa"] },
+  galaxy:   { primary: "#7c3aed", secondary: "#2563eb", accent: "#ec4899", name: "Galaxy",   swatch: ["#7c3aed","#2563eb","#ec4899"] },
+  neon:     { primary: "#22c55e", secondary: "#a855f7", accent: "#06b6d4", name: "Neon",     swatch: ["#22c55e","#a855f7","#06b6d4"] },
+  aurora:   { primary: "#a855f7", secondary: "#06b6d4", accent: "#34d399", name: "Aurora",   swatch: ["#a855f7","#06b6d4","#34d399"] },
   infrared: { primary: "#ef4444", secondary: "#7c3aed", accent: "#06b6d4", name: "Infrared", swatch: ["#ef4444","#7c3aed","#06b6d4"] },
 };
 
@@ -34,9 +38,9 @@ const LS_GLASS_OPACITY = "tc_glass_opacity";
 const LS_BG_INDEX = "tc_bg_index";
 const LS_AUTO_BG = "tc_auto_bg";
 
-const DEFAULT_KEY    = "violet";
+const DEFAULT_KEY    = "orange";
 const DEFAULT_DARK   = true;
-const DEFAULT_CUSTOM = { primary: "#6366f1", secondary: "#ec4899", accent: "#f59e0b" };
+const DEFAULT_CUSTOM = { primary: "#f97316", secondary: "#fb923c", accent: "#fdba74" };
 const DEFAULT_GLASS_FROST = true;
 const DEFAULT_GLASS_BLUR  = 36;
 const DEFAULT_GLASS_OPACITY = 55;
@@ -124,6 +128,17 @@ function applyToDom(theme: ThemeColors, dark: boolean, glassFrost: boolean, blur
   }
   r.style.setProperty("--spatial-glass-radius", "16px");
 
+  /* ── Dynamic orb edge colours — follow the active theme ── */
+  if (dark) {
+    r.style.setProperty("--orb-edge-1", theme.primary);
+    r.style.setProperty("--orb-edge-2", theme.secondary);
+    r.style.setProperty("--orb-edge-3", theme.accent);
+  } else {
+    r.style.setProperty("--orb-edge-1", theme.primary);
+    r.style.setProperty("--orb-edge-2", theme.secondary);
+    r.style.setProperty("--orb-edge-3", theme.accent);
+  }
+
   r.classList.toggle("tc-dark",  dark);
   r.classList.toggle("tc-light", !dark);
   r.setAttribute("data-theme", dark ? "dark" : "light");
@@ -153,7 +168,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const allThemes = buildAllThemes(customTheme);
-  const theme = allThemes[themeKey] ?? THEMES.violet;
+  const theme = allThemes[themeKey] ?? THEMES.orange;
 
   // Apply to DOM on every relevant state change
   useLayoutEffect(() => { applyToDom(theme, dark, glassFrost, glassBlur, glassOpacity); }, [theme, dark, glassFrost, glassBlur, glassOpacity]);

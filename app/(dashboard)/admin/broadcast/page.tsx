@@ -133,14 +133,18 @@ export default function AdminBroadcast() {
   const { dark } = useTheme();
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.52)" : "rgba(30,20,80,0.45)";
-  const glassBg      = dark ? "rgba(10, 8, 26, 0.80)" : "rgba(255,255,255,0.35)";
-  const glassBlur    = "blur(72px) saturate(210%) brightness(1.06)";
-  const glassBorder  = dark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.90)";
-  const glassShadow  = dark
-    ? "0 40px 100px rgba(0,0,0,0.60), 0 12px 36px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.13), inset 0 -1px 0 rgba(0,0,0,0.18)"
-    : "0 20px 60px rgba(0,0,0,0.10), 0 6px 20px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.98)";
   const inputBg      = dark ? "rgba(255,255,255,0.055)" : "rgba(0,0,0,0.03)";
   const inputBorder  = dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.09)";
+
+  // Mobile detection for compact layout
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const { data, isLoading } = useAdminShifts({ status: "published" });
   const [selectedShift, setSelectedShift] = useState("");
@@ -175,7 +179,7 @@ export default function AdminBroadcast() {
   };
 
   const inp: React.CSSProperties = {
-    width: "100%", padding: "13px 16px", borderRadius: 16, fontSize: 14,
+    width: "100%", padding: isMobile ? "10px 12px" : "13px 16px", borderRadius: isMobile ? 12 : 16, fontSize: isMobile ? 13 : 14,
     background: inputBg, border: `1px solid ${inputBorder}`,
     color: textMain, outline: "none", resize: "none",
     fontFamily: "var(--font-outfit,'Outfit',sans-serif)",
@@ -184,48 +188,57 @@ export default function AdminBroadcast() {
   };
 
   return (
-    <div style={{ padding: "24px 28px", minHeight: "100%", position: "relative" }}>
+    <div style={{ padding: isMobile ? "12px 12px" : "24px 28px", minHeight: "100%", position: "relative" }}>
 
-      {/* Ambient orbs */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: "-10%", right: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 12%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat1 20s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", bottom: "10%", left: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 10%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat2 25s ease-in-out infinite" }} />
-      </div>
+      {/* Ambient orbs — hidden on mobile for performance */}
+      {!isMobile && (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: "-10%", right: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 12%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat1 20s ease-in-out infinite" }} />
+          <div style={{ position: "absolute", bottom: "10%", left: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 10%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat2 25s ease-in-out infinite" }} />
+        </div>
+      )}
 
       {/* Header */}
-      <motion.div
-        style={{ marginBottom: 32, position: "relative", zIndex: 1 }}
+      <div
+        style={{ marginBottom: isMobile ? 16 : 32, position: "relative", zIndex: 1 }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 4 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)" }}>
-            <Mail size={22} color="#fff" />
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 14, marginBottom: 4 }}>
+          <div style={{
+            width: isMobile ? 36 : 48, height: isMobile ? 36 : 48,
+            borderRadius: isMobile ? 12 : 16,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+            boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
+            flexShrink: 0,
+          }}>
+            <Mail size={isMobile ? 17 : 22} color="#fff" />
           </div>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>Email Broadcast</h1>
-            <p style={{ fontSize: 13, color: textMuted, marginTop: 2 }}>Send shift notifications to employees via email · <span style={{ color: "var(--tc-primary)", cursor: "pointer" }}>WhatsApp</span></p>
+            <h1 style={{ fontSize: isMobile ? 18 : 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>Email Broadcast</h1>
+            <p style={{ fontSize: isMobile ? 11 : 13, color: textMuted, marginTop: 2 }}>Send shift notifications to employees via email · <span style={{ color: "var(--tc-primary)", cursor: "pointer" }}>WhatsApp</span></p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Main glass card */}
-      <motion.div
+      <div
         className="admin-panel"
         style={{
           maxWidth: 580, position: "relative", zIndex: 1,
-          borderRadius: 28, overflow: "hidden",
+          borderRadius: isMobile ? 20 : 28, overflow: "hidden",
         }}
       >
         {/* Top gradient bar */}
         <div style={{ height: 3, background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
 
         {/* Inner prismatic glow */}
-        <div style={{ position: "absolute", inset: 0, borderRadius: 28, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.09) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(139,92,246,0.07) 0%, transparent 50%)" : "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.05) 0%, transparent 55%)" }} />
+        <div style={{ position: "absolute", inset: 0, borderRadius: isMobile ? 20 : 28, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.09) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(139,92,246,0.07) 0%, transparent 50%)" : "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.05) 0%, transparent 55%)" }} />
 
-        <div style={{ padding: "28px 28px 32px", position: "relative" }}>
+        <div style={{ padding: isMobile ? "16px 14px 20px" : "28px 28px 32px", position: "relative" }}>
 
           {/* Shift selector */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.28 }} style={{ marginBottom: 24 }}>
-            <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: 10 }}>
+          <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+            <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
               Select Shift
             </label>
             {isLoading ? (
@@ -233,54 +246,54 @@ export default function AdminBroadcast() {
             ) : (
               <GlassSelect value={selectedShift} onChange={setSelectedShift} options={shiftOptions} placeholder="Choose a published shift…" dark={dark} textMain={textMain} textMuted={textMuted} />
             )}
-          </motion.div>
+          </div>
 
           {/* Target group */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.20, duration: 0.28 }} style={{ marginBottom: 24 }}>
-            <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: 10 }}>
+          <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+            <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
               Target Group
             </label>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: isMobile ? 6 : 8 }}>
               {targetGroups.map(g => {
                 const Icon = g.icon;
                 const isActive = targetGroup === g.id;
                 return (
-                  <motion.button key={g.id} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                  <button key={g.id}
                     onClick={() => setTargetGroup(g.id)}
                     className="admin-panel"
                     style={{
-                      flex: 1, padding: "16px 12px", borderRadius: 16, cursor: "pointer",
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                      flex: 1, padding: isMobile ? "10px 8px" : "16px 12px",
+                      borderRadius: isMobile ? 12 : 16, cursor: "pointer",
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: isMobile ? 4 : 6,
                       background: isActive ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" : dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
                       border: `1px solid ${isActive ? "transparent" : (dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)")}`,
                       boxShadow: isActive ? "0 6px 20px color-mix(in srgb, var(--tc-primary) 32%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)" : dark ? "inset 0 1px 0 rgba(255,255,255,0.06)" : "inset 0 1px 0 rgba(255,255,255,0.80)",
                       transition: "all 0.28s cubic-bezier(0.4,0,0.2,1)",
                     }}>
-                    <Icon size={15} color={isActive ? "#fff" : "var(--tc-primary)"} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? "#fff" : textMain }}>{g.label}</span>
-                  </motion.button>
+                    <Icon size={isMobile ? 13 : 15} color={isActive ? "#fff" : "var(--tc-primary)"} />
+                    <span style={{ fontSize: isMobile ? 10 : 11, fontWeight: 700, color: isActive ? "#fff" : textMain }}>{g.label}</span>
+                  </button>
                 );
               })}
             </div>
-          </motion.div>
+          </div>
 
           {/* Custom message */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.28 }} style={{ marginBottom: 28 }}>
-            <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: 10 }}>
+          <div style={{ marginBottom: isMobile ? 18 : 28 }}>
+            <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
               Custom Message <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, opacity: 0.7 }}>(optional)</span>
             </label>
-            <textarea rows={4} value={customMsg} onChange={e => setCustomMsg(e.target.value)}
+            <textarea rows={isMobile ? 3 : 4} value={customMsg} onChange={e => setCustomMsg(e.target.value)}
               className="admin-panel"
               placeholder="Leave blank to use the default shift notification template…"
               style={inp}
               onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 18%, transparent)"; e.target.style.background = dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.96)"; }}
               onBlur={e => { e.target.style.borderColor = inputBorder; e.target.style.boxShadow = "none"; e.target.style.background = inputBg; }}
             />
-            <p style={{ fontSize: 11, color: textMuted, marginTop: 7, paddingLeft: 2 }}>
+            <p style={{ fontSize: 11, color: textMuted, marginTop: isMobile ? 5 : 7, paddingLeft: 2 }}>
               {customMsg.length > 0 ? `${customMsg.length} characters` : "Default email template will be used"}
             </p>
-          </motion.div>
+          </div>
 
           {/* Send button */}
           <motion.button
@@ -289,10 +302,11 @@ export default function AdminBroadcast() {
             transition={{ type: "spring", stiffness: 380, damping: 26 }}
             onClick={handleSend} disabled={sending || !selectedShift}
             style={{
-              width: "100%", padding: "15px 0", borderRadius: 18, border: "none",
+              width: "100%", padding: isMobile ? "12px 0" : "15px 0",
+              borderRadius: isMobile ? 14 : 18, border: "none",
               background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
               color: "#fff", cursor: sending || !selectedShift ? "not-allowed" : "pointer",
-              fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
+              fontSize: isMobile ? 13 : 15, fontWeight: 700, letterSpacing: 0.3,
               opacity: sending || !selectedShift ? 0.55 : 1,
               boxShadow: "0 8px 28px color-mix(in srgb, var(--tc-primary) 36%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
@@ -301,11 +315,11 @@ export default function AdminBroadcast() {
             {sending ? (
               <><span style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} /> Sending…</>
             ) : (
-              <><Zap size={17} /> Send Broadcast</>
+              <><Zap size={isMobile ? 15 : 17} /> Send Broadcast</>
             )}
           </motion.button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -21,9 +21,14 @@ const SceneBackground = memo(function SceneBackground({
     let raf: number;
     let w = 0, h = 0;
     let lastTime = 0;
-    const FRAME_MS = 1000 / 30;
 
-    const particles = Array.from({ length: 25 }, () => ({
+    // ── Mobile detection for performance tuning ──
+    const isMobile = window.innerWidth <= 768;
+    const FRAME_MS = isMobile ? (1000 / 20) : (1000 / 30); // 20fps on mobile, 30fps on desktop
+    const PARTICLE_COUNT = isMobile ? 8 : 25;
+    const DRAW_LINES = !isMobile; // skip network lines on mobile
+
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
       x: Math.random(), y: Math.random(),
       vx: (Math.random() - 0.5) * 0.00016,
       vy: (Math.random() - 0.5) * 0.00016,
@@ -37,7 +42,7 @@ const SceneBackground = memo(function SceneBackground({
      *   - CSS variables like "var(--tc-primary)"
      *   - Hex like "#6366f1"
      *   - Already-rgb like "rgb(99,102,241)"
-     * Falls back to "99,102,241" (indigo) on any parse failure.
+     * Falls back to "249,115,22" (orange) on any parse failure.
      */
     const resolveToRgb = (color: string): string => {
       try {
@@ -45,7 +50,7 @@ const SceneBackground = memo(function SceneBackground({
         if (color.startsWith("var(")) {
           const varName = color.slice(4, -1).trim();
           const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-          if (!computed) return "99,102,241";
+          if (!computed) return "249,115,22";
           // Recurse in case the computed value is also hex
           return resolveToRgb(computed);
         }
@@ -58,7 +63,7 @@ const SceneBackground = memo(function SceneBackground({
           const r = parseInt(hex.slice(1, 3), 16);
           const g = parseInt(hex.slice(3, 5), 16);
           const b = parseInt(hex.slice(5, 7), 16);
-          if (isNaN(r) || isNaN(g) || isNaN(b)) return "99,102,241";
+          if (isNaN(r) || isNaN(g) || isNaN(b)) return "249,115,22";
           return `${r},${g},${b}`;
         }
         // rgb(...) or rgba(...)
@@ -66,9 +71,9 @@ const SceneBackground = memo(function SceneBackground({
         if (rgbMatch) {
           return `${rgbMatch[1]},${rgbMatch[2]},${rgbMatch[3]}`;
         }
-        return "99,102,241";
+        return "249,115,22";
       } catch {
-        return "99,102,241";
+        return "249,115,22";
       }
     };
 
@@ -96,19 +101,22 @@ const SceneBackground = memo(function SceneBackground({
         ctx.fillRect(0, 0, w, h);
       });
 
-      ctx.lineWidth = 0.6;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = (particles[i].x - particles[j].x) * w;
-          const dy = (particles[i].y - particles[j].y) * h;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < 160 * 160) {
-            const dist = Math.sqrt(d2);
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(${rgbP},${(1 - dist / 160) * (dark ? 0.11 : 0.06)})`;
-            ctx.moveTo(particles[i].x * w, particles[i].y * h);
-            ctx.lineTo(particles[j].x * w, particles[j].y * h);
-            ctx.stroke();
+      // Network lines — skip on mobile for performance
+      if (DRAW_LINES) {
+        ctx.lineWidth = 0.6;
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = (particles[i].x - particles[j].x) * w;
+            const dy = (particles[i].y - particles[j].y) * h;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < 160 * 160) {
+              const dist = Math.sqrt(d2);
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(${rgbP},${(1 - dist / 160) * (dark ? 0.11 : 0.06)})`;
+              ctx.moveTo(particles[i].x * w, particles[i].y * h);
+              ctx.lineTo(particles[j].x * w, particles[j].y * h);
+              ctx.stroke();
+            }
           }
         }
       }

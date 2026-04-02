@@ -232,17 +232,22 @@ export default function NotificationPanel({ role, userId }: Props) {
     if (item.href) { setOpen(false); router.push(item.href); }
   };
 
-  const bellBg     = open
-    ? "color-mix(in srgb, var(--tc-primary) 27%, transparent)"
-    : "color-mix(in srgb, var(--tc-primary) 13%, transparent)";
-  const bellBorder = open
-    ? "color-mix(in srgb, var(--tc-primary) 47%, transparent)"
-    : "color-mix(in srgb, var(--tc-primary) 20%, transparent)";
-  const bellOutline = open ? "2px solid color-mix(in srgb, var(--tc-primary) 55%, transparent)" : "none";
+  // Glass frost bell button styles — matching ThemePanel icons
+  const bellBg = open
+    ? (dark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.45)")
+    : (dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.30)");
+  const bellBorder = dark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.65)";
+  const bellShadow = open
+    ? (dark
+      ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.30), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 30%, transparent)"
+      : "inset 0 1px 0 rgba(255,255,255,0.90), 0 4px 12px rgba(0,0,0,0.08), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 20%, transparent)")
+    : (dark
+      ? "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -0.5px 0 rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.25)"
+      : "inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -0.5px 0 rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.06)");
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Bell button */}
+      {/* Bell button — Glass Frost */}
       <motion.button
         whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
         onClick={() => setOpen(o => !o)}
@@ -250,10 +255,12 @@ export default function NotificationPanel({ role, userId }: Props) {
           width: 32, height: 32, borderRadius: 10,
           background: bellBg,
           border: `1px solid ${bellBorder}`,
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          boxShadow: bellShadow,
           cursor: "pointer", display: "flex", alignItems: "center",
           justifyContent: "center", color: "var(--tc-primary)",
-          outline: bellOutline,
-          transition: "all 0.2s ease",
+          transition: "background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease",
           position: "relative",
         }}>
         <motion.div
