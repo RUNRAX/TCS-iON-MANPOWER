@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminEmployees, useApproveEmployee } from "@/hooks/use-api";
-import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2 } from "lucide-react";
+import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2, Phone, MapPin, CalendarDays, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
@@ -230,7 +230,7 @@ export default function AdminEmployees() {
                     )}
                   </motion.div>
 
-                  {/* ── Expanded detail panel with action buttons ── */}
+                  {/* ── Expanded employee detail panel ── */}
                   <AnimatePresence>
                     {selectedEmpDetail === emp.id && (
                       <motion.div
@@ -240,36 +240,81 @@ export default function AdminEmployees() {
                         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                         style={{ overflow: "hidden", borderBottom: `1px solid ${border}` }}
                       >
-                        <div style={{ padding: "12px 20px 16px", display: "flex", gap: 10, flexWrap: "wrap" }}>
-                          {/* Save Button */}
-                          <motion.button
-                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px rgba(16,185,129,0.3)" }}
-                            whileTap={{ scale: 0.96 }}
-                            className="admin-panel"
-                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
-                          >
-                            <Save size={13} /> Save
-                          </motion.button>
+                        <div className="admin-panel" style={{ position: "relative", margin: "8px 16px 14px", borderRadius: 18, padding: 22 }}>
+                          {/* Top row: avatar + name + status */}
+                          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
+                            <div style={{ width: 52, height: 52, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: "#fff", background: "linear-gradient(135deg, var(--tc-primary), var(--tc-accent))", boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)" }}>
+                              {initials(emp.full_name, emp.email)}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <h3 style={{ fontSize: 16, fontWeight: 800, color: textMain, marginBottom: 2 }}>{emp.full_name ?? "No Name"}</h3>
+                              <p style={{ fontSize: 12, color: textMuted }}>{emp.email}</p>
+                            </div>
+                            <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: sc.bg, color: sc.fg }}>
+                              {emp.status.replace("_", " ")}
+                            </span>
+                          </div>
 
-                          {/* Modify Button */}
-                          <motion.button
-                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)" }}
-                            whileTap={{ scale: 0.96 }}
-                            className="admin-panel"
-                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
-                          >
-                            <Edit3 size={13} /> Modify
-                          </motion.button>
+                          {/* Detail grid */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                            <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                              <Phone size={13} style={{ color: "var(--tc-primary)" }} />
+                              <div>
+                                <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Phone</p>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: textMain }}>{emp.phone ?? "Not provided"}</p>
+                              </div>
+                            </div>
+                            <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                              <MapPin size={13} style={{ color: "var(--tc-secondary)" }} />
+                              <div>
+                                <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Location</p>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: textMain }}>
+                                  {emp.city || emp.state ? `${emp.city ?? ""}${emp.city && emp.state ? ", " : ""}${emp.state ?? ""}` : "Not provided"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                              <CalendarDays size={13} style={{ color: "var(--tc-accent)" }} />
+                              <div>
+                                <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Joined</p>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: textMain }}>{new Date(emp.joined_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                              </div>
+                            </div>
+                            <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+                              <Shield size={13} style={{ color: emp.is_active ? "#10b981" : "#f59e0b" }} />
+                              <div>
+                                <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Account</p>
+                                <p style={{ fontSize: 12, fontWeight: 600, color: emp.is_active ? "#34d399" : "#fbbf24" }}>{emp.is_active ? "Active" : "Inactive"}</p>
+                              </div>
+                            </div>
+                          </div>
 
-                          {/* Remove Button */}
-                          <motion.button
-                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px rgba(239,68,68,0.3)" }}
-                            whileTap={{ scale: 0.96 }}
-                            className="admin-panel"
-                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
-                          >
-                            <Trash2 size={13} /> Remove
-                          </motion.button>
+                          {/* Rejection reason if rejected */}
+                          {emp.rejection_reason && (
+                            <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.18)", marginBottom: 14, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                              <XCircle size={13} style={{ color: "#f87171", marginTop: 1, flexShrink: 0 }} />
+                              <div>
+                                <p style={{ fontSize: 10, fontWeight: 700, color: "#f87171", letterSpacing: 1, textTransform: "uppercase", marginBottom: 2 }}>Rejection Reason</p>
+                                <p style={{ fontSize: 12, color: textMuted }}>{emp.rejection_reason}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Action buttons */}
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                              <Save size={13} /> Save
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                              <Edit3 size={13} /> Modify
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                              <Trash2 size={13} /> Remove
+                            </motion.button>
+                          </div>
                         </div>
                       </motion.div>
                     )}

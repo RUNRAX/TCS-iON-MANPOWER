@@ -120,17 +120,38 @@ export default function NotificationPanel({ role, userId }: Props) {
         setItems(notifs);
 
       } else {
-        const [shiftsRes, paymentsRes, notifsRes] = await Promise.all([
+        const [shiftsRes, paymentsRes, notifsRes, profileRes] = await Promise.all([
           fetch("/api/employee/shifts"),
           fetch("/api/employee/payments"),
           fetch("/api/employee/notifications"),
+          fetch("/api/employee/profile"),
         ]);
 
         const shifts   = shiftsRes.ok   ? await shiftsRes.json()   : null;
         const payments = paymentsRes.ok ? await paymentsRes.json() : null;
         const notifs   = notifsRes.ok   ? await notifsRes.json()   : null;
+        const profileData = profileRes.ok ? await profileRes.json() : null;
 
         const empItems: NotifItem[] = [];
+
+        // Profile completion notification for new employees
+        const profile = profileData?.data?.profile;
+        if (!profile || profile.status !== "approved") {
+          empItems.push({
+            id: "profile-complete",
+            icon: <UserCheck size={14} />,
+            title: !profile ? "Complete Your Profile" : profile.status === "pending" ? "Profile Under Review" : "Profile Update Needed",
+            message: !profile
+              ? "Please complete your KYC profile to start taking shifts"
+              : profile.status === "pending"
+              ? "Your profile is awaiting admin approval"
+              : "Please update your profile and resubmit",
+            time: "now",
+            read: false,
+            href: "/employee/profile",
+            accent: !profile ? "var(--tc-primary)" : profile.status === "pending" ? "#f59e0b" : "#ef4444",
+          });
+        }
 
         (notifs?.data?.notifications ?? []).slice(0, 4).forEach((n: Record<string, unknown>) => {
           empItems.push({
