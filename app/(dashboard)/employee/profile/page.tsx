@@ -64,7 +64,7 @@ const SectionCard = memo(function SectionCard({
   children, cardBg, border,
 }: { children: React.ReactNode; cardBg: string; border: string }) {
   return (
-    <div style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 16, padding: 22, marginBottom: 14, backdropFilter: "blur(12px)" }}>
+    <div className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 22, marginBottom: 14 }}>
       {children}
     </div>
   );

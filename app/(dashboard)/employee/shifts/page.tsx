@@ -40,7 +40,7 @@ export default function EmployeeShifts() {
 
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl p-5" style={{ background: cardBg, border: `1px solid ${borderCol}`, backdropFilter: "blur(12px)" }}>
+        className="admin-panel rounded-2xl p-5" style={{ position: "relative" }}>
         <div className="flex items-start justify-between mb-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: `color-mix(in srgb, var(--tc-primary) 13%, transparent)`, color: "var(--tc-primary)" }}>

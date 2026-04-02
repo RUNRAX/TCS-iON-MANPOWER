@@ -267,9 +267,9 @@ export default function AdminExcelPage() {
                 onClick={() => handleExport(ex.type)}
                 disabled={loadingType !== null}
                 className="admin-panel"
-                style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderRadius: 11, background: isLoading ? `${ex.color}30` : `linear-gradient(135deg,${ex.color},${ex.color}cc)`, border: "none", color: "#fff", cursor: loadingType !== null ? "not-allowed" : "pointer", fontWeight: 600, fontSize: 13, opacity: loadingType !== null && !isLoading ? 0.5 : 1, transition: "all 0.2s", marginTop: 4, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)" }}>
+                style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderRadius: 11, background: isLoading ? `${ex.color}18` : `${ex.color}10`, border: `1px solid ${ex.color}30`, color: ex.color, cursor: loadingType !== null ? "not-allowed" : "pointer", fontWeight: 700, fontSize: 13, opacity: loadingType !== null && !isLoading ? 0.5 : 1, transition: "all 0.22s", marginTop: 4, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)" }}>
                 {isLoading
-                  ? <><span style={{ width: 13, height: 13, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} /> Generating…</>
+                  ? <><span style={{ width: 13, height: 13, border: `2px solid ${ex.color}40`, borderTopColor: ex.color, borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} /> Generating…</>
                   : <><FileSpreadsheet size={14} /> Download .xlsx</>}
               </button>
             </div>

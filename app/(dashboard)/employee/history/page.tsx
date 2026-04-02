@@ -35,7 +35,7 @@ export default function EmployeeHistoryPage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {history.map(h => (
-            <div key={h.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            <div key={h.id} className="admin-panel" style={{ position: "relative", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                   <Calendar size={13} style={{ color: "var(--tc-primary)" }} />

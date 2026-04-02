@@ -40,6 +40,7 @@ const employeeNav = [
   { label: "My Bookings",      icon: ClipboardList,   href: "/employee/history"   },
   { label: "My Profile",       icon: UserCheck,       href: "/employee/profile"   },
   { label: "Payments",         icon: FileSpreadsheet, href: "/employee/payments"  },
+  { label: "Settings",          icon: Settings,        href: "/employee/settings"  },
 ];
 
 /* ── Helper: get greeting ────────────────────────────────────────────────── */
@@ -341,7 +342,7 @@ export default function SiteLayout({
       >
         {/* ── Sidebar color orbs (no blur — sharp defined circles) ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Purple orb */}
+          {/* Purple/Primary orb */}
           <div style={{
             position: "absolute",
             top: "10%",
@@ -349,13 +350,13 @@ export default function SiteLayout({
             width: "160px",
             height: "160px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%)",
+            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 25%, transparent) 0%, transparent 70%)",
             filter: "none",
             animation: "sidebarOrb1 8s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
           }} />
-          {/* Cyan orb */}
+          {/* Secondary orb */}
           <div style={{
             position: "absolute",
             bottom: "15%",
@@ -363,13 +364,13 @@ export default function SiteLayout({
             width: "140px",
             height: "140px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, transparent 70%)",
+            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 22%, transparent) 0%, transparent 70%)",
             filter: "none",
             animation: "sidebarOrb2 10s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
           }} />
-          {/* Pink/Magenta orb */}
+          {/* Accent orb */}
           <div style={{
             position: "absolute",
             top: "50%",
@@ -377,13 +378,13 @@ export default function SiteLayout({
             width: "120px",
             height: "120px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(236, 72, 153, 0.20) 0%, transparent 70%)",
+            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-accent) 20%, transparent) 0%, transparent 70%)",
             filter: "none",
             animation: "sidebarOrb3 12s ease-in-out infinite",
             willChange: "transform",
             transform: "translateZ(0)",
           }} />
-          {/* Indigo accent orb */}
+          {/* Secondary accent orb */}
           <div style={{
             position: "absolute",
             top: "70%",
@@ -391,7 +392,7 @@ export default function SiteLayout({
             width: "100px",
             height: "100px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, transparent 70%)",
+            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 22%, transparent) 0%, transparent 70%)",
             filter: "none",
             animation: "sidebarOrb4 9s ease-in-out infinite",
             willChange: "transform",

@@ -103,8 +103,8 @@ export default function EmployeeDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((c, i) => (
           <motion.div key={c.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-            className="rounded-2xl p-4"
-            style={{ background: cardBg, backdropFilter: "blur(12px)", border: `1px solid ${borderCol}` }}>
+            className="admin-panel rounded-2xl p-4"
+            style={{ position: "relative" }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
               style={{ background: `color-mix(in srgb, ${c.color} 13%, transparent)`, color: c.color }}>
               <c.icon className="w-4 h-4" />
@@ -119,8 +119,8 @@ export default function EmployeeDashboard() {
       <div className="grid grid-cols-2 gap-4">
         <Link href="/employee/shifts">
           <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}
-            className="rounded-2xl p-5 cursor-pointer flex items-center justify-between"
-            style={{ background: cardBg, border: `1px solid ${borderCol}`, backdropFilter: "blur(12px)" }}>
+            className="admin-panel rounded-2xl p-5 cursor-pointer flex items-center justify-between"
+            style={{ position: "relative" }}>
             <div>
               <p className="font-bold text-sm" style={{ color: textMain }}>Available Shifts</p>
               <p className="text-xs mt-0.5" style={{ color: textMuted }}>Browse and book shifts</p>
@@ -130,8 +130,8 @@ export default function EmployeeDashboard() {
         </Link>
         <Link href="/employee/history">
           <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}
-            className="rounded-2xl p-5 cursor-pointer flex items-center justify-between"
-            style={{ background: cardBg, border: `1px solid ${borderCol}`, backdropFilter: "blur(12px)" }}>
+            className="admin-panel rounded-2xl p-5 cursor-pointer flex items-center justify-between"
+            style={{ position: "relative" }}>
             <div>
               <p className="font-bold text-sm" style={{ color: textMain }}>My Bookings</p>
               <p className="text-xs mt-0.5" style={{ color: textMuted }}>View shift history</p>
@@ -142,8 +142,8 @@ export default function EmployeeDashboard() {
       </div>
 
       {/* Notifications Feed */}
-      <div className="rounded-2xl overflow-hidden"
-        style={{ background: cardBg, border: `1px solid ${borderCol}`, backdropFilter: "blur(12px)" }}>
+      <div className="admin-panel rounded-2xl overflow-hidden"
+        style={{ position: "relative" }}>
         <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: `1px solid ${borderCol}` }}>
           <Bell className="w-4 h-4" style={{ color: "var(--tc-primary)" }} />
           <h2 className="font-bold" style={{ color: textMain }}>Notifications</h2>

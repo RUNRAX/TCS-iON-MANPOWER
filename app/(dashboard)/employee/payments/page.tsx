@@ -34,7 +34,7 @@ export default function EmployeePaymentsPage() {
           { label: "Total Earned", value: `₹${totalEarned}`, icon: Check, color: "#10B981" },
           { label: "Pending",      value: `₹${totalPending}`, icon: Clock, color: "#f59e0b" },
         ].map(s => (
-          <div key={s.label} style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: 20 }}>
+          <div key={s.label} className="admin-panel" style={{ position: "relative", borderRadius: 14, padding: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <s.icon size={15} style={{ color: s.color }} />
               <span style={{ fontSize: 11, color: textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{s.label}</span>
@@ -54,7 +54,7 @@ export default function EmployeePaymentsPage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {payments.map(p => (
-            <div key={p.id} style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            <div key={p.id} className="admin-panel" style={{ position: "relative", borderRadius: 14, padding: "14px 20px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 140 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                   <Calendar size={12} style={{ color: "var(--tc-primary)" }} />
