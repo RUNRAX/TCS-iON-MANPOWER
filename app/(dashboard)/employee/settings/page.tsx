@@ -100,7 +100,7 @@ export default function EmployeeSettings() {
   };
 
   return (
-    <div style={{ padding: "24px 28px", maxWidth: 700, margin: "0 auto", minHeight: "100%" }}>
+    <div className="p-4 md:p-6 lg:p-8 w-full max-w-3xl mx-auto min-h-full">
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
@@ -117,10 +117,10 @@ export default function EmployeeSettings() {
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* ── Account Information ── */}
-        <div className="admin-panel" style={{ position: "relative", borderRadius: 20, padding: 24 }}>
+        <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
           <SectionHeader icon={Mail} title="Account Information" subtitle="Your contact details" dark={dark} />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
               <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Email</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -154,7 +154,7 @@ export default function EmployeeSettings() {
         </div>
 
         {/* ── Shift Reminders ── */}
-        <div className="admin-panel" style={{ position: "relative", borderRadius: 20, padding: 24 }}>
+        <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
           <SectionHeader icon={Bell} title="Shift Reminders" subtitle="Get notified before your shifts" dark={dark} />
 
           <SettingRow label="Enable Shift Reminders" description="Receive notifications before your booked shifts" border={border}>
@@ -165,7 +165,7 @@ export default function EmployeeSettings() {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
               style={{ paddingTop: 14 }}>
               <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>Remind Me Before</label>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
                   { label: "30 min", value: "30m" },
                   { label: "1 hour", value: "1h" },
@@ -192,7 +192,7 @@ export default function EmployeeSettings() {
         </div>
 
         {/* ── Notes ── */}
-        <div className="admin-panel" style={{ position: "relative", borderRadius: 20, padding: 24 }}>
+        <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
           <SectionHeader icon={StickyNote} title="Personal Notes" subtitle="Keep track of important information" dark={dark} />
 
           <textarea
@@ -212,7 +212,7 @@ export default function EmployeeSettings() {
         </div>
 
         {/* ── Security — Two-Step Verification ── */}
-        <div className="admin-panel" style={{ position: "relative", borderRadius: 20, padding: 24 }}>
+        <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
           <SectionHeader icon={Shield} title="Security" subtitle="Protect your account" dark={dark} />
 
           <SettingRow label="Two-Step Verification" description="Add an extra layer of security with OTP verification on login" border={border}>
@@ -232,7 +232,7 @@ export default function EmployeeSettings() {
         </div>
 
         {/* ── Glass Frost Mode ── */}
-        <div className="admin-panel" style={{ position: "relative", borderRadius: 20, padding: 24 }}>
+        <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
           <SectionHeader icon={Layers} title="Glass Frost Mode" subtitle="Control the visual design of your interface" dark={dark} />
 
           <SettingRow label="Glass Frost Effect" description="Enable the frosted glass transparency across all panels" border={border}>

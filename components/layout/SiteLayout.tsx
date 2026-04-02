@@ -332,7 +332,6 @@ export default function SiteLayout({
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
-          position: "relative",
           borderRight:          `1px solid ${borderCol}`,
           boxShadow:            edgeShadow,
           willChange:           "transform, opacity",
