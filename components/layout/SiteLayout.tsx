@@ -222,25 +222,25 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
 const LiquidBackground = () => (
   <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden" }}>
     {/* Top-Left Droplet */}
-    <div className="md:glowing-orb" style={{
-      position: "absolute", top: "-15%", left: "-5%", width: "55vmax", height: "55vmax",
-      borderRadius: "50%",
-      background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 18%, transparent) 0%, transparent 65%)",
-      transform: "translateZ(0)", willChange: "transform", animation: "floatOrb1 32s ease-in-out infinite",
+    <div className="glowing-orb" style={{
+      top: "-15%", left: "-5%",
+      width: "55vmax", height: "55vmax",
+      boxShadow: "inset -20px -30px 120px var(--orb-edge-1), inset -2px -4px 12px var(--orb-edge-2), 0 40px 120px rgba(0,0,0,0.7)",
+      animation: "floatOrb1 32s ease-in-out infinite",
     }} />
     {/* Bottom-Right Droplet */}
-    <div className="md:glowing-orb" style={{
-      position: "absolute", bottom: "-15%", right: "-5%", width: "60vmax", height: "60vmax",
-      borderRadius: "50%",
-      background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 15%, transparent) 0%, transparent 65%)",
-      transform: "translateZ(0)", willChange: "transform", animation: "floatOrb2 40s ease-in-out infinite",
+    <div className="glowing-orb" style={{
+      bottom: "-15%", right: "-5%",
+      width: "60vmax", height: "60vmax",
+      boxShadow: "inset 20px 30px 120px var(--orb-edge-2), inset 2px 4px 12px var(--orb-edge-3), 0 -40px 120px rgba(0,0,0,0.7)",
+      animation: "floatOrb2 40s ease-in-out infinite",
     }} />
     {/* Mid-Left Overlapping Droplet */}
-    <div className="md:glowing-orb" style={{
-      position: "absolute", top: "20%", left: "-15%", width: "45vmax", height: "45vmax",
-      borderRadius: "50%",
-      background: "radial-gradient(circle, color-mix(in srgb, var(--tc-accent) 12%, transparent) 0%, transparent 65%)",
-      transform: "translateZ(0)", willChange: "transform", animation: "floatOrb3 35s ease-in-out infinite",
+    <div className="glowing-orb" style={{
+      top: "20%", left: "-15%",
+      width: "45vmax", height: "45vmax",
+      boxShadow: "inset -15px 25px 100px var(--orb-edge-3), inset -2px 3px 10px var(--orb-edge-1), 0 20px 100px rgba(0,0,0,0.6)",
+      animation: "floatOrb3 35s ease-in-out infinite",
     }} />
   </div>
 );
@@ -614,13 +614,10 @@ export default function SiteLayout({
                 {/* User avatar in header */}
                 <div className="flex items-center gap-2.5 ml-1">
                   <div
-                    className="admin-panel w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                     style={{
-                      position: "relative",
-                      background: "color-mix(in srgb, var(--tc-primary) 30%, transparent)",
-                      border: "1px solid color-mix(in srgb, var(--tc-primary) 40%, transparent)",
-                      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                      color: "var(--tc-primary)",
+                      background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                      boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.22), 0 0 10px color-mix(in srgb, var(--tc-primary) 25%, transparent)",
                     }}
                   >
                     {(userFullName ?? userEmail)?.[0]?.toUpperCase() ?? "U"}

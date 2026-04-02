@@ -244,14 +244,12 @@ export default function NotificationPanel({ role, userId }: Props) {
     <div style={{ position: "relative" }}>
       {/* Bell button */}
       <motion.button
-        className="admin-panel"
         whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
         onClick={() => setOpen(o => !o)}
         style={{
           width: 32, height: 32, borderRadius: 10,
-          background: "color-mix(in srgb, var(--tc-primary) 15%, transparent)",
+          background: bellBg,
           border: `1px solid ${bellBorder}`,
-          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
           cursor: "pointer", display: "flex", alignItems: "center",
           justifyContent: "center", color: "var(--tc-primary)",
           outline: bellOutline,
