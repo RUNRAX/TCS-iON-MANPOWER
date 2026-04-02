@@ -184,7 +184,7 @@ export default function AdminBroadcast() {
   };
 
   return (
-    <div style={{ padding: "24px 28px", minHeight: "100%", position: "relative" }}>
+    <div className="p-4 md:p-6 lg:p-8 min-h-full relative max-w-3xl mx-auto">
 
       {/* Ambient orbs */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
@@ -221,7 +221,7 @@ export default function AdminBroadcast() {
         {/* Inner prismatic glow */}
         <div style={{ position: "absolute", inset: 0, borderRadius: 28, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.09) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(139,92,246,0.07) 0%, transparent 50%)" : "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.05) 0%, transparent 55%)" }} />
 
-        <div style={{ padding: "28px 28px 32px", position: "relative" }}>
+        <div className="p-5 md:p-7 pb-6 md:pb-8 relative">
 
           {/* Shift selector */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.28 }} style={{ marginBottom: 24 }}>
@@ -240,7 +240,7 @@ export default function AdminBroadcast() {
             <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: 10 }}>
               Target Group
             </label>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
               {targetGroups.map(g => {
                 const Icon = g.icon;
                 const isActive = targetGroup === g.id;

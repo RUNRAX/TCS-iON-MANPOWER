@@ -19,12 +19,13 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
   // All button colours use CSS vars — same string on server & client, no hydration mismatch
   const btnBase: React.CSSProperties = {
     ...btnSize,
-    background: "color-mix(in srgb, var(--tc-primary) 9%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)",
+    background: "color-mix(in srgb, var(--tc-primary) 15%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)",
     cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
     color: "var(--tc-primary)",
-    backdropFilter: "blur(12px)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
     transition: "background 0.2s, outline 0.2s",
   };
 
@@ -39,6 +40,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
 
       {/* Dark / Light toggle */}
       <motion.button
+        className="admin-panel"
         whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
         onClick={() => setDark(d => !d)}
         title={dark ? "Switch to light" : "Switch to dark"}
@@ -50,6 +52,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
       {/* Palette button */}
       <div style={{ position: "relative" }}>
         <motion.button
+          className="admin-panel"
           whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
           onClick={() => setOpen(o => !o)}
           style={{ ...btnBase, ...paletteActive }}
