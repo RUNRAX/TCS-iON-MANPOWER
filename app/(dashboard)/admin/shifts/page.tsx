@@ -422,17 +422,17 @@ export default function AdminShifts() {
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: [0.4,0,0.2,1] }}
+              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
               style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(32px) saturate(180%)", WebkitBackdropFilter: "blur(32px) saturate(180%)", background: dark ? "rgba(3,2,10,0.60)" : "rgba(15,8,30,0.22)" }}
               onClick={() => setShowCreate(false)}
             />
 
             {/* Modal panel */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.90, y: 48, filter: "blur(8px)" }}
+              initial={{ opacity: 0, scale: 0.95, y: 24, filter: "blur(6px)" }}
               animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 0.92, y: 20, filter: "blur(4px)" }}
-              transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.9 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(3px)" }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
               style={{
                 position: "fixed", inset: 0, zIndex: 51,
                 display: "flex", alignItems: "center", justifyContent: "center", padding: 20,

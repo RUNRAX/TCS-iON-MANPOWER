@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminEmployees, useApproveEmployee } from "@/hooks/use-api";
-import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX } from "lucide-react";
+import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
@@ -29,6 +29,7 @@ export default function AdminEmployees() {
   const [status, setStatus]       = useState<StatusFilter>("all");
   const [page, setPage]           = useState(1);
   const [selectedEmp, setSelectedEmp] = useState<string | null>(null);
+  const [selectedEmpDetail, setSelectedEmpDetail] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   // Debounce search so we don't fire on every keystroke
@@ -161,6 +162,7 @@ export default function AdminEmployees() {
                 const sc = statusColor(emp.status);
                 const displayName = emp.full_name ?? emp.email;
                 return (
+                  <React.Fragment key={emp.id}>
                   <motion.div
                     key={emp.id}
                     initial={{ opacity: 0, x: -8 }}
@@ -174,6 +176,7 @@ export default function AdminEmployees() {
                       boxShadow: dark ? "0 20px 40px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)"
                     }}
                     className="px-5 py-4 flex items-center gap-4 cursor-pointer relative group"
+                    onClick={() => setSelectedEmpDetail(selectedEmpDetail === emp.id ? null : emp.id)}
                     style={{ 
                       borderBottom: i < employees.length - 1 ? `1px solid ${border}` : "none",
                       transformStyle: "preserve-3d",
@@ -226,9 +229,54 @@ export default function AdminEmployees() {
                       </div>
                     )}
                   </motion.div>
+
+                  {/* ── Expanded detail panel with action buttons ── */}
+                  <AnimatePresence>
+                    {selectedEmpDetail === emp.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ overflow: "hidden", borderBottom: `1px solid ${border}` }}
+                      >
+                        <div style={{ padding: "12px 20px 16px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+                          {/* Save Button */}
+                          <motion.button
+                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px rgba(16,185,129,0.3)" }}
+                            whileTap={{ scale: 0.96 }}
+                            className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
+                          >
+                            <Save size={13} /> Save
+                          </motion.button>
+
+                          {/* Modify Button */}
+                          <motion.button
+                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)" }}
+                            whileTap={{ scale: 0.96 }}
+                            className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
+                          >
+                            <Edit3 size={13} /> Modify
+                          </motion.button>
+
+                          {/* Remove Button */}
+                          <motion.button
+                            whileHover={{ scale: 1.04, y: -2, boxShadow: "0 8px 24px rgba(239,68,68,0.3)" }}
+                            whileTap={{ scale: 0.96 }}
+                            className="admin-panel"
+                            style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)", transition: "all 0.22s" }}
+                          >
+                            <Trash2 size={13} /> Remove
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  </React.Fragment>
                 );
               })}
-
         {/* Pagination */}
         {pagination && pagination.total > pagination.limit && (
           <div className="px-5 py-3 flex items-center justify-between" style={{ borderTop: `1px solid ${border}` }}>

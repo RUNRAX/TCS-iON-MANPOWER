@@ -433,14 +433,16 @@ export default function AdminBookingsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
 
               {/* ── Left: Calendar ─────────────────────────────────────────── */}
-              <div style={{ background: calBg, border: `1px solid ${border}`, borderRadius: 22, padding: 20, backdropFilter: glassBlur, WebkitBackdropFilter: glassBlur, position: "sticky", top: 20, boxShadow: cardShadow }}>
+              <div className="admin-panel" style={{ position: "relative", borderRadius: 22, padding: 20, top: 20 }}>
                 {/* Month nav */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <button onClick={prevMonth} style={{ width: 28, height: 28, borderRadius: 8, background: "transparent", border: `1px solid ${border}`, cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <button onClick={prevMonth} className="admin-panel" style={{ position: "relative", width: 28, height: 28, borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.18s, box-shadow 0.18s" }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.1)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; }}>
                     <ChevronLeft size={14} />
                   </button>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: textMain }}>{MONTHS[calMonth]} {calYear}</span>
-                  <button onClick={nextMonth} style={{ width: 28, height: 28, borderRadius: 8, background: "transparent", border: `1px solid ${border}`, cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: textMain, letterSpacing: -0.2 }}>{MONTHS[calMonth]} {calYear}</span>
+                  <button onClick={nextMonth} className="admin-panel" style={{ position: "relative", width: 28, height: 28, borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", transition: "transform 0.18s, box-shadow 0.18s" }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.1)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; }}>
                     <ChevronRight size={14} />
                   </button>
                 </div>
@@ -474,7 +476,8 @@ export default function AdminBookingsPage() {
                     <button
                       onClick={exportAttendance}
                       disabled={!shifts.length}
-                      style={{ width: "100%", padding: "9px 0", borderRadius: 10, background: shifts.length ? `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))` : `var(--tc-primary)`, border: "none", color: "#fff", cursor: shifts.length ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, opacity: shifts.length ? 1 : 0.5, transition: "all 0.2s" }}>
+                      className="admin-panel"
+                      style={{ position: "relative", width: "100%", padding: "10px 0", borderRadius: 12, background: shifts.length ? `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))` : `var(--tc-primary)`, border: "none", color: "#fff", cursor: shifts.length ? "pointer" : "not-allowed", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, opacity: shifts.length ? 1 : 0.5, transition: "all 0.22s", boxShadow: shifts.length ? "0 6px 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)" : "none" }}>
                       <FileSpreadsheet size={13} /> Export Attendance .xlsx
                     </button>
                     {saving && <p style={{ fontSize: 10, color: textMuted, textAlign: "center", marginTop: 8 }}>● Auto-saving…</p>}
@@ -568,7 +571,7 @@ export default function AdminBookingsPage() {
                         </div>
                       </motion.div>
                     ) : (
-                      <div style={{ background: dark ? "rgba(8,7,18,0.92)" : "rgba(252,251,255,0.96)", border: `1px solid ${border}`, borderRadius: 20, overflow: "hidden", backdropFilter: glassBlur, WebkitBackdropFilter: glassBlur, boxShadow: cardShadow }}>
+                      <div className="admin-panel" style={{ position: "relative", borderRadius: 20, overflow: "hidden", boxShadow: cardShadow }}>
                         {/* Add employee button */}
                       <div style={{ padding: "10px 16px", borderBottom: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 12, color: textMuted }}>{employees.length} employee{employees.length !== 1 ? "s" : ""} added</span>

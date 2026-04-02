@@ -220,7 +220,7 @@ export default function AdminExcelPage() {
           { label: "Pending Payments", value: s?.pendingPayments ?? "–", icon: Wallet,   color: "#f59e0b" },
           { label: "Approved",         value: employees.filter(e => e.status === "approved").length || "–", icon: Check, color: "#10b981" },
         ].map(sc => (
-          <div key={sc.label} className="admin-panel" style={{ background: card, border: `1px solid ${border}`, borderRadius: 14, padding: "16px 18px" }}>
+          <div key={sc.label} className="admin-panel" style={{ position: "relative", borderRadius: 14, padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 9, background: `${sc.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <sc.icon size={14} style={{ color: sc.color }} />
@@ -238,7 +238,7 @@ export default function AdminExcelPage() {
         {exports.map(ex => {
           const isLoading = loadingType === ex.type;
           return (
-            <div key={ex.type} className="admin-panel" style={{ background: card, border: `1px solid ${border}`, borderRadius: 16, padding: 22, display: "flex", flexDirection: "column", gap: 12 }}>
+            <div key={ex.type} className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 22, display: "flex", flexDirection: "column", gap: 12 }}>
               {/* Title row */}
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 11, background: `${ex.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -262,11 +262,12 @@ export default function AdminExcelPage() {
                 ))}
               </div>
 
-              {/* Download button */}
+              {/* Download button — glass frost */}
               <button
                 onClick={() => handleExport(ex.type)}
                 disabled={loadingType !== null}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderRadius: 11, background: isLoading ? `${ex.color}30` : `linear-gradient(135deg,${ex.color},${ex.color}cc)`, border: "none", color: "#fff", cursor: loadingType !== null ? "not-allowed" : "pointer", fontWeight: 600, fontSize: 13, opacity: loadingType !== null && !isLoading ? 0.5 : 1, transition: "all 0.2s", marginTop: 4 }}>
+                className="admin-panel"
+                style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 0", borderRadius: 11, background: isLoading ? `${ex.color}30` : `linear-gradient(135deg,${ex.color},${ex.color}cc)`, border: "none", color: "#fff", cursor: loadingType !== null ? "not-allowed" : "pointer", fontWeight: 600, fontSize: 13, opacity: loadingType !== null && !isLoading ? 0.5 : 1, transition: "all 0.2s", marginTop: 4, backdropFilter: "blur(20px) saturate(160%)", WebkitBackdropFilter: "blur(20px) saturate(160%)" }}>
                 {isLoading
                   ? <><span style={{ width: 13, height: 13, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} /> Generating…</>
                   : <><FileSpreadsheet size={14} /> Download .xlsx</>}
@@ -276,21 +277,26 @@ export default function AdminExcelPage() {
         })}
       </div>
 
-      {/* Preview of what's in each file */}
-      <div style={{ background: card, border: `1px solid ${border}`, borderRadius: 16, padding: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, color: textMain, marginBottom: 4 }}>What's included</h2>
+      {/* Preview of what's in each file — glass frost matching export tiles */}
+      <div className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 22 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: textMain, marginBottom: 4 }}>What's included</h2>
         <p style={{ fontSize: 12, color: textMuted, marginBottom: 16 }}>Each file is a formatted Excel workbook with frozen headers and auto-sized columns.</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[
-            { label: "Employee List",   detail: "Full details — name, contact, address, approval status, join date" },
-            { label: "Shift Schedule",  detail: "All shifts — date, venue, timing, staff count, pay per shift" },
-            { label: "Payment Report",  detail: "All payments — employee details, shift info, amount, reference, cleared date + totals summary" },
+            { label: "Employee List",   detail: "Full details — name, contact, address, approval status, join date", color: "var(--tc-primary)", icon: Users },
+            { label: "Shift Schedule",  detail: "All shifts — date, venue, timing, staff count, pay per shift", color: "var(--tc-secondary)", icon: Calendar },
+            { label: "Payment Report",  detail: "All payments — employee details, shift info, amount, reference, cleared date + totals summary", color: "#10b981", icon: Wallet },
           ].map(row => (
-            <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: dark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.02)" }}>
-              <FileSpreadsheet size={14} style={{ color: "var(--tc-primary)", flexShrink: 0 }} />
-              <div>
-                <span style={{ fontSize: 13, fontWeight: 600, color: textMain }}>{row.label}</span>
-                <span style={{ fontSize: 12, color: textMuted, marginLeft: 8 }}>— {row.detail}</span>
+            <div key={row.label} className="admin-panel" style={{ position: "relative", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 14, transition: "transform 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s cubic-bezier(0.4,0,0.2,1)", cursor: "default" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px) scale(1.01)"; e.currentTarget.style.boxShadow = dark ? "0 12px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)" : "0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
+            >
+              <div style={{ width: 38, height: 38, borderRadius: 11, background: `${row.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <row.icon size={16} style={{ color: row.color }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: textMain, marginBottom: 2 }}>{row.label}</p>
+                <p style={{ fontSize: 11, color: textMuted, lineHeight: 1.4 }}>{row.detail}</p>
               </div>
             </div>
           ))}
