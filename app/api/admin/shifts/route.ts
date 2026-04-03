@@ -112,6 +112,48 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
     return ok({ message: "SHIFT CANCELLED" });
   }
 
+  if (action === "publish") {
+    const { data: shift } = await supabase.from("exam_shifts").select("status").eq("id", shiftId).single();
+    if (!shift) return badRequest("SHIFT NOT FOUND");
+    if (shift.status !== "draft") return badRequest("ONLY DRAFT SHIFTS CAN BE PUBLISHED");
+    const { error } = await supabase
+      .from("exam_shifts")
+      .update({ status: "published", published_at: new Date().toISOString() })
+      .eq("id", shiftId);
+    if (error) { console.error("[Admin/Shifts PATCH publish]:", error); return serverError(); }
+
+    // Notify all approved employees about the new shift
+    try {
+      const { data: employees } = await supabase
+        .from("employee_profiles")
+        .select("user_id, full_name")
+        .eq("status", "approved");
+
+      const { data: shiftDetails } = await supabase
+        .from("exam_shifts")
+        .select("title, venue, exam_date, shift_number, start_time, end_time")
+        .eq("id", shiftId)
+        .single();
+
+      if (employees && employees.length > 0 && shiftDetails) {
+        const notifications = employees.map((emp: any) => ({
+          user_id: emp.user_id,
+          title: "New Shift Published",
+          message: `${shiftDetails.title} — Shift ${shiftDetails.shift_number} at ${shiftDetails.venue} on ${shiftDetails.exam_date} (${shiftDetails.start_time}–${shiftDetails.end_time})`,
+          type: "shift_published",
+          is_read: false,
+        }));
+        await supabase.from("notifications").insert(notifications);
+      }
+    } catch (notifErr) {
+      console.error("[Admin/Shifts PATCH publish] notification error:", notifErr);
+      // Non-fatal — shift is still published even if notifications fail
+    }
+
+    await auditLog({ userId, action: "shift.publish", entityType: "shift", entityId: shiftId, after: { status: "published" }, request });
+    return ok({ message: "Shift published and employees notified." });
+  }
+
   if (action === "edit") {
     const allowed = ["title","exam_date","shift_number","start_time","end_time","venue","venue_address","max_employees","min_employees","pay_amount","response_deadline","notes"];
     const updates: Record<string, any> = {};

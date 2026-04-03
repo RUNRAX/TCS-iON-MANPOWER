@@ -93,8 +93,8 @@ export const adminApi = {
       body: JSON.stringify(data),
     }),
 
-  /** PATCH /api/admin/shifts — edit, cancel, or complete shift */
-  patchShift: (shiftId: string, action: "edit" | "cancel" | "complete", fields?: Record<string, unknown>) =>
+  /** PATCH /api/admin/shifts — edit, cancel, complete, or publish shift */
+  patchShift: (shiftId: string, action: "edit" | "cancel" | "complete" | "publish", fields?: Record<string, unknown>) =>
     apiFetch<{ message: string }>("/api/admin/shifts", {
       method: "PATCH",
       body: JSON.stringify({ shiftId, action, ...fields }),

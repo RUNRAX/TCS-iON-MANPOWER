@@ -11,7 +11,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
   const [open, setOpen] = useState(false);
 
   const textMuted  = dark ? "rgba(200,195,240,0.45)" : "rgba(30,20,80,0.4)";
-  const panelBg    = dark ? "rgba(8,6,20,0.98)" : "rgba(255,255,255,0.98)";
+  const panelBg    = dark ? "rgba(12,9,28,0.48)" : "rgba(255,255,255,0.35)";
   const btnSize    = size === "sm" ? { width: 32, height: 32, borderRadius: 10 } : { width: 38, height: 38, borderRadius: 12 };
   const iconSize   = size === "sm" ? 14 : 16;
   const topOffset  = size === "sm" ? 60 : 68;
@@ -95,6 +95,8 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                 boxShadow: dark
                   ? "0 28px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05)"
                   : "0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 1px rgba(255,255,255,0.60)",
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
               }}
             >
               {/* Preset swatches */}

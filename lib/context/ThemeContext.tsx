@@ -10,7 +10,7 @@ export interface ThemeColors {
 /* ── Theme catalog — warm tones first, then cool tones ─────────────────────── */
 export const THEMES: Record<string, ThemeColors> = {
   // ── Warm Palette ──
-  orange:   { primary: "#f97316", secondary: "#fb923c", accent: "#fdba74", name: "Orange",   swatch: ["#f97316","#fb923c","#fdba74"] },
+  orange:   { primary: "#e0550b", secondary: "#b63b07", accent: "#cc350f", name: "Orange",   swatch: ["#e0550b","#b63b07","#cc350f"] },
   amber:    { primary: "#f59e0b", secondary: "#d97706", accent: "#fbbf24", name: "Amber",    swatch: ["#f59e0b","#d97706","#fbbf24"] },
   sunset:   { primary: "#f97316", secondary: "#ec4899", accent: "#fbbf24", name: "Sunset",   swatch: ["#f97316","#ec4899","#fbbf24"] },
   rose:     { primary: "#f43f5e", secondary: "#e11d48", accent: "#fb7185", name: "Rose",     swatch: ["#f43f5e","#e11d48","#fb7185"] },
@@ -40,7 +40,7 @@ const LS_AUTO_BG = "tc_auto_bg";
 
 const DEFAULT_KEY    = "orange";
 const DEFAULT_DARK   = true;
-const DEFAULT_CUSTOM = { primary: "#f97316", secondary: "#fb923c", accent: "#fdba74" };
+const DEFAULT_CUSTOM = { primary: "#e0550b", secondary: "#b63b07", accent: "#cc350f" };
 const DEFAULT_GLASS_FROST = true;
 const DEFAULT_GLASS_BLUR  = 36;
 const DEFAULT_GLASS_OPACITY = 55;

@@ -15,9 +15,9 @@
    § 1  CSS Custom Properties
 ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --tc-primary: #f97316;
-  --tc-secondary: #fb923c;
-  --tc-accent: #fdba74;
+  --tc-primary: #e0550b;
+  --tc-secondary: #b63b07;
+  --tc-accent: #cc350f;
 
   /* ── Spatial UI — Swappable environment background ── */
   --theme-bg-image: none;
@@ -182,6 +182,8 @@ html.tc-light body {
   border: 1px solid var(--spatial-glass-border);
   border-radius: var(--spatial-glass-radius);
   box-shadow: var(--spatial-glass-shadow);
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* Elevated glass — Spatial UI panels, cards */
@@ -194,6 +196,8 @@ html.tc-light body {
   box-shadow:
     inset 0 1.5px 0 rgba(255, 255, 255, 0.18),
     0 20px 56px rgba(0, 0, 0, 0.45);
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* Ultra-heavy — Spatial UI modals, sheets */
@@ -206,6 +210,8 @@ html.tc-light body {
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.22),
     0 32px 80px rgba(0, 0, 0, 0.55);
+  will-change: transform, opacity;
+  transform: translateZ(0);
 }
 
 /* Light-mode glass overrides */

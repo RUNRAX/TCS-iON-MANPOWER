@@ -88,11 +88,11 @@ export function useCreateShift() {
   });
 }
 
-/** Edit / cancel shift mutation */
+/** Edit / cancel / complete / publish shift mutation */
 export function usePatchShift() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ shiftId, action, fields }: { shiftId: string; action: "edit" | "cancel" | "complete"; fields?: Record<string, unknown> }) =>
+    mutationFn: ({ shiftId, action, fields }: { shiftId: string; action: "edit" | "cancel" | "complete" | "publish"; fields?: Record<string, unknown> }) =>
       adminApi.patchShift(shiftId, action, fields),
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "shifts"] }); },
   });

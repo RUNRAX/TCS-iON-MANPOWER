@@ -114,7 +114,7 @@ export default function AdminShifts() {
     );
   };
 
-  const handlePublish  = (id: string) => patchShift({ shiftId: id, action: "edit", fields: { status: "published" } }, { onSuccess: () => toast.success("Published ✓") });
+  const handlePublish  = (id: string) => patchShift({ shiftId: id, action: "publish" }, { onSuccess: () => { toast.success("Published ✓ — All employees notified"); refetch(); } });
   const handleComplete = (id: string) => {
     patchShift({ shiftId: id, action: "complete" }, { onSuccess: () => { toast.success("Marked complete ✓"); setConfirmingComplete(null); } });
   };
@@ -290,7 +290,7 @@ export default function AdminShifts() {
                       ? "0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15)" 
                       : "0 20px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,1)"
                   }}
-                  style={{ borderRadius: 24, padding: 22, background: cardBg, border: `1px solid ${g.cardBorder}`, backdropFilter: "blur(32px) saturate(210%)", WebkitBackdropFilter: "blur(32px) saturate(210%)", boxShadow: g.cardShadow, position: "relative", overflow: "hidden", cursor: "pointer", transformStyle: "preserve-3d" }}>
+                  style={{ borderRadius: 24, padding: 22, background: cardBg, border: `1px solid ${g.cardBorder}`, backdropFilter: "blur(32px) saturate(210%)", WebkitBackdropFilter: "blur(32px) saturate(210%)", boxShadow: g.cardShadow, position: "relative", overflow: "hidden", cursor: "pointer", transformStyle: "preserve-3d", willChange: "transform, opacity", transform: "translateZ(0)" }}>
                   {/* Pop-up internal highlight */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   {/* Card inner glow */}

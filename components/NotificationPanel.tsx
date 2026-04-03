@@ -57,7 +57,7 @@ export default function NotificationPanel({ role, userId }: Props) {
 
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.45)" : "rgba(30,20,80,0.4)";
-  const panelBg   = dark ? "rgba(8,7,22,0.98)" : "rgba(255,255,255,0.98)";
+  const panelBg   = dark ? "rgba(12,9,28,0.48)" : "rgba(255,255,255,0.35)";
   const border    = `color-mix(in srgb, var(--tc-primary) ${dark ? 16 : 13}%, transparent)`;
   const rowHover  = dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)";
 
@@ -306,10 +306,13 @@ export default function NotificationPanel({ role, userId }: Props) {
               background: panelBg,
               border: `1px solid ${border}`,
               borderRadius: 20,
-              backdropFilter: "blur(32px)",
+              backdropFilter: "blur(32px) saturate(180%)",
+              WebkitBackdropFilter: "blur(32px) saturate(180%)",
               boxShadow: `0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px color-mix(in srgb, var(--tc-primary) 6%, transparent)`,
               overflow: "hidden",
               display: "flex", flexDirection: "column",
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
             }}>
 
             {/* Header */}
