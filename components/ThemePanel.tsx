@@ -88,13 +88,11 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                 width: 260,
                 borderRadius: 20,
                 padding: 18,
-                background: panelBg,
-                border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.80)"}`,
-                backdropFilter: "blur(32px) saturate(180%)",
-                WebkitBackdropFilter: "blur(32px) saturate(180%)",
-                boxShadow: dark
-                  ? "0 28px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05)"
-                  : "0 20px 60px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 0 1px rgba(255,255,255,0.60)",
+                background: "var(--spatial-glass-bg)",
+                border: "var(--spatial-glass-border)",
+                backdropFilter: "var(--spatial-glass-blur)",
+                WebkitBackdropFilter: "var(--spatial-glass-blur)",
+                boxShadow: "var(--spatial-glass-shadow)",
                 willChange: "transform, opacity",
                 transform: "translateZ(0)",
               }}
