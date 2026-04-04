@@ -76,7 +76,7 @@ const EmployeeRow = memo(function EmployeeRow({
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontWeight: 600, fontSize: 13, color: textMain, marginBottom: 1 }}>{emp.full_name}</p>
             <p style={{ fontSize: 10, color: textMuted, fontFamily: "monospace", letterSpacing: 0.3 }}>
-              {emp.id.slice(0, 8).toUpperCase()}
+              {(emp as any).employee_code ?? emp.id.slice(0, 8).toUpperCase()}
             </p>
           </div>
           <button
@@ -299,7 +299,7 @@ export default function AdminBookingsPage() {
         // Three separate duty columns — empty string (not hyphen) when not assigned
         return {
           "#":             i + 1,
-          "Resource ID":   e.id.slice(0, 8).toUpperCase(),
+          "Employee ID":   (e as any).employee_code ?? e.id.slice(0, 8).toUpperCase(),
           "Full Name":     e.full_name ?? "",
           "Email":         e.email ?? "",
           "Phone":         e.phone ?? "",
@@ -316,8 +316,13 @@ export default function AdminBookingsPage() {
       ws["!cols"] = headers.map(h => ({
         wch: Math.max(h.length + 2, ...rows.map(r => String((r as Record<string,unknown>)[h] ?? "").length + 2))
       }));
-      // Freeze header row
+      // Freeze header row and apply AutoFilter
       ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+      
+      // Add autofilter to the entire data range
+      const range = XLSX.utils.decode_range(ws["!ref"] || "A1:A1");
+      ws["!autofilter"] = { ref: XLSX.utils.encode_range(range) };
+      
       XLSX.utils.book_append_sheet(wb, ws, `Shift ${shift.shift_number}`);
     });
 
@@ -325,7 +330,7 @@ export default function AdminBookingsPage() {
     const summaryRows = employees.map((e, i) => {
       const row: Record<string, unknown> = {
         "#": i + 1,
-        "Resource ID": e.id.slice(0, 8).toUpperCase(),
+        "Employee ID": (e as any).employee_code ?? e.id.slice(0, 8).toUpperCase(),
         "Full Name": e.full_name ?? "",
         "Email": e.email ?? "",
         "Phone": e.phone ?? "",
@@ -342,6 +347,11 @@ export default function AdminBookingsPage() {
     const sHeaders = Object.keys(summaryRows[0] ?? {});
     sws["!cols"] = sHeaders.map(h => ({ wch: Math.max(h.length + 2, 14) }));
     sws["!freeze"] = { xSplit: 0, ySplit: 1 };
+    
+    // AutoFilter for summary sheet
+    const summaryRange = XLSX.utils.decode_range(sws["!ref"] || "A1:A1");
+    sws["!autofilter"] = { ref: XLSX.utils.encode_range(summaryRange) };
+
     XLSX.utils.book_append_sheet(wb, sws, "Summary");
 
     XLSX.writeFile(wb, `attendance-${selectedDate}.xlsx`);

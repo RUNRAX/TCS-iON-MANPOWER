@@ -51,7 +51,19 @@ export const ResetPasswordSchema = z.object({
 // ADMIN — EMPLOYEE MANAGEMENT
 // ─────────────────────────────────────────────────────────
 
+export const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
+] as const;
+
 export const AddEmployeeSchema = z.object({
+  // ── Essential (Required) ──
   fullName: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -65,6 +77,77 @@ export const AddEmployeeSchema = z.object({
   phone: z
     .string()
     .regex(phoneRegex, "Enter a valid 10-digit Indian mobile number"),
+  state: z
+    .string()
+    .min(2, "State is required")
+    .max(100),
+  city: z
+    .string()
+    .min(2, "City is required")
+    .max(100),
+  idProofType: z.enum(["aadhaar", "pan", "voter_id", "passport"], {
+    errorMap: () => ({ message: "Select a valid ID proof type" }),
+  }),
+
+  // ── Optional ──
+  altPhone: z
+    .string()
+    .regex(phoneRegex, "Enter a valid 10-digit Indian mobile number")
+    .optional()
+    .or(z.literal("")),
+  addressLine1: z
+    .string()
+    .min(5, "Address too short")
+    .max(200)
+    .optional()
+    .or(z.literal("")),
+  addressLine2: z.string().max(200).optional().or(z.literal("")),
+  pincode: z
+    .string()
+    .regex(pincodeRegex, "Enter a valid 6-digit pincode")
+    .optional()
+    .or(z.literal("")),
+  bankAccount: z
+    .string()
+    .min(9, "Account number too short")
+    .max(18, "Account number too long")
+    .regex(/^\d+$/, "Account number must be numeric")
+    .optional()
+    .or(z.literal("")),
+  bankIfsc: z
+    .string()
+    .regex(ifscRegex, "Enter a valid IFSC code (e.g. SBIN0001234)")
+    .toUpperCase()
+    .optional()
+    .or(z.literal("")),
+  bankName: z
+    .string()
+    .min(2, "Bank name required")
+    .max(100)
+    .optional()
+    .or(z.literal("")),
+  notes: z.string().max(500).optional().or(z.literal("")),
+});
+
+/** Schema for developer (super_admin) creating admin accounts */
+export const CreateAdminSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .max(100),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .max(255)
+    .toLowerCase(),
+  phone: z
+    .string()
+    .regex(phoneRegex, "Enter a valid 10-digit Indian mobile number"),
+  centerCode: z
+    .string()
+    .length(3, "Center code must be exactly 3 letters")
+    .regex(/^[A-Z]{3}$/, "Center code must be 3 uppercase letters")
+    .toUpperCase(),
 });
 
 export const ApproveEmployeeSchema = z.object({

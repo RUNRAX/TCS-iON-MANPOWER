@@ -3,8 +3,9 @@ import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminEmployees, useApproveEmployee } from "@/hooks/use-api";
-import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2, Phone, MapPin, CalendarDays, Shield } from "lucide-react";
+import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2, Phone, MapPin, CalendarDays, Shield, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import CreateEmployeeModal from "@/components/admin/CreateEmployeeModal";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
@@ -31,6 +32,7 @@ export default function AdminEmployees() {
   const [selectedEmp, setSelectedEmp] = useState<string | null>(null);
   const [selectedEmpDetail, setSelectedEmpDetail] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Debounce search so we don't fire on every keystroke
   const search = useDebounce(rawSearch, 350);
@@ -88,11 +90,30 @@ export default function AdminEmployees() {
           <h1 className="text-2xl font-bold" style={{ color: textMain }}>Employees</h1>
           <p className="text-sm mt-1" style={{ color: textMuted }}>Manage and approve employee registrations</p>
         </div>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: `color-mix(in srgb, var(--tc-primary) 13%, transparent)`, color: "var(--tc-primary)" }}>
-          <Users className="w-5 h-5" />
+        <div className="flex items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={() => setCreateModalOpen(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "10px 20px", borderRadius: 14,
+              background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+              color: "#fff", border: "none", fontSize: 13, fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.22)",
+            }}
+          >
+            <UserPlus size={15} /> Create Employee
+          </motion.button>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: `color-mix(in srgb, var(--tc-primary) 13%, transparent)`, color: "var(--tc-primary)" }}>
+            <Users className="w-5 h-5" />
+          </div>
         </div>
       </div>
+
+      {/* Create Employee Modal */}
+      <CreateEmployeeModal open={createModalOpen} onClose={() => setCreateModalOpen(false)} />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">

@@ -1088,53 +1088,71 @@ html.tc-light .admin-panel::after {
 
 /* ─────────────────────────────────────────────────────────────────────────────
    § 18  Mobile Performance Optimizations
-   Reduce GPU load: simpler blur, fewer animations, lighter transitions
+   Keep animations alive but GPU-optimized, reduce blur depth, lighten shadows
 ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Reduce glass blur intensity on mobile */
+  /* Reduce glass blur intensity on mobile to lighter 10px */
   :root {
-    --glass-blur-sm: blur(10px) saturate(130%);
-    --glass-blur-md: blur(16px) saturate(140%);
-    --glass-blur-lg: blur(20px) saturate(140%);
-    --glass-blur-xl: blur(24px) saturate(150%);
-    --spatial-glass-blur: blur(16px) saturate(150%);
+    --glass-blur-sm: blur(6px) saturate(130%);
+    --glass-blur-md: blur(8px) saturate(140%);
+    --glass-blur-lg: blur(10px) saturate(140%);
+    --glass-blur-xl: blur(12px) saturate(150%);
+    --spatial-glass-blur: blur(10px) saturate(140%);
   }
 
   /* Simplify glass panels on mobile */
   .glass,
   .glass-panel,
   .glass-panel-strong {
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
   }
 
   .admin-panel {
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    /* Better paint performance on scrolling containers inside admin panels */
+    contain: layout style;
+  }
+  
+  html.tc-dark .admin-panel {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 
-  /* Disable sidebar orb animations on mobile — static glow is enough */
-  @keyframes sidebarOrb1 { 0%, 100% { transform: translateZ(0); } }
-  @keyframes sidebarOrb2 { 0%, 100% { transform: translateZ(0); } }
-  @keyframes sidebarOrb3 { 0%, 100% { transform: translateZ(0); } }
-  @keyframes sidebarOrb4 { 0%, 100% { transform: translateZ(0); } }
+  /* Slow ambient sidebar orb animations (instead of completely frozen) */
+  @keyframes sidebarOrb1 { 
+    0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
+    50% { transform: translateY(10px) scale(1.05) translateZ(0); }
+  }
+  @keyframes sidebarOrb2 { 
+    0%, 100% { transform: translate(0) scale(1) translateZ(0); }
+    50% { transform: translate(-8px, -8px) scale(0.95) translateZ(0); }
+  }
+  @keyframes sidebarOrb3 { 
+    0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
+    50% { transform: translateY(-10px) scale(1.05) translateZ(0); }
+  }
+  @keyframes sidebarOrb4 { 
+    0%, 100% { transform: translate(0) scale(1) translateZ(0); }
+    50% { transform: translate(8px, 8px) scale(0.95) translateZ(0); }
+  }
 
-  /* Simplify glowing orbs on mobile (reduce movement) */
+  /* Glowing orbs keep motion but at ~50% speed / 60% displacement */
   .glowing-orb {
-    will-change: auto;
+    will-change: transform;
   }
 
   @keyframes floatOrb1 {
     0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
-    50%  { transform: translate(4%, 4%) scale(1.03) translateZ(0); }
+    50%  { transform: translate(8%, 8%) scale(1.05) translateZ(0); }
   }
   @keyframes floatOrb2 {
     0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
-    50%  { transform: translate(-4%, -4%) scale(0.97) translateZ(0); }
+    50%  { transform: translate(-8%, -6%) scale(0.95) translateZ(0); }
   }
   @keyframes floatOrb3 {
     0%, 100% { transform: translate(0, 0) scale(1) translateZ(0); }
-    50%  { transform: translate(3%, -3%) scale(1.02) translateZ(0); }
+    50%  { transform: translate(6%, -8%) scale(1.05) translateZ(0); }
   }
 
   /* Faster, cheaper layout transitions on mobile */
@@ -1145,8 +1163,13 @@ html.tc-light .admin-panel::after {
     transition:
       background 0.25s ease,
       border-color 0.25s ease,
-      box-shadow 0.25s ease,
+      /* no box-shadow transition for better perf */
       color 0.2s ease;
+  }
+  
+  /* Layout hints for main scrollable */
+  main {
+    contain: layout paint style;
   }
 
   /* Disable glossy flash animation on mobile */
@@ -1159,9 +1182,9 @@ html.tc-light .admin-panel::after {
 
   /* View transition simplified on mobile */
   ::view-transition-old(root) {
-    animation: 150ms ease both pageFadeOut;
+    animation: 200ms ease both pageFadeOut;
   }
   ::view-transition-new(root) {
-    animation: 200ms ease both pageFadeIn;
+    animation: 250ms ease both pageFadeIn;
   }
 }

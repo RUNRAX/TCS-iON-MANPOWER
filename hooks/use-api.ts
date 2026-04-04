@@ -79,6 +79,18 @@ export function useAdminShifts(params?: { status?: string; page?: number; limit?
   });
 }
 
+/** Create new employee — full details, sends welcome email */
+export function useCreateEmployee() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: adminApi.createEmployee,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["admin", "employees"] });
+      void qc.invalidateQueries({ queryKey: QK.adminStats });
+    },
+  });
+}
+
 /** Create shift mutation */
 export function useCreateShift() {
   const qc = useQueryClient();

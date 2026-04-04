@@ -1,7 +1,7 @@
 /**
  * /api/admin/employees
  * GET   — List employees (search by email, phone, full_name)
- * POST  — Add new employee
+ * POST  — Add new employee (full fields + generate XMP employee code)
  * PATCH — Approve / reject / toggle_active / edit
  */
 import { NextRequest } from "next/server";
@@ -11,9 +11,10 @@ import {
   serverError, badRequest, unauthorized, auditLog,
 } from "@/lib/utils/api";
 import { AddEmployeeSchema } from "@/lib/validations/schemas";
-import { notifyEmployee } from "@/lib/whatsapp/service";
+import { sendEmail } from "@/lib/email/send";
+import { employeeWelcomeEmail } from "@/lib/email/templates";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3018";
 
 // ── GET /api/admin/employees ─────────────────────────────────────────────────
 export const GET = withAdmin(async (request) => {
@@ -27,9 +28,7 @@ export const GET = withAdmin(async (request) => {
   const supabase = createAdminClient();
 
   // ── Step 1: resolve user IDs that match the search term ───────────────────
-  // The users table has email + phone; employee_profiles has full_name.
-  // We run both lookups in parallel then union the IDs.
-  let matchedUserIds: string[] | null = null; // null = "no search filter"
+  let matchedUserIds: string[] | null = null;
 
   if (search) {
     const [userRes, profileRes] = await Promise.all([
@@ -41,14 +40,13 @@ export const GET = withAdmin(async (request) => {
       supabase
         .from("employee_profiles")
         .select("user_id")
-        .ilike("full_name", `%${search}%`),
+        .or(`full_name.ilike.%${search}%,employee_code.ilike.%${search}%`),
     ]);
 
     const fromUsers    = (userRes.data ?? []).map((u: { id: string }) => u.id);
     const fromProfiles = (profileRes.data ?? []).map((p: { user_id: string }) => p.user_id);
     matchedUserIds = [...new Set([...fromUsers, ...fromProfiles])];
 
-    // Nothing matched — return early (avoids an unnecessary big query)
     if (matchedUserIds.length === 0) {
       return ok({ employees: [], pagination: { page, limit, total: 0, totalPages: 0 } });
     }
@@ -60,7 +58,7 @@ export const GET = withAdmin(async (request) => {
     .select(
       `id, email, phone, is_active, created_at,
        employee_profiles!employee_profiles_user_id_fkey(
-         id, full_name, city, state, status,
+         id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
        )`,
       { count: "exact" }
@@ -75,7 +73,7 @@ export const GET = withAdmin(async (request) => {
   const { data, error, count } = await query.range(from, from + limit - 1);
   if (error) { console.error("[Admin/Employees GET]:", error); return serverError(); }
 
-  // ── Step 3: flatten + apply status filter (server-side) ───────────────────
+  // ── Step 3: flatten + apply status filter ─────────────────────────────────
   const employees = (data ?? []).flatMap((u: Record<string, unknown>) => {
     const profiles = u.employee_profiles;
     const p = Array.isArray(profiles) ? profiles[0] : profiles as Record<string, unknown> | null;
@@ -92,6 +90,7 @@ export const GET = withAdmin(async (request) => {
       city:             (p?.city as string) ?? null,
       state:            (p?.state as string) ?? null,
       status:           profileStatus,
+      employee_code:    (p?.employee_code as string) ?? null,
       rejection_reason: (p?.rejection_reason as string) ?? null,
       photo_url:        (p?.photo_url as string) ?? null,
       joined_at:        (p?.created_at as string) ?? (u.created_at as string),
@@ -114,9 +113,14 @@ export const POST = withAdmin(async (request, { userId }) => {
   const parsed = await parseBody(request, AddEmployeeSchema);
   if ("error" in parsed) return parsed.error;
 
-  const { fullName, email, phone } = parsed.data;
+  const {
+    fullName, email, phone, state, city, idProofType,
+    altPhone, addressLine1, addressLine2, pincode,
+    bankAccount, bankIfsc, bankName, notes,
+  } = parsed.data;
   const supabase = createAdminClient();
 
+  // ── Check uniqueness ──
   const { data: existing } = await supabase
     .from("users")
     .select("id, email, phone")
@@ -129,14 +133,37 @@ export const POST = withAdmin(async (request, { userId }) => {
     if (dup.phone === phone) return conflict("An employee with this phone number already exists.");
   }
 
+  // ── Get admin's center_code ──
+  const { data: adminUser } = await supabase
+    .from("users")
+    .select("center_code")
+    .eq("id", userId)
+    .single();
+
+  const centerCode = (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
+
+  // ── Generate employee code: XMP-{CENTER}59{SEQ} ──
+  let employeeCode: string;
+  try {
+    const { data: seqData, error: seqError } = await supabase.rpc("next_employee_code", { p_center: centerCode });
+    if (seqError) throw seqError;
+    employeeCode = seqData as string;
+  } catch (e) {
+    console.error("[Employees] Failed to generate employee code:", e);
+    // Fallback: generate a random code
+    employeeCode = `XMP-${centerCode}59${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
+  }
+
+  // ── Generate temporary password ──
   const tempPassword = `Tc${generatePassword()}9!`;
 
+  // ── Create auth user ──
   const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
     email,
     phone: `+91${phone}`,
     password: tempPassword,
     email_confirm: true,
-    user_metadata: { role: "employee", full_name: fullName, phone, invited_by: userId },
+    user_metadata: { role: "employee", full_name: fullName, phone, employee_code: employeeCode, invited_by: userId },
   });
 
   if (createError || !newUser.user) {
@@ -144,23 +171,77 @@ export const POST = withAdmin(async (request, { userId }) => {
     return serverError("Failed to create employee account.");
   }
 
-  await supabase.from("users").update({ phone }).eq("id", newUser.user.id);
+  // ── Update users table ──
+  await supabase.from("users").update({ phone, created_by_admin: userId }).eq("id", newUser.user.id);
 
-  const message = `📋 *TCS ION Manpower Portal*\n\nHello ${fullName}! 👋\n\nYou've been added to the TCS ION Manpower Portal.\n\n📧 Email: ${email}\n📱 Phone: ${phone}\n🔑 Temp Password: ${tempPassword}\n\n👉 Login: ${APP_URL}/login\n\n⚠️ Please complete your profile after logging in.\n\n– TCS ION Admin`;
+  // ── Create employee profile ──
+  const { error: profileError } = await supabase.from("employee_profiles").insert({
+    user_id:       newUser.user.id,
+    full_name:     fullName,
+    phone,
+    alt_phone:     altPhone || null,
+    email,
+    address_line1: addressLine1 || "",
+    address_line2: addressLine2 || null,
+    city,
+    state,
+    pincode:       pincode || "",
+    id_proof_type: idProofType,
+    employee_code: employeeCode,
+    status:        "approved",  // Admin-created employees are auto-approved
+    approved_by:   userId,
+    approved_at:   new Date().toISOString(),
+    // Bank details stored as plain text for now (encryption can be added later)
+    bank_name:     bankName || null,
+  });
 
+  if (profileError) {
+    console.error("[Employees] Profile insert failed:", profileError);
+    // Clean up auth user
+    await supabase.auth.admin.deleteUser(newUser.user.id).catch(() => {});
+    return serverError("Failed to create employee profile.");
+  }
+
+  // ── Send welcome email ──
   try {
-    await notifyEmployee({ employeeId: newUser.user.id, toPhone: phone, type: "custom", title: "Welcome to TCS ION Portal", message });
-  } catch (e) { console.warn("[Employees] WhatsApp failed:", e); }
+    const emailContent = employeeWelcomeEmail({
+      fullName,
+      email,
+      phone,
+      employeeCode,
+      tempPassword,
+    });
+    await sendEmail({
+      to: email,
+      subject: emailContent.subject,
+      html: emailContent.html,
+    });
+  } catch (e) {
+    console.warn("[Employees] Welcome email failed:", e);
+  }
 
-  await auditLog({ userId, action: "employee.create", entityType: "employee", entityId: newUser.user.id, after: { fullName, email, phone }, request });
+  // ── Audit log ──
+  await auditLog({
+    userId,
+    action: "employee.create",
+    entityType: "employee",
+    entityId: newUser.user.id,
+    after: { fullName, email, phone, employeeCode, centerCode },
+    request,
+  });
 
-  return created({ employeeId: newUser.user.id, message: `${fullName} added. Credentials sent via WhatsApp.` });
+  return created({
+    employeeId: newUser.user.id,
+    employeeCode,
+    tempPassword,
+    message: `${fullName} created as ${employeeCode}. Credentials sent via email.`,
+  });
 });
 
 // ── PATCH /api/admin/employees — Approve / reject / toggle / edit ─────────────
 export async function PATCH(request: NextRequest) {
   const role = request.headers.get("x-user-role");
-  if (role !== "admin") return unauthorized("ADMIN ONLY");
+  if (role !== "admin" && role !== "super_admin") return unauthorized("ADMIN ONLY");
 
   const supabase = createAdminClient();
   const body = await request.json().catch(() => ({})) as Record<string, string>;

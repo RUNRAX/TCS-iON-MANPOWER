@@ -150,6 +150,26 @@ export const adminApi = {
   /** GET /api/admin/notifications — admin broadcast notifications */
   getNotifications: () =>
     apiFetch<{ notifications: unknown[] }>("/api/admin/notifications"),
+
+  /** POST /api/admin/employees — create new employee with full details */
+  createEmployee: (data: {
+    fullName: string; email: string; phone: string;
+    state: string; city: string; idProofType: string;
+    altPhone?: string; addressLine1?: string; addressLine2?: string;
+    pincode?: string; bankAccount?: string; bankIfsc?: string;
+    bankName?: string; notes?: string;
+  }) =>
+    apiFetch<{ employeeId: string; employeeCode: string; tempPassword: string; message: string }>(
+      "/api/admin/employees",
+      { method: "POST", body: JSON.stringify(data) }
+    ),
+
+  /** POST /api/admin/parse-employee — AI auto-fill from text */
+  parseEmployeeText: (message: string) =>
+    apiFetch<Record<string, string>>("/api/admin/parse-employee", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
 };
 
 // ── Employee API ─────────────────────────────────────────────────────────────
