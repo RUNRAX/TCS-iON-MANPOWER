@@ -221,21 +221,20 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
             position: "relative",
             zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
             borderRadius: 28,
-            background: dark ? "rgba(10,8,24,0.92)" : "rgba(255,255,255,0.88)",
-            backdropFilter: "blur(80px) saturate(220%)", WebkitBackdropFilter: "blur(80px) saturate(220%)",
-            border: `1px solid ${dark ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.92)"}`,
+            background: dark ? "rgba(8,6,22,0.86)" : "rgba(255,255,255,0.30)",
+            backdropFilter: "blur(56px) saturate(220%) brightness(1.07)", 
+            WebkitBackdropFilter: "blur(56px) saturate(220%) brightness(1.07)",
+            border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.85)"}`,
             boxShadow: dark
-              ? "0 40px 100px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.14)"
-              : "0 24px 70px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
+              ? "inset 0 2px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.18), inset 1px 0 0 rgba(255,255,255,0.10), inset -1px 0 0 rgba(255,255,255,0.05), 0 24px 80px -8px rgba(0,0,0,0.55), 0 8px 32px -4px rgba(0,0,0,0.30)"
+              : "inset 0 2px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(0,0,0,0.04), inset 1px 0 0 rgba(255,255,255,0.90), inset -1px 0 0 rgba(255,255,255,0.70), 0 16px 64px -8px rgba(0,0,0,0.12), 0 4px 16px -4px rgba(0,0,0,0.08)",
             display: "flex", flexDirection: "column", overflow: "hidden",
           }}
         >
         {/* Inner sheen */}
         <div aria-hidden style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: "30%",
-          background: dark
-            ? "linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, transparent 100%)"
-            : "linear-gradient(to bottom, rgba(255,255,255,0.70) 0%, transparent 100%)",
+          position: "absolute", top: 0, left: 0, right: 0, height: "35%",
+          background: dark ? "linear-gradient(to bottom, rgba(255,255,255,0.06), transparent)" : "linear-gradient(to bottom, rgba(255,255,255,0.80), transparent)",
           pointerEvents: "none", borderRadius: "inherit", zIndex: 0,
         }} />
 

@@ -55,7 +55,8 @@ function prettyDate(s: string) {
   });
 }
 
-const EMPTY_FORM = { title: "", shiftNumber: 1, startTime: "09:00", endTime: "17:00", venue: "", maxEmployees: 10, minEmployees: 1, payAmount: 800, notes: "", examDate: "" };
+const EMPTY_SHIFT = { shiftNumber: 1, startTime: "09:00", endTime: "13:00", maxEmployees: 10, minEmployees: 1, payAmount: 800, notes: "" };
+const EMPTY_MULTI_FORM = { title: "", venue: "", examDate: "", shifts: [{ ...EMPTY_SHIFT }] };
 
 export default function AdminShifts() {
   const { theme: t, dark } = useTheme();
@@ -72,7 +73,7 @@ export default function AdminShifts() {
 
   // ── Create modal state ────────────────────────────────────────────────────
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ ...EMPTY_FORM, examDate: selectedDate });
+  const [form, setForm] = useState({ ...EMPTY_MULTI_FORM, examDate: selectedDate });
 
   // ── Status filter ─────────────────────────────────────────────────────────
   const [statusFilter, setStatusFilter] = useState("all");
@@ -82,7 +83,7 @@ export default function AdminShifts() {
   const [confirmingCancel, setConfirmingCancel] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useAdminShifts({ status: statusFilter === "all" ? undefined : statusFilter });
-  const { mutate: createShift, isPending: creating } = useCreateShift();
+  const { mutateAsync: createShiftAsync, isPending: creating } = useCreateShift();
   const { mutate: patchShift } = usePatchShift();
 
   // Filter shifts by selected date
@@ -99,19 +100,29 @@ export default function AdminShifts() {
   );
 
   const openCreate = useCallback(() => {
-    setForm(prev => ({ ...EMPTY_FORM, examDate: selectedDate, shiftNumber: shiftsForDate.length + 1 }));
+    setForm(prev => ({ ...EMPTY_MULTI_FORM, examDate: selectedDate, shifts: [{ ...EMPTY_SHIFT, shiftNumber: shiftsForDate.length + 1 }] }));
     setShowCreate(true);
   }, [selectedDate, shiftsForDate.length]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!form.title || !form.venue) { toast.error("Title and venue required"); return; }
-    createShift(
-      { ...form, examDate: form.examDate || selectedDate },
-      {
-        onSuccess: () => { toast.success("Shift created ✓"); setShowCreate(false); setForm({ ...EMPTY_FORM, examDate: selectedDate }); refetch(); },
-        onError: (e) => toast.error(e.message),
+    if (form.shifts.length === 0) { toast.error("At least one shift is required"); return; }
+    
+    let successCount = 0;
+    for (const shift of form.shifts) {
+      try {
+        await createShiftAsync({ ...form, ...shift, examDate: form.examDate || selectedDate });
+        successCount++;
+      } catch (e: any) {
+        toast.error(`Shift ${shift.shiftNumber} failed: ${e.message}`);
       }
-    );
+    }
+    if (successCount > 0) {
+      toast.success(`${successCount} Shift(s) created ✓`);
+      setShowCreate(false);
+      setForm({ ...EMPTY_MULTI_FORM, examDate: selectedDate, shifts: [{ ...EMPTY_SHIFT, shiftNumber: shiftsForDate.length + successCount + 1 }] });
+      refetch();
+    }
   };
 
   const handlePublish  = (id: string) => patchShift({ shiftId: id, action: "publish" }, { onSuccess: () => { toast.success("Published ✓ — All employees notified"); refetch(); } });
@@ -498,40 +509,66 @@ export default function AdminShifts() {
                     <input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} placeholder="e.g. CIT Bangalore" style={inp} onFocus={inpFocus} onBlur={inpBlur} />
                   </div>
 
-                  {/* Shift number */}
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Shift Number</label>
-                    <input type="number" min={1} max={10} value={form.shiftNumber} onChange={e => setForm(p => ({ ...p, shiftNumber: +e.target.value }))} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                  </div>
+                  {/* Multi-Shift Items */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                    {form.shifts.map((shift, idx) => (
+                      <div key={idx} style={{ padding: 16, borderRadius: 16, background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${g.inputBorder}`, position: "relative" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--tc-primary)", textTransform: "uppercase", letterSpacing: 1 }}>Shift {shift.shiftNumber} Configuration</span>
+                          {form.shifts.length > 1 && (
+                            <button onClick={() => setForm(p => ({ ...p, shifts: p.shifts.filter((_, i) => i !== idx) }))} style={{ border: "none", background: "none", cursor: "pointer", color: "#EF4444" }}>
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* Shift number & Times */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Shift Number</label>
+                            <input type="number" min={1} value={shift.shiftNumber} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].shiftNumber=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Start Time</label>
+                            <input type="time" value={shift.startTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].startTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>End Time</label>
+                            <input type="time" value={shift.endTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].endTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                        </div>
 
-                  {/* Times */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Start Time</label>
-                      <input type="time" value={form.startTime} onChange={e => setForm(p => ({ ...p, startTime: e.target.value }))} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>End Time</label>
-                      <input type="time" value={form.endTime} onChange={e => setForm(p => ({ ...p, endTime: e.target.value }))} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                    </div>
-                  </div>
+                        {/* Staff, Pay & Notes */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Max Staff</label>
+                            <input type="number" min={1} value={shift.maxEmployees} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].maxEmployees=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Pay (₹)</label>
+                            <input type="number" min={0} value={shift.payAmount} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].payAmount=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Notes (optional)</label>
+                          <textarea rows={1} value={shift.notes} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].notes=v; return {...p, shifts:s}; }) }} placeholder="Additional instructions…" style={{ ...inp, resize: "none", padding: "8px 12px", minHeight: 36 }} onFocus={inpFocus} onBlur={inpBlur} />
+                        </div>
+                      </div>
+                    ))}
 
-                  {/* Staff & Pay */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Max Staff</label>
-                      <input type="number" min={1} value={form.maxEmployees} onChange={e => setForm(p => ({ ...p, maxEmployees: +e.target.value }))} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Pay (₹)</label>
-                      <input type="number" min={0} value={form.payAmount} onChange={e => setForm(p => ({ ...p, payAmount: +e.target.value }))} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Notes (optional)</label>
-                    <textarea rows={2} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Any additional instructions…" style={{ ...inp, resize: "none" }} onFocus={inpFocus} onBlur={inpBlur} />
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => {
+                        const last = p.shifts.length > 0 ? p.shifts[p.shifts.length - 1] : EMPTY_SHIFT;
+                        const nextNum = last.shiftNumber + 1;
+                        let nextStart = last.endTime;
+                        if (!nextStart) nextStart = "14:00";
+                        return { ...p, shifts: [...p.shifts, { ...EMPTY_SHIFT, shiftNumber: nextNum, startTime: nextStart, endTime: "18:00" }] };
+                      })}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 12, background: dark ? "rgba(79,158,255,0.08)" : "rgba(79,158,255,0.1)", border: `1px dashed rgba(79,158,255,0.4)`, color: "var(--tc-primary)", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
+                    >
+                      <Plus size={14} /> Add Another Shift
+                    </button>
                   </div>
 
                   {/* Submit */}
