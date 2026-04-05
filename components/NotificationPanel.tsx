@@ -92,13 +92,13 @@ export default function NotificationPanel({ role, userId }: Props) {
           });
         });
 
-        (shifts?.data?.shifts ?? []).slice(0, 3).forEach((s: Record<string, unknown>) => {
+        (shifts?.data?.shifts ?? []).slice(0, 3).forEach((s: Record<string, any>) => {
           notifs.push({
             id: `shift-${s.id}`,
             icon: <CalendarDays size={14} />,
             title: "Upcoming Shift",
-            message: `${s.title} · ${s.venue} · ${s.confirmed_count}/${s.maxEmployees} confirmed`,
-            time: timeAgo((s.examDate as string) ?? new Date().toISOString()),
+            message: `${s.title} · ${s.venue} · ${s.confirmed_count}/${s.max_employees} confirmed`,
+            time: timeAgo((s.exam_date as string) ?? new Date().toISOString()),
             read: true,
             href: "/admin/shifts",
             accent: "var(--tc-primary)",
@@ -160,7 +160,7 @@ export default function NotificationPanel({ role, userId }: Props) {
             title: (n.title as string) ?? "Notification",
             message: (n.message as string) ?? "",
             time: timeAgo((n.created_at as string) ?? new Date().toISOString()),
-            read: n.is_read === true || n.is_read === "true",
+            read: n.read === true || n.read === "true" || n.is_read === true,
             href: "/employee/dashboard",
             accent: "var(--tc-primary)",
           });

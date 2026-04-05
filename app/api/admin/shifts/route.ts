@@ -105,10 +105,19 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
   }
 
   if (action === "cancel") {
-    const { data: shift } = await supabase.from("exam_shifts").select("status").eq("id", shiftId).single();
-    if (shift?.status === "published") return badRequest("CANNOT CANCEL A PUBLISHED SHIFT — EMPLOYEES HAVE ALREADY BEEN NOTIFIED");
+    // We allow cancelling published shifts because of real-world changes. So we don't block it.
+    const { data: shift } = await supabase.from("exam_shifts").select("id, title, status").eq("id", shiftId).single();
     const { error } = await supabase.from("exam_shifts").update({ status: "cancelled" }).eq("id", shiftId);
     if (error) return serverError();
+
+    // Mark related assignments as cancelled so it drops out of employee history
+    await supabase.from("shift_assignments").update({ status: "cancelled" }).eq("shift_id", shiftId);
+
+    // Try deleting explicit push notifications for this shift
+    if (shift?.title) {
+        await supabase.from("notifications").delete().like("message", `%${shift.title}%`);
+    }
+
     return ok({ message: "SHIFT CANCELLED" });
   }
 
@@ -137,11 +146,11 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
 
       if (employees && employees.length > 0 && shiftDetails) {
         const notifications = employees.map((emp: any) => ({
-          user_id: emp.user_id,
+          employee_id: emp.user_id,
           title: "New Shift Published",
           message: `${shiftDetails.title} — Shift ${shiftDetails.shift_number} at ${shiftDetails.venue} on ${shiftDetails.exam_date} (${shiftDetails.start_time}–${shiftDetails.end_time})`,
           type: "shift_published",
-          is_read: false,
+          read: false,
         }));
         await supabase.from("notifications").insert(notifications);
       }

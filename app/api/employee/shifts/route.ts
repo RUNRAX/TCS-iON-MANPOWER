@@ -108,18 +108,7 @@ export const POST = withEmployee(async (request: NextRequest, { userId }) => {
     return conflict("This shift is full. Please choose another.");
   }
 
-  // Check no other shift same date
-  const { data: sameDay } = await supabase
-    .from("shift_assignments")
-    .select("id, exam_shifts!inner(exam_date)")
-    .eq("employee_id", userId)
-    .eq("status", "confirmed")
-    .eq("exam_shifts.exam_date", shift.exam_date)
-    .limit(1);
-
-  if (sameDay && sameDay.length > 0) {
-    return conflict(`You already have a confirmed shift on ${shift.exam_date}.`);
-  }
+  // Allowed choosing multiple shifts (removed exact-day limit)
 
   // Upsert assignment
   const { data: assignment, error } = await supabase

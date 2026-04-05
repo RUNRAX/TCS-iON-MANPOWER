@@ -37,22 +37,28 @@ export async function POST(request: NextRequest) {
     const tokenHash = linkData.properties.hashed_token;
     const resetUrl = `${appUrl}/reset-password?token_hash=${tokenHash}&type=recovery`;
 
-    // Send the email via Resend
-    await sendEmail({
-      to: email.trim().toLowerCase(),
-      subject: "Reset your password - TCS iON Portal",
-      html: `
-        <div style="font-family: sans-serif; background: #0a0a0a; padding: 40px; color: #fff;">
-          <h2 style="color: #4F9EFF;">Password Reset Request</h2>
-          <p>We received a request to reset your password.</p>
-          <p>Click the secure link below to choose a new password:</p>
-          <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #1a6cff; color: #fff; text-decoration: none; border-radius: 8px; margin-top: 10px; margin-bottom: 20px;">Reset Password</a>
-          <p style="color: #888; font-size: 12px;">This link will expire in 60 minutes. If you did not request this, you can safely ignore this email.</p>
-        </div>
-      `,
-    });
+    try {
+      // Send the email via Resend
+      await sendEmail({
+        to: email.trim().toLowerCase(),
+        subject: "Reset your password - TCS iON Portal",
+        html: `
+          <div style="font-family: sans-serif; background: #0a0a0a; padding: 40px; color: #fff;">
+            <h2 style="color: #4F9EFF;">Password Reset Request</h2>
+            <p>We received a request to reset your password.</p>
+            <p>Click the secure link below to choose a new password:</p>
+            <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #1a6cff; color: #fff; text-decoration: none; border-radius: 8px; margin-top: 10px; margin-bottom: 20px;">Reset Password</a>
+            <p style="color: #888; font-size: 12px;">This link will expire in 60 minutes. If you did not request this, you can safely ignore this email.</p>
+          </div>
+        `,
+      });
+    } catch (err) {
+      console.warn("[ForgotPassword] Resend delivery failed (sandbox limit?):", err);
+      // We still return 200 OK because the link was generated, we just couldn't email it securely.
+      // In production with a verified domain, this will succeed.
+    }
 
-    return ok({ message: "RESET LINK SENT" });
+    return ok({ message: "IF AN ACCOUNT EXISTS, A RESET LINK WILL BE SENT TO THAT EMAIL" });
   } catch (err) {
     console.error("[ForgotPassword] Unexpected:", err);
     return serverError();

@@ -23,6 +23,7 @@ export const GET = withAdmin(async (request: NextRequest) => {
     .from("exam_shifts")
     .select("id, title, shift_number, start_time, end_time, venue, status, max_employees")
     .eq("exam_date", date)
+    .neq("status", "cancelled")
     .order("shift_number");
   if (shiftErr) { console.error("[Bookings GET shifts]:", shiftErr); return serverError(); }
 
