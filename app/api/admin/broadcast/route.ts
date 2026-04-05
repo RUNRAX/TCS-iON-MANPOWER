@@ -8,10 +8,9 @@ import { withAdmin, ok, serverError } from "@/lib/utils/api";
 import { z } from "zod";
 
 const Schema = z.object({
-  type: z.string().default("custom"),
-  title: z.string().default("Broadcast"),
-  body: z.string().min(1, "Message body required"),
-  target: z.enum(["all", "approved"]).default("approved"),
+  shiftId: z.string().min(1, "shiftId required"),
+  targetGroup: z.enum(["all", "confirmed", "unresponded"]).default("unresponded"),
+  customMessage: z.string().optional(),
 });
 
 export const POST = withAdmin(async (request: NextRequest, { userId }) => {
@@ -21,21 +20,41 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
   const parsed = Schema.safeParse(body);
   if (!parsed.success) return ok({ sent: 0, failed: 0 });
 
-  const { type, title, body: messageBody, target } = parsed.data;
+  const { shiftId, targetGroup, customMessage } = parsed.data;
   const supabase = createAdminClient();
 
-  // Fetch target employees
-  let query = supabase.from("employee_profiles").select("user_id, full_name, phone").eq("is_deleted", false);
-  if (target === "approved") query = query.eq("status", "approved");
+  // Get active shift assignments for this shift
+  const { data: assignments } = await supabase.from("shift_assignments").select("employee_id, status").eq("shift_id", shiftId);
+  const assignedSet = assignments ?? [];
 
+  // Fetch all approved employees
+  let query = supabase.from("employee_profiles").select("user_id, full_name, phone").eq("is_deleted", false).eq("status", "approved");
   const { data: employees, error } = await query;
   if (error || !employees) return ok({ sent: 0, failed: 0 });
+
+  let targetIds = new Set<string>();
+
+  if (targetGroup === "all") {
+    employees.forEach(e => targetIds.add(e.user_id));
+  } else if (targetGroup === "confirmed") {
+    assignedSet.filter(a => a.status === "confirmed").forEach(a => targetIds.add(a.employee_id));
+  } else if (targetGroup === "unresponded") {
+    const unrespondedGroup = employees.filter(e => !assignedSet.find(a => a.employee_id === e.user_id));
+    unrespondedGroup.forEach(e => targetIds.add(e.user_id));
+  }
+
+  const finalEmployees = employees.filter(e => targetIds.has(e.user_id));
+  if (finalEmployees.length === 0) return ok({ sent: 0, failed: 0 });
+
+  const messageBody = customMessage || "You have an update regarding your shift. Please check the portal.";
+  const type = "custom";
+  const title = customMessage ? "New Message from Admin" : "Shift Update";
 
   let sent = 0, failed = 0;
 
   // Send in batches of 10 with delay to avoid rate limits
-  for (let i = 0; i < employees.length; i += 10) {
-    const batch = employees.slice(i, i + 10);
+  for (let i = 0; i < finalEmployees.length; i += 10) {
+    const batch = finalEmployees.slice(i, i + 10);
     await Promise.allSettled(batch.map(async (emp) => {
       const personalizedMsg = messageBody.replace("{name}", emp.full_name).replace("{employeeName}", emp.full_name);
       const result = await sendWhatsApp(emp.phone, personalizedMsg);
@@ -52,7 +71,7 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
 
       if (result) sent++; else failed++;
     }));
-    if (i + 10 < employees.length) await new Promise(r => setTimeout(r, 300));
+    if (i + 10 < finalEmployees.length) await new Promise(r => setTimeout(r, 300));
   }
 
   // Save broadcast log
@@ -61,12 +80,12 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
     type,
     title,
     body: messageBody,
-    target,
+    target: targetGroup,
     sent,
     failed,
   }).then(null, () => {});
 
-  return ok({ sent, failed, total: employees.length });
+  return ok({ sent, failed, total: finalEmployees.length });
 });
 
 async function sendWhatsApp(phone: string, message: string): Promise<boolean> {

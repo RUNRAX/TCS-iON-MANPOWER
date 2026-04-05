@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Palette } from "lucide-react";
 import { useTheme, THEMES } from "@/lib/context/ThemeContext";
@@ -9,6 +9,19 @@ interface ThemePanelProps { size?: "sm" | "md"; }
 export default function ThemePanel({ size = "md" }: ThemePanelProps) {
   const { dark, setDark, themeKey, setThemeKey, customTheme, setCustomTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   const textMuted  = dark ? "rgba(200,195,240,0.45)" : "rgba(30,20,80,0.4)";
   const panelBg    = dark ? "rgba(12,9,28,0.48)" : "rgba(255,255,255,0.35)";
@@ -23,6 +36,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
       ? "rgba(255,255,255,0.08)"
       : "rgba(255,255,255,0.30)",
     border: `1px solid ${dark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.65)"}`,
+    outline: "none",
     cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
     color: "var(--tc-primary)",
@@ -58,7 +72,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
       </motion.button>
 
       {/* Palette button */}
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative" }} ref={panelRef}>
         <motion.button
           whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
           onClick={() => setOpen(o => !o)}
@@ -66,11 +80,6 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
         >
           <Palette size={iconSize} />
         </motion.button>
-
-        {/* Backdrop */}
-        {open && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 9990 }} onClick={() => setOpen(false)} />
-        )}
 
         {/* Theme panel */}
         <AnimatePresence>

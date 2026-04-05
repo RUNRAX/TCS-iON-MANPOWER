@@ -136,6 +136,7 @@ export default function AdminDashboard() {
   type Assignment = {
     id: string; employee_name?: string; shift_title?: string;
     exam_date?: string; shift_number?: number; status: string;
+    max_employees?: number; start_time?: string; end_time?: string; venue?: string;
   };
   const recentAssignments = (assignData?.assignments ?? []) as Assignment[];
   const loading = statsLoading || assignLoading;
@@ -341,11 +342,19 @@ export default function AdminDashboard() {
                           {b.employee_name ?? "—"}
                         </p>
                         <p
-                          className="text-xs truncate"
-                          style={{ color: textMuted, fontFamily: FONT_SYSTEM, marginTop: 1 }}
+                          className="text-[11px] truncate"
+                          style={{ color: textMuted, fontFamily: FONT_SYSTEM, marginTop: 2 }}
                         >
-                          {b.shift_title} — Shift {b.shift_number} · {b.exam_date}
+                          {b.shift_title} (Shift {b.shift_number}) · {b.exam_date}
                         </p>
+                        <div className="flex items-center gap-3 mt-1.5 opacity-80" style={{ fontSize: 10, color: textMuted, fontFamily: FONT_SYSTEM }}>
+                          <span className="flex items-center gap-1">
+                            <Clock size={10} /> {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users size={10} /> {b.max_employees} required
+                          </span>
+                        </div>
                       </div>
 
                       {/* Status pill */}

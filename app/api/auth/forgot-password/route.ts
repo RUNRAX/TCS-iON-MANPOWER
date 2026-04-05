@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
       .eq("email", email.trim().toLowerCase())
       .single();
 
-    // Always return success even if email not found — prevents email enumeration
-    if (!userExists) return ok({ message: "IF AN ACCOUNT EXISTS, A RESET LINK WILL BE SENT" });
+    // Check if the email exists in our users table
+    if (!userExists) return badRequest("Email not found in our database. Please check and try again.");
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 

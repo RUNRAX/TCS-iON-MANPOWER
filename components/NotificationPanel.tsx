@@ -3,7 +3,7 @@
  * NotificationPanel.tsx
  * Bell button + slide-down notification panel.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, CheckCircle2, Clock, CalendarDays, IndianRupee, UserCheck, X, Check, ChevronRight } from "lucide-react";
 import { useTheme } from "@/lib/context/ThemeContext";
@@ -226,6 +226,19 @@ export default function NotificationPanel({ role, userId }: Props) {
     if (open) fetchNotifs();
   }, [open, fetchNotifs]);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
   const markAllRead  = () => setItems(prev => prev.map(n => ({ ...n, read: true })));
   const handleClick  = (item: NotifItem) => {
     setItems(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
@@ -246,7 +259,7 @@ export default function NotificationPanel({ role, userId }: Props) {
       : "inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -0.5px 0 rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.06)");
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative" }} ref={panelRef}>
       {/* Bell button — Glass Frost */}
       <motion.button
         whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
@@ -255,6 +268,7 @@ export default function NotificationPanel({ role, userId }: Props) {
           width: 32, height: 32, borderRadius: 10,
           background: bellBg,
           border: `1px solid ${bellBorder}`,
+          outline: "none",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
           boxShadow: bellShadow,
@@ -283,11 +297,6 @@ export default function NotificationPanel({ role, userId }: Props) {
           </motion.span>
         )}
       </motion.button>
-
-      {/* Backdrop */}
-      {open && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9990 }} onClick={() => setOpen(false)} />
-      )}
 
       <AnimatePresence>
         {open && (

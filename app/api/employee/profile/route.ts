@@ -16,8 +16,39 @@ export const GET = withEmployee(async (_req, { userId }) => {
     .from("employee_profiles")
     .select("id,full_name,phone,alt_phone,email,address_line1,address_line2,city,state,pincode,bank_name,id_proof_type,photo_url,status,rejection_reason,created_at")
     .eq("user_id", userId).eq("is_deleted", false).maybeSingle();
-  if (error) return serverError();
-  return ok({ profile: data ?? null });
+  // Get stats
+  const [ { data: shifts }, { data: payments } ] = await Promise.all([
+    supabase.from("shift_assignments").select("status, exam_shifts(pay_amount)").eq("employee_id", userId),
+    supabase.from("payment_records").select("amount, status").eq("employee_id", userId)
+  ]);
+
+  let totalShiftsDone = 0;
+  let upcomingShifts = 0;
+  let totalEarnings = 0;
+  let pendingPayment = 0;
+  let clearedPayment = 0;
+
+  if (shifts) {
+    totalShiftsDone = shifts.filter(s => s.status === "completed").length;
+    upcomingShifts = shifts.filter(s => s.status === "confirmed").length;
+  }
+
+  if (payments) {
+    payments.forEach(p => {
+      const amt = Number(p.amount) || 0;
+      if (p.status === "cleared") {
+        totalEarnings += amt;
+        clearedPayment += amt;
+      } else if (p.status === "pending") {
+        pendingPayment += amt;
+      }
+    });
+  }
+
+  return ok({
+    profile: data ?? null,
+    stats: { totalShiftsDone, upcomingShifts, totalEarnings, pendingPayment, clearedPayment }
+  });
 });
 
 export const POST = withEmployee(async (request, { userId }) => {
