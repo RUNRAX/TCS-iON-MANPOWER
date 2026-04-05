@@ -16,8 +16,8 @@ function getResend(): Resend {
   return _resend;
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "rakshitawati7@gmail.com";
-const FROM_NAME = "TCS iON Manpower Portal";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+const FROM_NAME = "TCS iON Portal";
 
 interface SendEmailOpts {
   to: string | string[];

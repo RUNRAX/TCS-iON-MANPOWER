@@ -207,28 +207,29 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
   return (
     <>
       {/* Backdrop */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.50)" }}
-        onClick={step < 4 ? handleClose : undefined} />
-
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 32 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.94, y: 24 }}
-        transition={{ type: "spring", stiffness: 440, damping: 32 }}
-        style={{
-          position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-          zIndex: 9999, width: "min(540px, 94vw)", maxHeight: "88vh",
-          borderRadius: 28,
-          background: dark ? "rgba(10,8,24,0.92)" : "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(80px) saturate(220%)", WebkitBackdropFilter: "blur(80px) saturate(220%)",
-          border: `1px solid ${dark ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.92)"}`,
-          boxShadow: dark
-            ? "0 40px 100px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.14)"
-            : "0 24px 70px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
-          display: "flex", flexDirection: "column", overflow: "hidden",
-        }}
-      >
+      <div style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.50)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        onClick={step < 4 ? handleClose : undefined}>
+        
+        {/* Modal */}
+        <motion.div
+          onClick={e => e.stopPropagation()}
+          initial={{ opacity: 0, scale: 0.92, y: 32 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.94, y: 24 }}
+          transition={{ type: "spring", stiffness: 440, damping: 32 }}
+          style={{
+            position: "relative",
+            zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
+            borderRadius: 28,
+            background: dark ? "rgba(10,8,24,0.92)" : "rgba(255,255,255,0.88)",
+            backdropFilter: "blur(80px) saturate(220%)", WebkitBackdropFilter: "blur(80px) saturate(220%)",
+            border: `1px solid ${dark ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.92)"}`,
+            boxShadow: dark
+              ? "0 40px 100px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.14)"
+              : "0 24px 70px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
+            display: "flex", flexDirection: "column", overflow: "hidden",
+          }}
+        >
         {/* Inner sheen */}
         <div aria-hidden style={{
           position: "absolute", top: 0, left: 0, right: 0, height: "30%",
@@ -566,6 +567,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
           </div>
         )}
       </motion.div>
+      </div>
     </>
   );
 }

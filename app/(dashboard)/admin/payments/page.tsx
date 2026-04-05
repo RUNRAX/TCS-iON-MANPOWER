@@ -207,13 +207,15 @@ export default function AdminBookingsPage() {
     fetch(`/api/admin/bookings?date=${selectedDate}`)
       .then(r => r.json())
       .then(d => {
-        setShifts(d.data?.shifts ?? []);
+        const loadedShifts = d.data?.shifts ?? [];
+        setShifts(loadedShifts);
         const allEmps = d.data?.employees ?? [];
         
-        // STRICT: Never auto-populate. Admin must ALWAYS manually add employees via the + button.
-        // We keep the table completely empty on load. Only employees the admin explicitly
-        // added in a PREVIOUS session (with a saved duty_role) will appear.
-        setEmployees([]);
+        // Auto-populate employees who were already assigned to any shift on this date
+        const activeEmps = allEmps.filter((e: any) => 
+          loadedShifts.some((s: any) => e.assignments && e.assignments[s.id] && e.assignments[s.id].duty_role)
+        );
+        setEmployees(activeEmps);
         setAllAvailableEmployees(allEmps);
       })
       .catch(() => toast.error("Failed to load attendance data"))
@@ -292,41 +294,9 @@ export default function AdminBookingsPage() {
     if (!selectedDate || !shifts.length || !employees.length) return;
     const wb = XLSX.utils.book_new();
 
-    shifts.forEach(shift => {
-      const rows = employees.map((e, i) => {
-        const asgn = e.assignments[shift.id] ?? {};
-        const role = (asgn.duty_role as string) ?? "";
-        // Three separate duty columns — empty string (not hyphen) when not assigned
-        return {
-          "#":             i + 1,
-          "Employee ID":   (e as any).employee_code ?? e.id.slice(0, 8).toUpperCase(),
-          "Full Name":     e.full_name ?? "",
-          "Email":         e.email ?? "",
-          "Phone":         e.phone ?? "",
-          "Invigilation":  role === "Invigilation" ? "✓" : "",
-          "Biometric":     role === "Biometric"     ? "✓" : "",
-          "Registration":  role === "Registration"  ? "✓" : "",
-          "Notes":         (asgn.notes as string)   ?? "",
-        };
-      });
+    const examName = shifts[0]?.title ? shifts[0].title.replace(/[^a-z0-9]/gi, '_') : 'Exam';
 
-      const headers = Object.keys(rows[0] ?? {});
-      const ws = XLSX.utils.json_to_sheet(rows);
-      // Auto column widths
-      ws["!cols"] = headers.map(h => ({
-        wch: Math.max(h.length + 2, ...rows.map(r => String((r as Record<string,unknown>)[h] ?? "").length + 2))
-      }));
-      // Freeze header row and apply AutoFilter
-      ws["!freeze"] = { xSplit: 0, ySplit: 1 };
-      
-      // Add autofilter to the entire data range
-      const range = XLSX.utils.decode_range(ws["!ref"] || "A1:A1");
-      ws["!autofilter"] = { ref: XLSX.utils.encode_range(range) };
-      
-      XLSX.utils.book_append_sheet(wb, ws, `Shift ${shift.shift_number}`);
-    });
-
-    // Summary sheet across all shifts
+    // Single consolidated sheet
     const summaryRows = employees.map((e, i) => {
       const row: Record<string, unknown> = {
         "#": i + 1,
@@ -335,26 +305,40 @@ export default function AdminBookingsPage() {
         "Email": e.email ?? "",
         "Phone": e.phone ?? "",
       };
+      
+      let allNotes = "";
       shifts.forEach(shift => {
-        const role = (e.assignments[shift.id]?.duty_role as string) ?? "";
-        row[`Shift ${shift.shift_number} – Invigilation`] = role === "Invigilation" ? "✓" : "";
-        row[`Shift ${shift.shift_number} – Biometric`]    = role === "Biometric"    ? "✓" : "";
-        row[`Shift ${shift.shift_number} – Registration`] = role === "Registration" ? "✓" : "";
+        const asgn = e.assignments[shift.id] ?? {};
+        const role = (asgn.duty_role as string) ?? "";
+        row[`Shift ${shift.shift_number}`] = role;
+        
+        if (asgn.notes) {
+          allNotes += `[S${shift.shift_number}]: ${asgn.notes} `;
+        }
       });
+      row["Notes"] = allNotes.trim();
+
       return row;
     });
-    const sws = XLSX.utils.json_to_sheet(summaryRows);
-    const sHeaders = Object.keys(summaryRows[0] ?? {});
-    sws["!cols"] = sHeaders.map(h => ({ wch: Math.max(h.length + 2, 14) }));
-    sws["!freeze"] = { xSplit: 0, ySplit: 1 };
+
+    const ws = XLSX.utils.json_to_sheet(summaryRows);
+    const headers = Object.keys(summaryRows[0] ?? {});
     
-    // AutoFilter for summary sheet
-    const summaryRange = XLSX.utils.decode_range(sws["!ref"] || "A1:A1");
-    sws["!autofilter"] = { ref: XLSX.utils.encode_range(summaryRange) };
+    // Auto column widths
+    ws["!cols"] = headers.map(h => ({
+      wch: Math.max(h.length + 2, ...summaryRows.map(r => String((r as Record<string,unknown>)[h] ?? "").length + 2))
+    }));
+    
+    // Freeze header row
+    ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+    
+    // AutoFilter
+    const range = XLSX.utils.decode_range(ws["!ref"] || "A1:A1");
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range(range) };
 
-    XLSX.utils.book_append_sheet(wb, sws, "Summary");
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance");
 
-    XLSX.writeFile(wb, `attendance-${selectedDate}.xlsx`);
+    XLSX.writeFile(wb, `${examName}-${selectedDate}.xlsx`);
     toast.success("Attendance exported ✓");
   }, [selectedDate, shifts, employees]);
 
@@ -439,7 +423,7 @@ export default function AdminBookingsPage() {
 
       <AnimatePresence mode="wait">
         {!showPayments ? (
-          <motion.div key="attendance">
+          <motion.div key="attendance" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.25, ease: "easeOut" }}>
             <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
 
               {/* ── Left: Calendar ─────────────────────────────────────────── */}
@@ -637,15 +621,15 @@ export default function AdminBookingsPage() {
                         </div>
                         {/* Action buttons — Save / Modify / Remove */}
                         <div style={{ padding: "12px 16px", borderTop: `1px solid ${border}`, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                          <motion.button onClick={() => { flushSaves(); toast.success("Attendance saved successfully"); }} whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
                             style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
                             <Save size={13} /> Save
                           </motion.button>
-                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                          <motion.button onClick={() => toast("Changes auto-save. Use dropdowns above to modify.", { icon: "💡" })} whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
                             style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
                             <Edit3 size={13} /> Modify
                           </motion.button>
-                          <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                          <motion.button onClick={() => toast("Use the trash icon next to an employee to remove them.", { icon: "🗑️" })} whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
                             style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
                             <Trash2 size={13} /> Remove
                           </motion.button>
@@ -658,7 +642,7 @@ export default function AdminBookingsPage() {
             </div>
           </motion.div>
         ) : (
-          <motion.div key="payments">
+          <motion.div key="payments" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.25, ease: "easeOut" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 16, gap: 8 }}>
               {(["", "pending", "cleared"] as const).map(s => (
                 <button key={s} onClick={() => setStatusFilter(s || undefined)}
