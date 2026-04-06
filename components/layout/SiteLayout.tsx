@@ -540,10 +540,10 @@ export default function SiteLayout({
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: headerBg,
-                  border: `1px solid ${scrolled
-                    ? (dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
-                    : (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)")}`,
-                  borderRadius: 16,
+                  border: scrolled
+                    ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
+                    : "none",
+                  borderRadius: 20,
                   backdropFilter: BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
