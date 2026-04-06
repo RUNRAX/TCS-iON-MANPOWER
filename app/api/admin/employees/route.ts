@@ -63,7 +63,7 @@ export const GET = withAdmin(async (request) => {
        )`,
       { count: "exact" }
     )
-    .eq("role", "employee")
+    .neq("role", "admin")
     .order("created_at", { ascending: false });
 
   if (matchedUserIds !== null) {

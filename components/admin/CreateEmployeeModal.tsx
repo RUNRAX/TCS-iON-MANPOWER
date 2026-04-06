@@ -218,6 +218,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         {/* Modal */}
         <motion.div
           onClick={e => e.stopPropagation()}
+          className="glass-panel-strong admin-panel"
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 16 }}
@@ -226,17 +227,12 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
             position: "relative",
             zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
             borderRadius: 28,
-            background: "var(--spatial-glass-bg)",
-            backdropFilter: "var(--spatial-glass-blur)", 
-            WebkitBackdropFilter: "var(--spatial-glass-blur)",
-            border: "var(--spatial-glass-border)",
-            boxShadow: "var(--spatial-glass-shadow)",
             display: "flex", flexDirection: "column", overflow: "hidden",
           }}
         >
 
         {/* Header */}
-        <div style={{ padding: "18px 24px 14px", borderBottom: `1px solid ${border}`, flexShrink: 0, position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ padding: "24px 24px 18px", borderBottom: `1px solid ${border}`, flexShrink: 0, position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: textMain, marginBottom: 2 }}>Create Employee</h2>
             <p style={{ fontSize: 11, color: textMuted }}>{steps[step]}</p>

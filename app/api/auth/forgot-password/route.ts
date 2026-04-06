@@ -59,9 +59,10 @@ export async function POST(request: NextRequest) {
         `,
       });
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
       console.error("[ForgotPassword] Email delivery failed:", err);
       return NextResponse.json(
-        { status: "error", message: "Failed to send reset email. Please try again or contact admin." },
+        { status: "error", message: errorMsg },
         { status: 500 }
       );
     }

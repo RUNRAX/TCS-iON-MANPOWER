@@ -133,11 +133,17 @@ export default function AdminDashboard() {
     },
   ], [stats]);
 
-  /* ── Filter shifts for 1-month window starting April 20 ── */
+  /* ── Filter shifts for dynamic rolling 60-day window ── */
   const monthlyShifts = useMemo(() => {
     if (!shiftsData?.shifts) return [];
-    const windowStart = new Date("2026-04-20");
-    const windowEnd = new Date("2026-05-20");
+    const now = new Date();
+    
+    // Window: 30 days ago to 30 days ahead
+    const windowStart = new Date(now);
+    windowStart.setDate(windowStart.getDate() - 30);
+    
+    const windowEnd = new Date(now);
+    windowEnd.setDate(windowEnd.getDate() + 30);
     
     return shiftsData.shifts
       .filter((s: any) => {
@@ -309,7 +315,7 @@ export default function AdminDashboard() {
               background: "rgba(99,102,241,0.10)",
               color: "#818cf8",
             }}>
-              Apr 20 — May 20
+              Rolling 60 Days
             </span>
             <Link href="/admin/shifts">
               <motion.span
@@ -349,7 +355,7 @@ export default function AdminDashboard() {
             >
               <Calendar size={32} style={{ margin: "0 auto 12px", opacity: 0.4 }} />
               <p className="text-sm font-medium" style={{ marginBottom: 4 }}>No shifts in this window</p>
-              <p className="text-xs" style={{ opacity: 0.7 }}>Create shifts for the Apr 20 – May 20 period</p>
+              <p className="text-xs" style={{ opacity: 0.7 }}>Create shifts for the current period</p>
             </div>
           ) : (
             <>
