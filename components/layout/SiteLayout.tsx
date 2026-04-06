@@ -285,7 +285,7 @@ export default function SiteLayout({
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-    const onScroll = () => setScrolled(el.scrollTop > 8);
+    const onScroll = () => setScrolled(el.scrollTop > 24);
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
@@ -546,8 +546,8 @@ export default function SiteLayout({
                     ? `rgba(255,255,255,${scrolled ? 0.08 : 0})` 
                     : `rgba(0,0,0,${scrolled ? 0.05 : 0})`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
-                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
+                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 12) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
+                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 12) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
                   boxShadow: scrolled
                     ? (dark
                         ? "inset 0 1.5px 2px rgba(255,255,255,0.18), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
