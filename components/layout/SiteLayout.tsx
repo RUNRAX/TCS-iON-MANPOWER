@@ -338,7 +338,6 @@ export default function SiteLayout({
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
-          borderRight: `1px solid ${borderCol}`,
           boxShadow: edgeShadow,
           willChange: "transform, opacity",
           overflow: "hidden",
@@ -382,7 +381,7 @@ export default function SiteLayout({
         }} />
 
         {/* Logo */}
-        <div className="px-4 py-4 relative z-10" style={{ borderBottom: `1px solid ${borderCol}` }}>
+        <div className="px-4 py-4 relative z-10">
           <div className="flex items-center gap-3">
             <motion.div
               animate={{
@@ -517,7 +516,7 @@ export default function SiteLayout({
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
-          <div style={{ position: "sticky", top: 0, zIndex: 50 }}>
+          <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0.5rem 1rem" }}>
             <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
 
               {/*
