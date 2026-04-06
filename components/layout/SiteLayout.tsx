@@ -357,59 +357,43 @@ export default function SiteLayout({
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
           {/* Purple/Primary orb */}
           <div style={{
-            position: "absolute",
-            top: "10%",
-            left: "-20%",
-            width: "160px",
-            height: "160px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 25%, transparent) 0%, transparent 70%)",
-            filter: "none",
+            position: "absolute", top: "8%", left: "-10%",
+            width: "120px", height: "120px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.25,
             animation: "sidebarOrb1 8s ease-in-out infinite",
-            willChange: "transform",
-            transform: "translateZ(0)",
+            willChange: "transform", transform: "translateZ(0)",
           }} />
           {/* Secondary orb */}
           <div style={{
-            position: "absolute",
-            bottom: "15%",
-            right: "-15%",
-            width: "140px",
-            height: "140px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 22%, transparent) 0%, transparent 70%)",
-            filter: "none",
+            position: "absolute", bottom: "12%", right: "-10%",
+            width: "100px", height: "100px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-secondary), var(--tc-accent))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.25,
             animation: "sidebarOrb2 10s ease-in-out infinite",
-            willChange: "transform",
-            transform: "translateZ(0)",
+            willChange: "transform", transform: "translateZ(0)",
           }} />
           {/* Accent orb */}
           <div style={{
-            position: "absolute",
-            top: "50%",
-            left: "30%",
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-accent) 20%, transparent) 0%, transparent 70%)",
-            filter: "none",
+            position: "absolute", top: "45%", left: "35%",
+            width: "80px", height: "80px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-accent), var(--tc-primary))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.20,
             animation: "sidebarOrb3 12s ease-in-out infinite",
-            willChange: "transform",
-            transform: "translateZ(0)",
+            willChange: "transform", transform: "translateZ(0)",
           }} />
-          {/* Secondary accent orb */}
+          {/* Small accent orb */}
           <div style={{
-            position: "absolute",
-            top: "70%",
-            left: "-10%",
-            width: "100px",
-            height: "100px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 22%, transparent) 0%, transparent 70%)",
-            filter: "none",
+            position: "absolute", top: "72%", left: "-5%",
+            width: "60px", height: "60px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-primary), #fff)",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.20,
             animation: "sidebarOrb4 9s ease-in-out infinite",
-            willChange: "transform",
-            transform: "translateZ(0)",
+            willChange: "transform", transform: "translateZ(0)",
           }} />
         </div>
         {/* Inner top sheen */}
