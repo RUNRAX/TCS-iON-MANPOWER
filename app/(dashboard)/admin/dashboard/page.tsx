@@ -153,7 +153,8 @@ export default function AdminDashboard() {
       .sort((a: any, b: any) => new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime());
   }, [shiftsData]);
 
-  const upcomingShifts = monthlyShifts.filter((s: any) => s.status === "published" || s.status === "draft");
+  const upcomingShifts = monthlyShifts.filter((s: any) => (s.status === "published" || s.status === "draft") && !isPast(s.exam_date));
+  const pendingActionShifts = monthlyShifts.filter((s: any) => s.status === "published" && isPast(s.exam_date));
   const completedShifts = monthlyShifts.filter((s: any) => s.status === "completed");
 
   const loading = statsLoading || shiftsLoading;
@@ -457,6 +458,107 @@ export default function AdminDashboard() {
                                 {completing ? "..." : "Complete"}
                               </motion.button>
                             )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Pending Action Shifts Section */}
+              {pendingActionShifts.length > 0 && (
+                <div>
+                  <div className="px-5 py-2.5" style={{ background: dark ? "rgba(245,158,11,0.05)" : "rgba(245,158,11,0.04)" }}>
+                    <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#fbbf24" }}>
+                      Pending Action ({pendingActionShifts.length})
+                    </p>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: borderCol }}>
+                    {pendingActionShifts.map((s: any, i: number) => {
+                      const pill = statusMap[s.status] ?? defaultStatus;
+                      const completing = completingId === s.id;
+                      return (
+                        <motion.div
+                          key={s.id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="px-5 py-3 flex items-center gap-3"
+                          style={{ transition: "background 0.15s" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          {/* Date pill */}
+                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center" style={{
+                            background: dark ? "rgba(245,158,11,0.12)" : "rgba(245,158,11,0.08)",
+                            border: `1px solid rgba(245,158,11,0.18)`,
+                          }}>
+                            <span className="text-[10px] font-bold leading-none" style={{ color: "#fbbf24" }}>
+                              {new Date(s.exam_date).getDate()}
+                            </span>
+                            <span className="text-[8px] font-semibold uppercase" style={{ color: "#fbbf24", opacity: 0.7 }}>
+                              {new Date(s.exam_date).toLocaleDateString("en", { month: "short" })}
+                            </span>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: textMain, fontFamily: FONT_SYSTEM }}>
+                              {s.title} — Shift {s.shift_number}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap" style={{ fontSize: 11, color: textMuted, fontFamily: FONT_SYSTEM }}>
+                              <span className="flex items-center gap-1">
+                                <Clock size={10} /> {fmtTime(s.start_time)}–{fmtTime(s.end_time)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin size={10} /> {s.venue}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users size={10} /> {s.confirmed_count}/{s.max_employees}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Status + Mark Complete */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span
+                              className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                              style={{
+                                background: pill.bg, color: pill.color,
+                                border: `1px solid ${pill.border}`,
+                                fontFamily: FONT_SYSTEM,
+                              }}
+                            >
+                              {pill.label}
+                            </span>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                              onClick={() => handleMarkComplete(s.id)}
+                              disabled={completing}
+                              style={{
+                                padding: "5px 10px", borderRadius: 10,
+                                background: "rgba(16,185,129,0.12)",
+                                border: "1px solid rgba(16,185,129,0.25)",
+                                color: "#34d399", fontSize: 10, fontWeight: 700,
+                                cursor: completing ? "not-allowed" : "pointer",
+                                display: "flex", alignItems: "center", gap: 4,
+                                opacity: completing ? 0.6 : 1,
+                                fontFamily: FONT_SYSTEM,
+                                transition: "opacity 0.15s, background 0.15s",
+                              }}
+                              onMouseEnter={e => { if (!completing) e.currentTarget.style.background = "rgba(16,185,129,0.20)"; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = "rgba(16,185,129,0.12)"; }}
+                            >
+                              {completing ? (
+                                <Loader2 size={10} style={{ animation: "spin 0.7s linear infinite" }} />
+                              ) : (
+                                <CheckCircle size={10} />
+                              )}
+                              {completing ? "..." : "Complete"}
+                            </motion.button>
                           </div>
                         </motion.div>
                       );

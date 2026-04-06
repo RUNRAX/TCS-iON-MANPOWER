@@ -308,13 +308,13 @@ export default function NotificationPanel({ role, userId }: Props) {
             transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.75 }}
             style={{
               position: "fixed",
-              top: 58, right: 52,
+              top: 68, right: 16,
               zIndex: 9999,
-              width: 340,
-              maxHeight: 480,
+              width: 300,
+              maxHeight: 420,
               background: "var(--spatial-glass-bg)",
               border: "var(--spatial-glass-border)",
-              borderRadius: 20,
+              borderRadius: 18,
               backdropFilter: "var(--spatial-glass-blur)",
               WebkitBackdropFilter: "var(--spatial-glass-blur)",
               boxShadow: "var(--spatial-glass-shadow)",

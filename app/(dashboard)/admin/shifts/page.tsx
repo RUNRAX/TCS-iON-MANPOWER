@@ -82,6 +82,9 @@ export default function AdminShifts() {
   const [confirmingComplete, setConfirmingComplete] = useState<string | null>(null);
   const [confirmingCancel, setConfirmingCancel] = useState<string | null>(null);
 
+  // ── Details Modal State ──────────────────────────────────────────────────
+  const [shiftDetails, setShiftDetails] = useState<any>(null);
+
   const { data, isLoading, refetch } = useAdminShifts({ status: statusFilter === "all" ? undefined : statusFilter });
   const { mutateAsync: createShiftAsync, isPending: creating } = useCreateShift();
   const { mutate: patchShift } = usePatchShift();
@@ -404,27 +407,111 @@ export default function AdminShifts() {
         </div>
       )}
 
-      {/* ── All-status list below (if filter is not "all") ─────────────────── */}
-      {statusFilter !== "all" && allShifts.filter(s => s.exam_date !== selectedDate).length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>Other dates</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12 }}>
-            {allShifts.filter(s => s.exam_date !== selectedDate).map(s => {
-              const sc = statusColors[s.status] ?? statusColors.draft;
-              return (
-                <div key={s.id} style={{ borderRadius: 16, padding: "14px 16px", background: cardBg, border: `1px solid ${borderCol}`, opacity: 0.75 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, color: textMuted }}>{s.exam_date} · Shift {s.shift_number}</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, ...sc }}>{s.status}</span>
-                  </div>
-                  <p style={{ fontWeight: 600, fontSize: 13, color: textMain }}>{s.title}</p>
-                  <p style={{ fontSize: 11, color: textMuted }}>{s.start_time}–{s.end_time} · {s.venue}</p>
-                </div>
-              );
-            })}
+      {/* ── All Shifts Table ─────────────────────────────────────────────────── */}
+      {statusFilter !== "all" || allShifts.length > 0 ? (
+        <div style={{ marginTop: 40 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16 }}>Shift Directory</p>
+          <div style={{
+            background: cardBg, borderRadius: 20, overflow: "hidden",
+            border: `1px solid ${borderCol}`, backdropFilter: g.blur, WebkitBackdropFilter: g.blur,
+            boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 4px 16px rgba(0,0,0,0.04)"
+          }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                <thead>
+                  <tr style={{ background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)", borderBottom: `1px solid ${borderCol}` }}>
+                    {["Date", "Title", "Venue", "Time", "Status"].map(h => (
+                      <th key={h} style={{ padding: "12px 18px", textAlign: "left", fontSize: 11, fontWeight: 700, color: textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody style={{ fontSize: 13, color: textMain }}>
+                  {allShifts.slice().sort((a,b) => new Date(b.exam_date).getTime() - new Date(a.exam_date).getTime()).map(s => {
+                    const sc = statusColors[s.status] ?? statusColors.draft;
+                    return (
+                      <tr key={s.id}
+                        onClick={() => setShiftDetails(s)}
+                        style={{ borderBottom: `1px solid ${borderCol}`, cursor: "pointer", transition: "background 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                        <td style={{ padding: "14px 18px", whiteSpace: "nowrap" }}>
+                          <span style={{ fontWeight: 600 }}>{s.exam_date}</span>
+                          <span style={{ display: "block", fontSize: 11, color: textMuted }}>Shift {s.shift_number}</span>
+                        </td>
+                        <td style={{ padding: "14px 18px", fontWeight: 600 }}>{s.title}</td>
+                        <td style={{ padding: "14px 18px", color: textMuted }}>{s.venue}</td>
+                        <td style={{ padding: "14px 18px", color: textMuted }}>{s.start_time}-{s.end_time}</td>
+                        <td style={{ padding: "14px 18px" }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 99, ...sc }}>{s.status}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {allShifts.length === 0 && (
+                <div style={{ padding: 30, textAlign: "center", color: textMuted, fontSize: 13 }}>No shifts found</div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      ) : null}
+
+      {/* ── Shift Details Modal ────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {shiftDetails && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ position: "fixed", inset: 0, zIndex: 60, backdropFilter: "blur(12px) saturate(120%)", background: dark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.3)" }}
+              onClick={() => setShiftDetails(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+              style={{
+                position: "fixed", top: "50%", left: "50%", zIndex: 61,
+                transform: "translate(-50%, -50%)", width: "100%", maxWidth: 440,
+                background: "var(--spatial-glass-bg)", border: "var(--spatial-glass-border)",
+                borderRadius: 24, padding: "0 0 24px", overflow: "hidden",
+                backdropFilter: "var(--spatial-glass-blur)", boxShadow: "var(--spatial-glass-shadow)"
+              }}>
+              <div style={{ height: 4, background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary))" }} />
+              <div style={{ padding: "20px 24px 16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: `1px solid ${borderCol}` }}>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 4 }}>{shiftDetails.title}</h3>
+                  <p style={{ fontSize: 13, color: textMuted }}>Shift {shiftDetails.shift_number} · {prettyDate(shiftDetails.exam_date)}</p>
+                </div>
+                <button onClick={() => setShiftDetails(null)} style={{ width: 30, height: 30, borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "none", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <X size={14} />
+                </button>
+              </div>
+              
+              <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+                {[
+                  { label: "Status", value: <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 99, ...(statusColors[shiftDetails.status] ?? statusColors.draft) }}>{shiftDetails.status}</span> },
+                  { label: "Time", value: `${shiftDetails.start_time} – ${shiftDetails.end_time}` },
+                  { label: "Venue", value: shiftDetails.venue },
+                  { label: "Pay Amount", value: `₹${shiftDetails.pay_amount}` },
+                  { label: "Confirmed Staff", value: `${shiftDetails.confirmed_count} / ${shiftDetails.max_employees}`, highlight: shiftDetails.confirmed_count >= shiftDetails.min_employees }
+                ].map(row => (
+                  <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: row.highlight ? "#34d399" : textMain }}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ padding: "0 24px" }}>
+                <button onClick={() => setShiftDetails(null)} style={{ width: "100%", padding: "12px", borderRadius: 12, background: "var(--tc-primary)", color: "#fff", border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Close</button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── iOS 26 Glass Create Shift Modal ─────────────────────────────────── */}
       <AnimatePresence>

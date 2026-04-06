@@ -212,7 +212,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
-        style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.50)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
         onClick={step < 4 ? handleClose : undefined}>
         
         {/* Modal */}
@@ -227,6 +227,8 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
             position: "relative",
             zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
             borderRadius: 28,
+            background: "var(--spatial-glass-bg)",
+            backdropFilter: "var(--spatial-glass-blur)",
             display: "flex", flexDirection: "column", overflow: "hidden",
           }}
         >
@@ -243,7 +245,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         </div>
 
         {/* Step indicator */}
-        <div style={{ padding: "10px 24px 8px", display: "flex", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
+        <div style={{ padding: "8px 24px", display: "flex", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
           {steps.map((s, i) => (
             <div key={s} style={{
               flex: 1, height: 4, borderRadius: 99,
@@ -256,7 +258,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px 20px", position: "relative", zIndex: 1 }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "12px 24px 20px", position: "relative", zIndex: 1 }}>
           <AnimatePresence mode="wait">
             {/* Step 0: AI Auto-Fill */}
             {step === 0 && (

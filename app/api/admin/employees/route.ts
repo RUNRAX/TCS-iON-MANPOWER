@@ -35,7 +35,8 @@ export const GET = withAdmin(async (request) => {
       supabase
         .from("users")
         .select("id")
-        .eq("role", "employee")
+        .neq("role", "admin")
+        .neq("role", "super_admin")
         .or(`email.ilike.%${search}%,phone.ilike.%${search}%`),
       supabase
         .from("employee_profiles")
@@ -64,6 +65,7 @@ export const GET = withAdmin(async (request) => {
       { count: "exact" }
     )
     .neq("role", "admin")
+    .neq("role", "super_admin")
     .order("created_at", { ascending: false });
 
   if (matchedUserIds !== null) {

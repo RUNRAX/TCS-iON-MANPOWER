@@ -94,9 +94,9 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                 position: "fixed",
                 top: topOffset, right: 16,
                 zIndex: 9999,
-                width: 260,
-                borderRadius: 20,
-                padding: 18,
+                width: 220,
+                borderRadius: 18,
+                padding: 14,
                 background: "var(--spatial-glass-bg)",
                 border: "var(--spatial-glass-border)",
                 backdropFilter: "var(--spatial-glass-blur)",
@@ -119,7 +119,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                     onClick={() => { setThemeKey(key); setOpen(false); }}
                     title={th.name}
                     style={{
-                      width: 38, height: 38, borderRadius: 11, border: "none",
+                      width: 32, height: 32, borderRadius: 9, border: "none",
                       // Swatch gradients use the theme's own hex values (not CSS vars) — this is fine
                       // because swatches are decorative and don't participate in hydration
                       background: `linear-gradient(135deg, ${th.swatch[0]}, ${th.swatch[1]})`,

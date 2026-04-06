@@ -18,7 +18,7 @@ export const GET = withEmployee(async (_req, { userId }) => {
     .eq("user_id", userId).eq("is_deleted", false).maybeSingle();
   // Get stats
   const [ { data: shifts }, { data: payments } ] = await Promise.all([
-    supabase.from("shift_assignments").select("status, exam_shifts(pay_amount)").eq("employee_id", userId),
+    supabase.from("shift_assignments").select("status, exam_shifts(exam_date, pay_amount)").eq("employee_id", userId),
     supabase.from("payment_records").select("amount, status").eq("employee_id", userId)
   ]);
 
@@ -29,8 +29,15 @@ export const GET = withEmployee(async (_req, { userId }) => {
   let clearedPayment = 0;
 
   if (shifts) {
+    const today = new Date(new Date().toDateString());
     totalShiftsDone = shifts.filter(s => s.status === "completed").length;
-    upcomingShifts = shifts.filter(s => s.status === "confirmed").length;
+    upcomingShifts = shifts.filter(s => {
+      if (s.status !== "confirmed") return false;
+      // Handle Supabase joining exam_shifts
+      const es = Array.isArray(s.exam_shifts) ? s.exam_shifts[0] : s.exam_shifts;
+      if (!es?.exam_date) return false;
+      return new Date(es.exam_date) >= today;
+    }).length;
   }
 
   if (payments) {
