@@ -534,26 +534,28 @@ export default function SiteLayout({
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
-            <header 
-              className="h-14 flex items-center justify-between px-5 md:px-6"
-              style={{
-                background:           headerBg,
-                border:               scrolled
-                  ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
-                  : "1px solid transparent",
-                borderRadius:         20,
-                backdropFilter:       BLUR_HEADER,
-                WebkitBackdropFilter: BLUR_HEADER,
-                boxShadow: scrolled
-                  ? [
-                      "0 8px 32px rgba(0,0,0,0.22)",
-                      `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                      dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                    ].join(", ")
-                  : "none",
-                transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
-              }}
-            >
+            <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
+              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
+              <div
+                style={{
+                  position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+                  background:           headerBg,
+                  border:               scrolled
+                    ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
+                    : "none",
+                  borderRadius:         20,
+                  backdropFilter:       BLUR_HEADER,
+                  WebkitBackdropFilter: BLUR_HEADER,
+                  boxShadow: scrolled
+                    ? [
+                        "0 8px 32px rgba(0,0,0,0.22)",
+                        `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                        dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                      ].join(", ")
+                    : "none",
+                  transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
+                }}
+              />
 
               {/* Mobile toggle */}
               <motion.button
@@ -614,28 +616,6 @@ export default function SiteLayout({
                 </div>
               </div>
             </header>
-            {/* ── Curved SVG separator below header ── */}
-            <svg
-              viewBox="0 0 1200 24"
-              preserveAspectRatio="none"
-              style={{
-                width: "100%", height: 14, display: "block",
-                opacity: scrolled ? 0.7 : 0,
-                transition: "opacity 0.4s cubic-bezier(0.22,1,0.36,1)",
-                marginTop: -2,
-              }}
-            >
-              <defs>
-                <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="transparent" />
-                  <stop offset="20%" stopColor="var(--tc-primary)" stopOpacity="0.3" />
-                  <stop offset="50%" stopColor="var(--tc-secondary)" stopOpacity="0.5" />
-                  <stop offset="80%" stopColor="var(--tc-primary)" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="transparent" />
-                </linearGradient>
-              </defs>
-              <path d="M0,0 Q300,24 600,12 T1200,0" fill="none" stroke="url(#curveGrad)" strokeWidth="1.5" />
-            </svg>
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}
