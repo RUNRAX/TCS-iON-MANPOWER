@@ -543,7 +543,7 @@ export default function SiteLayout({
                   border:               scrolled
                     ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
                     : "1px solid transparent",
-                  borderRadius:         20,
+                  borderRadius:         0,
                   backdropFilter:       BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
