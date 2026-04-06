@@ -532,27 +532,21 @@ export default function SiteLayout({
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
-          {/* Header — Sticky frosted glass pill */}
-          <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
-            <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
-              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
+          {/* Header — Floating frosted glass pill */}
+          <div className="pt-3 px-3 md:pt-4 md:px-5 lg:px-6" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]">
+              {/* ── Background Layer ── */}
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background: headerBg,
-                  border: `1px solid ${scrolled
-                    ? (dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
-                    : (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)")}`,
-                  borderRadius: 16,
-                  backdropFilter: BLUR_HEADER,
-                  WebkitBackdropFilter: BLUR_HEADER,
-                  boxShadow: scrolled
-                    ? [
-                      "0 8px 32px rgba(0,0,0,0.22)",
-                      `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                      dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                    ].join(", ")
-                    : "none",
+                  background: dark ? "rgba(18, 14, 25, 0.70)" : "rgba(255, 255, 255, 0.65)",
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"}`,
+                  borderRadius: 20,
+                  backdropFilter: `blur(${Math.max(actualBlur, 24)}px) saturate(160%)`,
+                  WebkitBackdropFilter: `blur(${Math.max(actualBlur, 24)}px) saturate(160%)`,
+                  boxShadow: dark
+                    ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)"
+                    : "0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
                   transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
                 }}
               />
@@ -639,4 +633,5 @@ export default function SiteLayout({
       </div>
     </div>
   );
+
 }
