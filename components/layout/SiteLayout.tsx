@@ -329,7 +329,7 @@ export default function SiteLayout({
 
   return (
     <div
-      className="flex h-screen overflow-hidden relative px-4 pb-4 gap-3"
+      className="flex h-screen overflow-hidden relative p-4 gap-3"
       style={{
         background: bgMain,
         color: textMain,
@@ -540,10 +540,10 @@ export default function SiteLayout({
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: headerBg,
-                  border: scrolled
-                    ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
-                    : "1px solid transparent",
-                  borderRadius: scrolled ? "0 0 12px 12px" : 0,
+                  border: `1px solid ${scrolled
+                    ? (dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
+                    : (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)")}`,
+                  borderRadius: 16,
                   backdropFilter: BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
