@@ -321,8 +321,8 @@ export default function SiteLayout({
   const actualBlur = glassFrost ? glassBlur : 0;
   // Sidebar: NO blur — background stays sharp
   const BLUR_SIDEBAR = "none";
-  // Header blur: reduced from 28→16 for subtlety, add glow instead
-  const headerBlurPx = scrolled ? Math.max(Math.min(actualBlur, 16), 16) : 0;
+  // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
+  const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
   const BLUR_HEADER  = headerBlurPx > 0
     ? `blur(${headerBlurPx}px)`
     : "none";
@@ -548,10 +548,9 @@ export default function SiteLayout({
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
                     ? [
-                        "0 8px 32px rgba(0,0,0,0.18)",
+                        "0 8px 32px rgba(0,0,0,0.22)",
                         `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
                         dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                        `0 0 20px 2px color-mix(in srgb, var(--tc-primary) 12%, transparent)`,
                       ].join(", ")
                     : "none",
                   transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
