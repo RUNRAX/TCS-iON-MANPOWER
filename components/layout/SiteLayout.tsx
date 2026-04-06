@@ -290,10 +290,8 @@ export default function SiteLayout({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-
-
-  /* Design tokens 
-     Read dynamic opacity directly from the ThemeContext integers 
+  /* Design tokens
+     Read dynamic opacity directly from the ThemeContext integers
   */
   const alphaVal = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
   // Set transparent so the <body> background image is visible
@@ -535,25 +533,25 @@ export default function SiteLayout({
           {/* Header — Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
             <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
-              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
+
+              {/* ── Background Layer ── opacity: 0 at rest, fades in on scroll ── */}
+              {/* FIX: Using opacity to fully suppress the compositing layer at rest.        */}
+              {/* border/transparent alone leaves a faint GPU layer outline in dark mode.    */}
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: headerBg,
-                  border: scrolled
-                    ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
-                    : "transparent",
-                  borderRadius: 20,
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"}`,
+                  borderRadius: 16,
                   backdropFilter: BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
-                  boxShadow: scrolled
-                    ? [
-                      "0 8px 32px rgba(0,0,0,0.22)",
-                      `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                      dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                    ].join(", ")
-                    : "none",
-                  transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
+                  boxShadow: [
+                    "0 8px 32px rgba(0,0,0,0.22)",
+                    `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                    dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                  ].join(", "),
+                  opacity: scrolled ? 1 : 0,
+                  transition: "opacity 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
                 }}
               />
 
