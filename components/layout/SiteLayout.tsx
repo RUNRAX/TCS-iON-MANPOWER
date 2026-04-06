@@ -539,14 +539,16 @@ export default function SiteLayout({
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background: dark ? "rgba(18, 14, 25, 0.70)" : "rgba(255, 255, 255, 0.65)",
-                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"}`,
+                  background: scrolled ? (dark ? "rgba(18, 14, 25, 0.70)" : "rgba(255, 255, 255, 0.65)") : "transparent",
+                  border: `1px solid ${scrolled ? (dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${Math.max(actualBlur, 24)}px) saturate(160%)`,
-                  WebkitBackdropFilter: `blur(${Math.max(actualBlur, 24)}px) saturate(160%)`,
-                  boxShadow: dark
-                    ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)"
-                    : "0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
+                  backdropFilter: scrolled ? `blur(${Math.max(actualBlur, 24)}px) saturate(160%)` : "none",
+                  WebkitBackdropFilter: scrolled ? `blur(${Math.max(actualBlur, 24)}px) saturate(160%)` : "none",
+                  boxShadow: scrolled
+                    ? (dark
+                        ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+                        : "0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)")
+                    : "none",
                   transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
                 }}
               />
