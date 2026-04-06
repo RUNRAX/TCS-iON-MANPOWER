@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 /**
- * components/layout/SiteLayout.tsx  — iOS 26.4 "Liquid Glass" Dashboard Shell
+ * components/layout/SiteLayout.tsx  ΓÇö iOS 26.4 "Liquid Glass" Dashboard Shell
  *
  * Sidebar, header, canvas background, and nav items.
  * Used by: app/(dashboard)/layout.tsx
@@ -23,7 +23,7 @@ import {
   Search, BarChart3, ClipboardCheck,
 } from "lucide-react";
 
-/* ── Nav config ──────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Nav config ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 const adminNav = [
   { label: "Dashboard",     icon: LayoutDashboard, href: "/admin/dashboard" },
   { label: "Employees",     icon: Users,           href: "/admin/employees" },
@@ -43,7 +43,7 @@ const employeeNav = [
   { label: "Settings",          icon: Settings,        href: "/employee/settings"  },
 ];
 
-/* ── Helper: get greeting ────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Helper: get greeting ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 function getGreeting(): string {
   const h = new Date().getHours();
   if (h < 12) return "Good Morning";
@@ -56,27 +56,27 @@ function getDateString(): string {
   });
 }
 
-/* ── Dynamic background configs ──────────────────────────────────────────── */
+/* ΓöÇΓöÇ Dynamic background configs ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 const BG_CONFIGS = [
-  // Config 0 — Deep purple orbs
+  // Config 0 ΓÇö Deep purple orbs
   [
     { top: "-10%", right: "-5%", w: "45vw", h: "45vw", color: "var(--tc-primary)", opacity: 0.12, blur: 80, anim: "orbFloat2" },
     { bottom: "-5%", left: "5%", w: "35vw", h: "35vw", color: "var(--tc-secondary)", opacity: 0.10, blur: 64, anim: "orbFloat3" },
     { top: "30%", left: "40%", w: "28vw", h: "28vw", color: "var(--tc-accent)", opacity: 0.08, blur: 100, anim: "orbFloat4" },
   ],
-  // Config 1 — Wide spread
+  // Config 1 ΓÇö Wide spread
   [
     { top: "5%", left: "10%", w: "50vw", h: "50vw", color: "var(--tc-secondary)", opacity: 0.10, blur: 90, anim: "orbFloat1" },
     { bottom: "10%", right: "-8%", w: "40vw", h: "40vw", color: "var(--tc-accent)", opacity: 0.12, blur: 70, anim: "orbFloat4" },
     { top: "50%", left: "55%", w: "25vw", h: "25vw", color: "var(--tc-primary)", opacity: 0.08, blur: 110, anim: "orbFloat2" },
   ],
-  // Config 2 — Center glow
+  // Config 2 ΓÇö Center glow
   [
     { top: "15%", left: "25%", w: "55vw", h: "55vw", color: "var(--tc-primary)", opacity: 0.09, blur: 120, anim: "orbFloat3" },
     { bottom: "-12%", right: "15%", w: "38vw", h: "38vw", color: "var(--tc-secondary)", opacity: 0.11, blur: 75, anim: "orbFloat1" },
     { top: "-5%", right: "30%", w: "30vw", h: "30vw", color: "var(--tc-accent)", opacity: 0.07, blur: 95, anim: "orbFloat2" },
   ],
-  // Config 3 — Diagonal flow
+  // Config 3 ΓÇö Diagonal flow
   [
     { top: "-8%", left: "-5%", w: "42vw", h: "42vw", color: "var(--tc-accent)", opacity: 0.10, blur: 85, anim: "orbFloat4" },
     { top: "40%", right: "5%", w: "48vw", h: "48vw", color: "var(--tc-primary)", opacity: 0.08, blur: 100, anim: "orbFloat1" },
@@ -84,7 +84,7 @@ const BG_CONFIGS = [
   ],
 ];
 
-/* ── NavItem ─────────────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ NavItem ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 interface NavItemProps {
   item:      { label: string; icon: React.ElementType; href: string };
   active:    boolean;
@@ -218,7 +218,7 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
   );
 });
 
-/* ── Liquid Background Component (Internal) ──────────────────────────────── */
+/* ΓöÇΓöÇ Liquid Background Component (Internal) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 const LiquidBackground = () => {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -259,7 +259,7 @@ const LiquidBackground = () => {
   );
 };
 
-/* ── Main SiteLayout ─────────────────────────────────────────────────────── */
+/* ΓöÇΓöÇ Main SiteLayout ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 interface SiteLayoutProps {
   children:      React.ReactNode;
   role:          "admin" | "employee";
@@ -299,7 +299,7 @@ export default function SiteLayout({
   // Set transparent so the <body> background image is visible
   const bgMain    = dark ? "transparent" : "#f0f0fa";
   const sidebarBg = dark ? `rgba(30,30,35,0.4)`    : `rgba(252,251,255,${alphaVal})`;
-  // Header: transparent background — blur alone provides the frosted effect
+  // Header: transparent background ΓÇö blur alone provides the frosted effect
   const headerBg = "transparent";
   const borderCol = dark
     ? "rgba(255,255,255,0.10)"
@@ -319,7 +319,7 @@ export default function SiteLayout({
   };
 
   const actualBlur = glassFrost ? glassBlur : 0;
-  // Sidebar: NO blur — background stays sharp
+  // Sidebar: NO blur ΓÇö background stays sharp
   const BLUR_SIDEBAR = "none";
   // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
   const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
@@ -337,10 +337,10 @@ export default function SiteLayout({
       }}
       suppressHydrationWarning
     >
-      {/* ── Premium Realistic 3D Liquid Orbs Background (Client-only) ── */}
+      {/* ΓöÇΓöÇ Premium Realistic 3D Liquid Orbs Background (Client-only) ΓöÇΓöÇ */}
       {mounted && <LiquidBackground />}
 
-      {/* ── Sidebar ── */}
+      {/* ΓöÇΓöÇ Sidebar ΓöÇΓöÇ */}
       <aside
         className={`admin-panel fixed inset-y-4 left-4 z-40 w-[220px] rounded-2xl flex flex-col transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
@@ -353,35 +353,47 @@ export default function SiteLayout({
           transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* ── Sidebar Aurora Wave ── */}
+        {/* ΓöÇΓöÇ Sidebar color orbs (no blur ΓÇö sharp defined circles) ΓöÇΓöÇ */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Aurora gradient layer 1 */}
+          {/* Purple/Primary orb */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(160deg, color-mix(in srgb, var(--tc-primary) 18%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--tc-secondary) 14%, transparent) 70%, transparent 100%)`,
-            animation: "auroraShift1 12s ease-in-out infinite",
-            willChange: "opacity", transform: "translateZ(0)",
-          }} />
-          {/* Aurora gradient layer 2 — counter-flow */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(340deg, transparent 0%, color-mix(in srgb, var(--tc-accent) 12%, transparent) 30%, transparent 60%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 90%)`,
-            animation: "auroraShift2 16s ease-in-out infinite",
-            willChange: "opacity", transform: "translateZ(0)",
-          }} />
-          {/* Aurora gradient layer 3 — diagonal sweep */}
-          <div style={{
-            position: "absolute", inset: "-50%",
-            background: `conic-gradient(from 180deg at 50% 50%, color-mix(in srgb, var(--tc-primary) 10%, transparent) 0deg, transparent 60deg, color-mix(in srgb, var(--tc-secondary) 8%, transparent) 120deg, transparent 180deg, color-mix(in srgb, var(--tc-accent) 10%, transparent) 240deg, transparent 300deg, color-mix(in srgb, var(--tc-primary) 10%, transparent) 360deg)`,
-            animation: "auroraRotate 25s linear infinite",
+            position: "absolute", top: "8%", left: "-10%",
+            width: "120px", height: "120px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.25,
+            animation: "sidebarOrb1 8s ease-in-out infinite",
             willChange: "transform", transform: "translateZ(0)",
           }} />
-          {/* Soft edge vignette for depth */}
+          {/* Secondary orb */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: dark
-              ? "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(0,0,0,0.15) 100%)"
-              : "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(255,255,255,0.25) 100%)",
+            position: "absolute", bottom: "12%", right: "-10%",
+            width: "100px", height: "100px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-secondary), var(--tc-accent))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.25,
+            animation: "sidebarOrb2 10s ease-in-out infinite",
+            willChange: "transform", transform: "translateZ(0)",
+          }} />
+          {/* Accent orb */}
+          <div style={{
+            position: "absolute", top: "45%", left: "35%",
+            width: "80px", height: "80px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-accent), var(--tc-primary))",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.20,
+            animation: "sidebarOrb3 12s ease-in-out infinite",
+            willChange: "transform", transform: "translateZ(0)",
+          }} />
+          {/* Small accent orb */}
+          <div style={{
+            position: "absolute", top: "72%", left: "-5%",
+            width: "60px", height: "60px", borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--tc-primary), #fff)",
+            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
+            opacity: 0.20,
+            animation: "sidebarOrb4 9s ease-in-out infinite",
+            willChange: "transform", transform: "translateZ(0)",
           }} />
         </div>
         {/* Inner top sheen */}
@@ -459,7 +471,7 @@ export default function SiteLayout({
           })}
         </nav>
 
-        {/* User footer — island pill */}
+        {/* User footer ΓÇö island pill */}
         <div className="px-3 py-3 relative z-10">
           <div
             className="rounded-2xl p-2.5"
@@ -528,14 +540,14 @@ export default function SiteLayout({
         )}
       </AnimatePresence>
 
-      {/* ── Main area ── */}
+      {/* ΓöÇΓöÇ Main area ΓöÇΓöÇ */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
-        {/* Single scroll container — header is sticky inside so content scrolls behind it */}
+        {/* Single scroll container ΓÇö header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
-          {/* Header — Sticky frosted glass pill */}
+          {/* Header ΓÇö Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
             <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
-              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
+              {/* ΓöÇΓöÇ Background Layer (extracting backdrop-filter so children aren't trapped) ΓöÇΓöÇ */}
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
@@ -574,7 +586,7 @@ export default function SiteLayout({
                 </AnimatePresence>
               </motion.button>
 
-              {/* Greeting — Good Morning, Admin + Date */}
+              {/* Greeting ΓÇö Good Morning, Admin + Date */}
               <div className="hidden md:block relative z-10" suppressHydrationWarning>
                 {mounted ? (
                   <>
@@ -590,7 +602,7 @@ export default function SiteLayout({
                 )}
               </div>
 
-              {/* Actions — Only notification bell + ThemePanel + user */}
+              {/* Actions ΓÇö Only notification bell + ThemePanel + user */}
               <div className="flex items-center gap-2 ml-auto relative z-10">
                 {/* Notification Panel (functional) */}
                 <NotificationPanel role={role} userId={userId} />
@@ -618,7 +630,7 @@ export default function SiteLayout({
             </header>
           </div>
 
-          {/* Page content — always render same DOM structure to avoid hydration mismatch */}
+          {/* Page content ΓÇö always render same DOM structure to avoid hydration mismatch */}
           <div style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
               <div
