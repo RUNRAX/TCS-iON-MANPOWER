@@ -546,13 +546,13 @@ export default function SiteLayout({
                     ? `rgba(255,255,255,${scrolled ? 0.08 : 0})` 
                     : `rgba(0,0,0,${scrolled ? 0.05 : 0})`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : (actualBlur > 0 ? 4 : 0)}px) saturate(${scrolled ? 160 : 100}%)`,
-                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : (actualBlur > 0 ? 4 : 0)}px) saturate(${scrolled ? 160 : 100}%)`,
+                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
+                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
                   boxShadow: scrolled
                     ? (dark
-                        ? "0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
-                        : "0 12px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)")
-                    : "0 0 0 rgba(0,0,0,0), inset 0 0 0 rgba(255,255,255,0), 0 0 0 transparent",
+                        ? "inset 0 1.5px 2px rgba(255,255,255,0.18), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+                        : "inset 0 1.5px 2px rgba(255,255,255,0.90), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 12%, transparent)")
+                    : "inset 0 0 0 rgba(255,255,255,0), inset 0 0 0 rgba(0,0,0,0), inset 0 0 0 transparent",
                   transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
               />
