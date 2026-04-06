@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminShifts } from "@/hooks/use-api";
-import { Send, Clock, ChevronDown, Check, Zap, Users, Radio, Mail, MessageCircle } from "lucide-react";
+import { Send, Clock, ChevronDown, Check, Zap, Users, Radio, Mail, MessageCircle, Wallet, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 
 // ── Custom glass dropdown ─────────────────────────────────────────────────────
@@ -135,6 +135,7 @@ export default function AdminBroadcast() {
   const textMuted = dark ? "rgba(200,195,240,0.52)" : "rgba(30,20,80,0.45)";
   const inputBg      = dark ? "rgba(255,255,255,0.055)" : "rgba(0,0,0,0.03)";
   const inputBorder  = dark ? "rgba(255,255,255,0.11)" : "rgba(0,0,0,0.09)";
+  const border       = dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
 
   // Mobile detection for compact layout
   const [isMobile, setIsMobile] = useState(false);
@@ -187,6 +188,106 @@ export default function AdminBroadcast() {
     boxSizing: "border-box",
   };
 
+  // ── Payroll State ────────────────────────────────────────────────────────────
+  const [payrollDate, setPayrollDate]   = useState("");
+  const [payrollLoading, setPayrollLoading] = useState(false);
+  const [payrollShifts, setPayrollShifts]   = useState<Array<{ id: string; title: string; shift_number: number; start_time: string; end_time: string; venue: string }>>([]);
+  const [payrollEmployees, setPayrollEmployees] = useState<Array<{ id: string; full_name: string; email: string; phone: string; assignments: Record<string, { duty_role?: string; notes?: string }> }>>([]);
+  const [payrollAmounts, setPayrollAmounts] = useState<Record<string, string>>({});
+  const [payrollRefs, setPayrollRefs]       = useState<Record<string, string>>({});
+  const [sendingPayments, setSendingPayments] = useState<Record<string, boolean>>({});
+  const [broadcastingAll, setBroadcastingAll] = useState(false);
+  const [selectedPayrollShift, setSelectedPayrollShift] = useState("");
+
+  const fetchPayrollData = async (date: string) => {
+    if (!date) return;
+    setPayrollLoading(true);
+    setPayrollEmployees([]);
+    setPayrollShifts([]);
+    setPayrollAmounts({});
+    setPayrollRefs({});
+    setSelectedPayrollShift("");
+    try {
+      const res = await fetch(`/api/admin/bookings?date=${date}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message);
+      const loadedShifts = json.data?.shifts ?? [];
+      setPayrollShifts(loadedShifts);
+      // Auto-select first shift
+      if (loadedShifts.length > 0) setSelectedPayrollShift(loadedShifts[0].id);
+      const allEmps = json.data?.employees ?? [];
+      // Filter only employees who have an assignment for any shift on this date
+      const assignedEmps = allEmps.filter((e: any) =>
+        loadedShifts.some((s: any) => e.assignments && e.assignments[s.id] && e.assignments[s.id].duty_role)
+      );
+      setPayrollEmployees(assignedEmps);
+    } catch {
+      toast.error("Failed to load attendance data for payroll");
+    } finally {
+      setPayrollLoading(false);
+    }
+  };
+
+  const handleSinglePayment = async (empId: string, empName: string) => {
+    const amount = parseFloat(payrollAmounts[empId] ?? "");
+    if (!amount || amount <= 0) { toast.error(`Enter a valid amount for ${empName}`); return; }
+    if (!selectedPayrollShift) { toast.error("Select a shift first"); return; }
+    setSendingPayments(prev => ({ ...prev, [empId]: true }));
+    try {
+      const res = await fetch("/api/admin/payments", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeId: empId, shiftId: selectedPayrollShift,
+          amountRupees: amount, referenceNumber: payrollRefs[empId] || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Payment failed");
+      toast.success(`₹${amount} cleared for ${empName} ✓`);
+      setPayrollAmounts(prev => { const n = { ...prev }; delete n[empId]; return n; });
+      setPayrollRefs(prev => { const n = { ...prev }; delete n[empId]; return n; });
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : `Payment failed for ${empName}`);
+    } finally {
+      setSendingPayments(prev => ({ ...prev, [empId]: false }));
+    }
+  };
+
+  const handleBroadcastAll = async () => {
+    if (!selectedPayrollShift) { toast.error("Select a shift first"); return; }
+    const entries = payrollEmployees.filter(e => {
+      const amt = parseFloat(payrollAmounts[e.id] ?? "");
+      return amt > 0;
+    });
+    if (entries.length === 0) { toast.error("Enter amounts for at least one employee"); return; }
+    setBroadcastingAll(true);
+    let success = 0;
+    let fail = 0;
+    for (const emp of entries) {
+      try {
+        const res = await fetch("/api/admin/payments", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            employeeId: emp.id, shiftId: selectedPayrollShift,
+            amountRupees: parseFloat(payrollAmounts[emp.id]),
+            referenceNumber: payrollRefs[emp.id] || undefined,
+          }),
+        });
+        if (res.ok) { success++; } else { fail++; }
+      } catch { fail++; }
+    }
+    if (success > 0) toast.success(`${success} payment${success > 1 ? "s" : ""} cleared ✓`);
+    if (fail > 0) toast.error(`${fail} payment${fail > 1 ? "s" : ""} failed`);
+    setPayrollAmounts({});
+    setPayrollRefs({});
+    setBroadcastingAll(false);
+  };
+
+  // Active employees for the selected payroll shift
+  const payrollShiftEmployees = selectedPayrollShift
+    ? payrollEmployees.filter(e => e.assignments[selectedPayrollShift]?.duty_role)
+    : payrollEmployees;
+
   return (
     <div style={{ padding: isMobile ? "12px 12px" : "24px 28px", minHeight: "100%", position: "relative" }}>
 
@@ -214,18 +315,19 @@ export default function AdminBroadcast() {
             <Mail size={isMobile ? 17 : 22} color="#fff" />
           </div>
           <div>
-            <h1 style={{ fontSize: isMobile ? 18 : 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>Email Broadcast</h1>
-            <p style={{ fontSize: isMobile ? 11 : 13, color: textMuted, marginTop: 2 }}>Send shift notifications to employees via email · <span style={{ color: "var(--tc-primary)", cursor: "pointer" }}>WhatsApp</span></p>
+            <h1 style={{ fontSize: isMobile ? 18 : 26, fontWeight: 800, color: textMain, letterSpacing: -0.5 }}>Notifications & Payroll</h1>
+            <p style={{ fontSize: isMobile ? 11 : 13, color: textMuted, marginTop: 2 }}>Email broadcasts · Manual payment assignment</p>
           </div>
         </div>
       </div>
 
-      {/* Main glass card */}
+      {/* ─── EMAIL BROADCAST CARD ─────────────────────────────────────────────── */}
       <div
         className="admin-panel"
         style={{
           maxWidth: 580, position: "relative", zIndex: 1,
           borderRadius: isMobile ? 20 : 28, overflow: "hidden",
+          marginBottom: isMobile ? 20 : 32,
         }}
       >
         {/* Top gradient bar */}
@@ -235,6 +337,11 @@ export default function AdminBroadcast() {
         <div style={{ position: "absolute", inset: 0, borderRadius: isMobile ? 20 : 28, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.09) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(139,92,246,0.07) 0%, transparent 50%)" : "radial-gradient(ellipse at 20% 0%, rgba(99,102,241,0.05) 0%, transparent 55%)" }} />
 
         <div style={{ padding: isMobile ? "16px 14px 20px" : "28px 28px 32px", position: "relative" }}>
+          {/* Section label */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: isMobile ? 14 : 20 }}>
+            <Radio size={14} style={{ color: "var(--tc-primary)" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted }}>Email Broadcast</span>
+          </div>
 
           {/* Shift selector */}
           <div style={{ marginBottom: isMobile ? 16 : 24 }}>
@@ -320,6 +427,258 @@ export default function AdminBroadcast() {
           </motion.button>
         </div>
       </div>
+
+      {/* ─── MANUAL PAYROLL ASSIGNMENT CARD ───────────────────────────────────── */}
+      <div
+        className="admin-panel"
+        style={{
+          maxWidth: 780, position: "relative", zIndex: 1,
+          borderRadius: isMobile ? 20 : 28, overflow: "hidden",
+        }}
+      >
+        {/* Top gradient bar */}
+        <div style={{ height: 3, background: "linear-gradient(90deg, #10b981, var(--tc-primary), var(--tc-secondary), var(--tc-primary), #10b981)", backgroundSize: "200% 100%", animation: "gradientSlide 5s linear infinite" }} />
+
+        {/* Inner prismatic glow */}
+        <div style={{ position: "absolute", inset: 0, borderRadius: isMobile ? 20 : 28, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 20% 0%, rgba(16,185,129,0.08) 0%, transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(139,92,246,0.06) 0%, transparent 50%)" : "radial-gradient(ellipse at 20% 0%, rgba(16,185,129,0.04) 0%, transparent 55%)" }} />
+
+        <div style={{ padding: isMobile ? "16px 14px 20px" : "28px 28px 32px", position: "relative" }}>
+          {/* Section label */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: isMobile ? 14 : 20 }}>
+            <Wallet size={14} style={{ color: "#10b981" }} />
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted }}>Manual Payroll Assignment</span>
+          </div>
+
+          {/* Date picker */}
+          <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+            <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
+              Select Date
+            </label>
+            <input
+              type="date"
+              value={payrollDate}
+              onChange={e => { setPayrollDate(e.target.value); fetchPayrollData(e.target.value); }}
+              style={{
+                ...inp,
+                cursor: "pointer",
+                colorScheme: dark ? "dark" : "light",
+              }}
+              onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 18%, transparent)"; }}
+              onBlur={e => { e.target.style.borderColor = inputBorder; e.target.style.boxShadow = "none"; }}
+            />
+          </div>
+
+          {/* Shift tabs */}
+          {payrollShifts.length > 1 && (
+            <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+              <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
+                Select Shift
+              </label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {payrollShifts.map(s => {
+                  const isActive = selectedPayrollShift === s.id;
+                  return (
+                    <button key={s.id} onClick={() => setSelectedPayrollShift(s.id)}
+                      style={{
+                        padding: "8px 16px", borderRadius: 12, cursor: "pointer", fontSize: 12, fontWeight: 600,
+                        background: isActive ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" : (dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"),
+                        color: isActive ? "#fff" : textMain,
+                        border: `1px solid ${isActive ? "transparent" : border}`,
+                        boxShadow: isActive ? "0 4px 14px color-mix(in srgb, var(--tc-primary) 30%, transparent)" : "none",
+                        transition: "all 0.22s",
+                      }}>
+                      Shift {s.shift_number} · {s.start_time}–{s.end_time}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Content */}
+          {payrollLoading ? (
+            <div style={{ padding: "40px 0", textAlign: "center" }}>
+              <div style={{ width: 28, height: 28, border: "3px solid var(--tc-primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite", margin: "0 auto 12px" }} />
+              <p style={{ fontSize: 13, color: textMuted }}>Loading attendance data…</p>
+            </div>
+          ) : !payrollDate ? (
+            <div style={{ padding: "40px 0", textAlign: "center" }}>
+              <CalendarIcon size={36} style={{ color: textMuted, margin: "0 auto 12px", opacity: 0.4 }} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: textMain, marginBottom: 4 }}>Select a date</p>
+              <p style={{ fontSize: 12, color: textMuted }}>Choose an exam date to view assigned employees</p>
+            </div>
+          ) : payrollShifts.length === 0 ? (
+            <div style={{ padding: "40px 0", textAlign: "center" }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: textMain, marginBottom: 4 }}>No shifts on this date</p>
+              <p style={{ fontSize: 12, color: textMuted }}>No shifts found for the selected date</p>
+            </div>
+          ) : payrollShiftEmployees.length === 0 ? (
+            <div style={{ padding: "40px 0", textAlign: "center" }}>
+              <Users size={36} style={{ color: textMuted, margin: "0 auto 12px", opacity: 0.4 }} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: textMain, marginBottom: 4 }}>No employees assigned</p>
+              <p style={{ fontSize: 12, color: textMuted }}>Assign employees in the Attendance page first</p>
+            </div>
+          ) : (
+            <>
+              {/* Employee payroll table */}
+              <div style={{ borderRadius: 16, border: `1px solid ${border}`, overflow: "hidden", marginBottom: isMobile ? 14 : 20 }}>
+                {/* Table header */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr 90px 80px" : "1fr 140px 120px 100px",
+                  padding: "10px 14px",
+                  background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                  borderBottom: `1px solid ${border}`,
+                  gap: 8,
+                }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted }}>Employee</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted }}>Amount (₹)</span>
+                  {!isMobile && <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted }}>Reference</span>}
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: textMuted, textAlign: "center" }}>Action</span>
+                </div>
+
+                {/* Employee rows */}
+                {payrollShiftEmployees.map((emp, i) => {
+                  const assignment = emp.assignments[selectedPayrollShift];
+                  const isSending = sendingPayments[emp.id];
+                  return (
+                    <motion.div
+                      key={emp.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03, duration: 0.2 }}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: isMobile ? "1fr 90px 80px" : "1fr 140px 120px 100px",
+                        padding: "12px 14px",
+                        borderBottom: i < payrollShiftEmployees.length - 1 ? `1px solid ${border}` : "none",
+                        alignItems: "center",
+                        gap: 8,
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.015)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Employee info */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+                          background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#fff", fontWeight: 700, fontSize: 12,
+                        }}>
+                          {(emp.full_name ?? "?")[0]?.toUpperCase()}
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontWeight: 600, fontSize: 13, color: textMain, marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{emp.full_name}</p>
+                          <p style={{ fontSize: 10, color: textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {assignment?.duty_role ?? "—"} {!isMobile && `· ${emp.email}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Amount input */}
+                      <input
+                        type="number"
+                        placeholder="0"
+                        min="0"
+                        value={payrollAmounts[emp.id] ?? ""}
+                        onChange={e => setPayrollAmounts(prev => ({ ...prev, [emp.id]: e.target.value }))}
+                        style={{
+                          width: "100%", padding: "7px 10px", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                          background: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                          border: `1px solid ${border}`, color: textMain, outline: "none",
+                          fontFamily: "var(--font-outfit,'Outfit',sans-serif)",
+                          transition: "border-color 0.2s, box-shadow 0.2s",
+                        }}
+                        onFocus={e => { e.target.style.borderColor = "#10b981"; e.target.style.boxShadow = "0 0 0 2px rgba(16,185,129,0.15)"; }}
+                        onBlur={e => { e.target.style.borderColor = border; e.target.style.boxShadow = "none"; }}
+                      />
+
+                      {/* Reference input (desktop only) */}
+                      {!isMobile && (
+                        <input
+                          type="text"
+                          placeholder="Ref #"
+                          value={payrollRefs[emp.id] ?? ""}
+                          onChange={e => setPayrollRefs(prev => ({ ...prev, [emp.id]: e.target.value }))}
+                          style={{
+                            width: "100%", padding: "7px 10px", borderRadius: 10, fontSize: 12,
+                            background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                            border: `1px solid ${border}`, color: textMain, outline: "none",
+                            fontFamily: "var(--font-outfit,'Outfit',sans-serif)",
+                            transition: "border-color 0.2s",
+                          }}
+                          onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; }}
+                          onBlur={e => { e.target.style.borderColor = border; }}
+                        />
+                      )}
+
+                      {/* Action button */}
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <motion.button
+                          whileHover={{ scale: 1.06 }}
+                          whileTap={{ scale: 0.94 }}
+                          onClick={() => handleSinglePayment(emp.id, emp.full_name)}
+                          disabled={isSending || !payrollAmounts[emp.id]}
+                          style={{
+                            padding: "6px 14px", borderRadius: 10, border: "none", cursor: isSending || !payrollAmounts[emp.id] ? "not-allowed" : "pointer",
+                            background: isSending ? "rgba(16,185,129,0.15)" : "linear-gradient(135deg, #10b981, #059669)",
+                            color: "#fff", fontSize: 11, fontWeight: 700,
+                            opacity: isSending || !payrollAmounts[emp.id] ? 0.5 : 1,
+                            display: "flex", alignItems: "center", gap: 5,
+                            boxShadow: "0 3px 10px rgba(16,185,129,0.25)",
+                            transition: "opacity 0.2s",
+                          }}
+                        >
+                          {isSending ? (
+                            <span style={{ width: 12, height: 12, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .6s linear infinite" }} />
+                          ) : (
+                            <><Send size={11} /> Pay</>
+                          )}
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Summary + Broadcast All */}
+              <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between", gap: 12 }}>
+                <p style={{ fontSize: 12, color: textMuted }}>
+                  {payrollShiftEmployees.length} employee{payrollShiftEmployees.length !== 1 ? "s" : ""} ·
+                  {" "}{Object.values(payrollAmounts).filter(v => parseFloat(v) > 0).length} with amounts entered
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: "0 12px 32px color-mix(in srgb, var(--tc-primary) 40%, transparent)" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleBroadcastAll}
+                  disabled={broadcastingAll || Object.values(payrollAmounts).filter(v => parseFloat(v) > 0).length === 0}
+                  style={{
+                    padding: isMobile ? "12px 0" : "12px 28px",
+                    borderRadius: 14, border: "none",
+                    background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                    color: "#fff", cursor: broadcastingAll ? "not-allowed" : "pointer",
+                    fontSize: 13, fontWeight: 700,
+                    opacity: broadcastingAll || Object.values(payrollAmounts).filter(v => parseFloat(v) > 0).length === 0 ? 0.5 : 1,
+                    boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    transition: "opacity 0.22s",
+                  }}
+                >
+                  {broadcastingAll ? (
+                    <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} /> Processing…</>
+                  ) : (
+                    <><Zap size={15} /> Broadcast All Payments</>
+                  )}
+                </motion.button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
+

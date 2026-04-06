@@ -76,10 +76,12 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return badRequest("Invalid JSON"); }
 
-  const { employeeId, shiftId, status, dutyRole, notes } = body as {
+  // Accept both camelCase (dutyRole) and snake_case (duty_role) from frontend
+  const { employeeId, shiftId, status, dutyRole, duty_role, notes } = body as {
     employeeId: string; shiftId: string;
-    status?: string; dutyRole?: string; notes?: string;
+    status?: string; dutyRole?: string; duty_role?: string; notes?: string;
   };
+  const resolvedRole = dutyRole ?? duty_role ?? null;
 
   if (!employeeId || !shiftId) return badRequest("employeeId and shiftId required");
 
@@ -91,7 +93,7 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
       employee_id:  employeeId,
       shift_id:     shiftId,
       status:       status ?? "confirmed",
-      duty_role:    dutyRole ?? null,
+      duty_role:    resolvedRole,
       notes:        notes ?? null,
       confirmed_at: new Date().toISOString(),
       updated_by:   userId,

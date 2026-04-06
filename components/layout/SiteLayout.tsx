@@ -321,8 +321,8 @@ export default function SiteLayout({
   const actualBlur = glassFrost ? glassBlur : 0;
   // Sidebar: NO blur — background stays sharp
   const BLUR_SIDEBAR = "none";
-  // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
-  const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
+  // Header blur: reduced from 28→16 for subtlety, add glow instead
+  const headerBlurPx = scrolled ? Math.max(Math.min(actualBlur, 16), 16) : 0;
   const BLUR_HEADER  = headerBlurPx > 0
     ? `blur(${headerBlurPx}px)`
     : "none";
@@ -353,47 +353,35 @@ export default function SiteLayout({
           transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* ── Sidebar color orbs (no blur — sharp defined circles) ── */}
+        {/* ── Sidebar Aurora Wave ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Purple/Primary orb */}
+          {/* Aurora gradient layer 1 */}
           <div style={{
-            position: "absolute", top: "8%", left: "-10%",
-            width: "120px", height: "120px", borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
-            opacity: 0.25,
-            animation: "sidebarOrb1 8s ease-in-out infinite",
+            position: "absolute", inset: 0,
+            background: `linear-gradient(160deg, color-mix(in srgb, var(--tc-primary) 18%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--tc-secondary) 14%, transparent) 70%, transparent 100%)`,
+            animation: "auroraShift1 12s ease-in-out infinite",
+            willChange: "opacity", transform: "translateZ(0)",
+          }} />
+          {/* Aurora gradient layer 2 — counter-flow */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: `linear-gradient(340deg, transparent 0%, color-mix(in srgb, var(--tc-accent) 12%, transparent) 30%, transparent 60%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 90%)`,
+            animation: "auroraShift2 16s ease-in-out infinite",
+            willChange: "opacity", transform: "translateZ(0)",
+          }} />
+          {/* Aurora gradient layer 3 — diagonal sweep */}
+          <div style={{
+            position: "absolute", inset: "-50%",
+            background: `conic-gradient(from 180deg at 50% 50%, color-mix(in srgb, var(--tc-primary) 10%, transparent) 0deg, transparent 60deg, color-mix(in srgb, var(--tc-secondary) 8%, transparent) 120deg, transparent 180deg, color-mix(in srgb, var(--tc-accent) 10%, transparent) 240deg, transparent 300deg, color-mix(in srgb, var(--tc-primary) 10%, transparent) 360deg)`,
+            animation: "auroraRotate 25s linear infinite",
             willChange: "transform", transform: "translateZ(0)",
           }} />
-          {/* Secondary orb */}
+          {/* Soft edge vignette for depth */}
           <div style={{
-            position: "absolute", bottom: "12%", right: "-10%",
-            width: "100px", height: "100px", borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--tc-secondary), var(--tc-accent))",
-            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
-            opacity: 0.25,
-            animation: "sidebarOrb2 10s ease-in-out infinite",
-            willChange: "transform", transform: "translateZ(0)",
-          }} />
-          {/* Accent orb */}
-          <div style={{
-            position: "absolute", top: "45%", left: "35%",
-            width: "80px", height: "80px", borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--tc-accent), var(--tc-primary))",
-            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.3), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
-            opacity: 0.20,
-            animation: "sidebarOrb3 12s ease-in-out infinite",
-            willChange: "transform", transform: "translateZ(0)",
-          }} />
-          {/* Small accent orb */}
-          <div style={{
-            position: "absolute", top: "72%", left: "-5%",
-            width: "60px", height: "60px", borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--tc-primary), #fff)",
-            boxShadow: "inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -4px 12px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.2)",
-            opacity: 0.20,
-            animation: "sidebarOrb4 9s ease-in-out infinite",
-            willChange: "transform", transform: "translateZ(0)",
+            position: "absolute", inset: 0,
+            background: dark
+              ? "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(0,0,0,0.15) 100%)"
+              : "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(255,255,255,0.25) 100%)",
           }} />
         </div>
         {/* Inner top sheen */}
@@ -547,7 +535,7 @@ export default function SiteLayout({
           {/* Header — Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
             <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
-              {/* ── Background Layer (extracting backdrop-filter so children aren't trapped) ── */}
+              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
@@ -560,9 +548,10 @@ export default function SiteLayout({
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
                     ? [
-                        "0 8px 32px rgba(0,0,0,0.22)",
+                        "0 8px 32px rgba(0,0,0,0.18)",
                         `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
                         dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                        `0 0 20px 2px color-mix(in srgb, var(--tc-primary) 12%, transparent)`,
                       ].join(", ")
                     : "none",
                   transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
@@ -628,6 +617,28 @@ export default function SiteLayout({
                 </div>
               </div>
             </header>
+            {/* ── Curved SVG separator below header ── */}
+            <svg
+              viewBox="0 0 1200 24"
+              preserveAspectRatio="none"
+              style={{
+                width: "100%", height: 14, display: "block",
+                opacity: scrolled ? 0.7 : 0,
+                transition: "opacity 0.4s cubic-bezier(0.22,1,0.36,1)",
+                marginTop: -2,
+              }}
+            >
+              <defs>
+                <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="transparent" />
+                  <stop offset="20%" stopColor="var(--tc-primary)" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="var(--tc-secondary)" stopOpacity="0.5" />
+                  <stop offset="80%" stopColor="var(--tc-primary)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="transparent" />
+                </linearGradient>
+              </defs>
+              <path d="M0,0 Q300,24 600,12 T1200,0" fill="none" stroke="url(#curveGrad)" strokeWidth="1.5" />
+            </svg>
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}

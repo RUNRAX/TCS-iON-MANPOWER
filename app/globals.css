@@ -898,85 +898,41 @@ html.tc-light .skeleton {
   }
 }
 
-/* ── Sidebar Live Blurred Color Orb Animations ───────────────────────────── */
-@keyframes sidebarOrb1 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) translateZ(0);
+/* ── Sidebar Aurora Wave Animations ──────────────────────────────────────── */
+@keyframes auroraShift1 {
+  0%, 100% {
+    opacity: 0.7;
+    background-position: 0% 0%;
+    filter: hue-rotate(0deg);
   }
-
-  25% {
-    transform: translate(80%, 30%) scale(1.15) translateZ(0);
+  33% {
+    opacity: 1;
+    filter: hue-rotate(8deg);
   }
-
-  50% {
-    transform: translate(40%, 60%) scale(0.9) translateZ(0);
-  }
-
-  75% {
-    transform: translate(-10%, 40%) scale(1.1) translateZ(0);
+  66% {
+    opacity: 0.5;
+    filter: hue-rotate(-5deg);
   }
 }
 
-@keyframes sidebarOrb2 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) translateZ(0);
+@keyframes auroraShift2 {
+  0%, 100% {
+    opacity: 0.5;
+    filter: hue-rotate(0deg);
   }
-
-  30% {
-    transform: translate(-60%, -40%) scale(1.2) translateZ(0);
+  40% {
+    opacity: 0.9;
+    filter: hue-rotate(-10deg);
   }
-
-  60% {
-    transform: translate(-20%, -70%) scale(0.85) translateZ(0);
-  }
-
-  80% {
-    transform: translate(30%, -30%) scale(1.05) translateZ(0);
-  }
-}
-
-@keyframes sidebarOrb3 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) translateZ(0);
-  }
-
-  20% {
-    transform: translate(-40%, -30%) scale(1.1) translateZ(0);
-  }
-
-  45% {
-    transform: translate(50%, -50%) scale(0.95) translateZ(0);
-  }
-
   70% {
-    transform: translate(20%, 30%) scale(1.15) translateZ(0);
+    opacity: 0.4;
+    filter: hue-rotate(6deg);
   }
 }
 
-@keyframes sidebarOrb4 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) translateZ(0);
-  }
-
-  35% {
-    transform: translate(70%, -20%) scale(1.1) translateZ(0);
-  }
-
-  65% {
-    transform: translate(40%, 50%) scale(0.9) translateZ(0);
-  }
-
-  85% {
-    transform: translate(-30%, 20%) scale(1.05) translateZ(0);
-  }
+@keyframes auroraRotate {
+  from { transform: rotate(0deg) translateZ(0); }
+  to   { transform: rotate(360deg) translateZ(0); }
 }
 
 /* ── Premium Realistic Glowing Orbs (Solid 3D Droplets with Gooey Merge) ── */
@@ -1119,22 +1075,18 @@ html.tc-light .admin-panel::after {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 
-  /* Slow ambient sidebar orb animations (instead of completely frozen) */
-  @keyframes sidebarOrb1 { 
-    0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
-    50% { transform: translateY(10px) scale(1.05) translateZ(0); }
+  /* Slow ambient sidebar aurora animations on mobile */
+  @keyframes auroraShift1 { 
+    0%, 100% { opacity: 0.5; filter: hue-rotate(0deg); }
+    50% { opacity: 0.8; filter: hue-rotate(5deg); }
   }
-  @keyframes sidebarOrb2 { 
-    0%, 100% { transform: translate(0) scale(1) translateZ(0); }
-    50% { transform: translate(-8px, -8px) scale(0.95) translateZ(0); }
+  @keyframes auroraShift2 { 
+    0%, 100% { opacity: 0.4; filter: hue-rotate(0deg); }
+    50% { opacity: 0.6; filter: hue-rotate(-5deg); }
   }
-  @keyframes sidebarOrb3 { 
-    0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
-    50% { transform: translateY(-10px) scale(1.05) translateZ(0); }
-  }
-  @keyframes sidebarOrb4 { 
-    0%, 100% { transform: translate(0) scale(1) translateZ(0); }
-    50% { transform: translate(8px, 8px) scale(0.95) translateZ(0); }
+  @keyframes auroraRotate {
+    from { transform: rotate(0deg) translateZ(0); }
+    to   { transform: rotate(360deg) translateZ(0); }
   }
 
   /* Glowing orbs keep motion but at ~50% speed / 60% displacement */
