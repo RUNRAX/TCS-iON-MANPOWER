@@ -25,22 +25,22 @@ import {
 
 /* ── Nav config ──────────────────────────────────────────────────────────── */
 const adminNav = [
-  { label: "Dashboard",     icon: LayoutDashboard, href: "/admin/dashboard" },
-  { label: "Employees",     icon: Users,           href: "/admin/employees" },
-  { label: "Schedule",      icon: CalendarDays,    href: "/admin/shifts"    },
-  { label: "Attendance",    icon: ClipboardCheck,  href: "/admin/payments"  },
-  { label: "Analytics",     icon: BarChart3,       href: "/admin/excel"     },
-  { label: "Notifications", icon: Bell,            href: "/admin/broadcast" },
-  { label: "Settings",      icon: Settings,        href: "/admin/settings"  },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+  { label: "Employees", icon: Users, href: "/admin/employees" },
+  { label: "Schedule", icon: CalendarDays, href: "/admin/shifts" },
+  { label: "Attendance", icon: ClipboardCheck, href: "/admin/payments" },
+  { label: "Analytics", icon: BarChart3, href: "/admin/excel" },
+  { label: "Notifications", icon: Bell, href: "/admin/broadcast" },
+  { label: "Settings", icon: Settings, href: "/admin/settings" },
 ];
 
 const employeeNav = [
-  { label: "My Dashboard",     icon: LayoutDashboard, href: "/employee/dashboard" },
-  { label: "Available Shifts", icon: CalendarDays,    href: "/employee/shifts"    },
-  { label: "My Bookings",      icon: ClipboardList,   href: "/employee/history"   },
-  { label: "My Profile",       icon: UserCheck,       href: "/employee/profile"   },
-  { label: "Payments",         icon: FileSpreadsheet, href: "/employee/payments"  },
-  { label: "Settings",          icon: Settings,        href: "/employee/settings"  },
+  { label: "My Dashboard", icon: LayoutDashboard, href: "/employee/dashboard" },
+  { label: "Available Shifts", icon: CalendarDays, href: "/employee/shifts" },
+  { label: "My Bookings", icon: ClipboardList, href: "/employee/history" },
+  { label: "My Profile", icon: UserCheck, href: "/employee/profile" },
+  { label: "Payments", icon: FileSpreadsheet, href: "/employee/payments" },
+  { label: "Settings", icon: Settings, href: "/employee/settings" },
 ];
 
 /* ── Helper: get greeting ────────────────────────────────────────────────── */
@@ -86,8 +86,8 @@ const BG_CONFIGS = [
 
 /* ── NavItem ─────────────────────────────────────────────────────────────── */
 interface NavItemProps {
-  item:      { label: string; icon: React.ElementType; href: string };
-  active:    boolean;
+  item: { label: string; icon: React.ElementType; href: string };
+  active: boolean;
   textMuted: string;
 }
 
@@ -100,36 +100,36 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
       animate={hovered ? "hover" : "idle"}
       whileTap="tap"
       variants={{
-        idle:  { scale: 1,     x: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
+        idle: { scale: 1, x: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
         hover: { scale: 1.012, x: 2, transition: { type: "spring", stiffness: 420, damping: 30 } },
-        tap:   { scale: 0.955, x: 1, transition: { type: "spring", stiffness: 500, damping: 22 } },
+        tap: { scale: 0.955, x: 1, transition: { type: "spring", stiffness: 500, damping: 22 } },
       }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       style={{
-        position:    "relative",
-        display:     "flex",
-        alignItems:  "center",
-        gap:         12,
-        padding:     "11px 14px",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "11px 14px",
         borderRadius: 14,
-        cursor:      "pointer",
+        cursor: "pointer",
         transformStyle: "preserve-3d",
-        willChange:  "transform",
+        willChange: "transform",
         background: active
           ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))"
           : hovered
-          ? "color-mix(in srgb, var(--tc-primary) 9%, transparent)"
-          : "transparent",
+            ? "color-mix(in srgb, var(--tc-primary) 9%, transparent)"
+            : "transparent",
         boxShadow: active
           ? [
-              "inset 0 1.5px 0 rgba(255,255,255,0.26)",
-              "inset 0 -1px 0 rgba(0,0,0,0.16)",
-              "0 6px 28px color-mix(in srgb, var(--tc-primary) 40%, transparent)",
-            ].join(", ")
+            "inset 0 1.5px 0 rgba(255,255,255,0.26)",
+            "inset 0 -1px 0 rgba(0,0,0,0.16)",
+            "0 6px 28px color-mix(in srgb, var(--tc-primary) 40%, transparent)",
+          ].join(", ")
           : hovered
-          ? "0 4px 20px color-mix(in srgb, var(--tc-primary) 18%, transparent), 0 0 0 1px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
-          : "none",
+            ? "0 4px 20px color-mix(in srgb, var(--tc-primary) 18%, transparent), 0 0 0 1px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+            : "none",
         transition: "background 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s cubic-bezier(0.22,1,0.36,1)",
       }}
     >
@@ -138,10 +138,10 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
         <motion.div
           variants={{ idle: { opacity: 0 }, hover: { opacity: 1 } }}
           style={{
-            position:      "absolute",
-            inset:         -1,
-            borderRadius:  14,
-            background:    "radial-gradient(ellipse at 30% 50%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 0%, transparent 70%)",
+            position: "absolute",
+            inset: -1,
+            borderRadius: 14,
+            background: "radial-gradient(ellipse at 30% 50%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 0%, transparent 70%)",
             pointerEvents: "none",
           }}
         />
@@ -169,16 +169,16 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
       {/* Icon */}
       <motion.div
         variants={{
-          idle:  { scale: 1,    rotate: 0  },
+          idle: { scale: 1, rotate: 0 },
           hover: { scale: 1.18, rotate: -5 },
-          tap:   { scale: 0.90, rotate: 0  },
+          tap: { scale: 0.90, rotate: 0 },
         }}
         style={{ flexShrink: 0, willChange: "transform" }}
       >
         <item.icon
           className="w-[18px] h-[18px]"
           style={{
-            color:  active ? "#fff" : "var(--tc-primary)",
+            color: active ? "#fff" : "var(--tc-primary)",
             filter: hovered && !active ? "drop-shadow(0 0 8px var(--tc-primary))" : "none",
             transition: "filter 0.25s ease",
           }}
@@ -187,11 +187,11 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
 
       {/* Label */}
       <span style={{
-        fontSize:   14,
+        fontSize: 14,
         fontWeight: active || hovered ? 600 : 500,
-        color:      active ? "#fff" : hovered ? "var(--tc-primary)" : textMuted,
+        color: active ? "#fff" : hovered ? "var(--tc-primary)" : textMuted,
         transition: "color 0.22s ease",
-        flex:       1,
+        flex: 1,
         letterSpacing: hovered ? "0.01em" : "0",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif",
       }}>
@@ -202,14 +202,14 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
         <motion.div
           layoutId="nav-active-bar"
           style={{
-            position:   "absolute",
-            right:      -1,
-            top:        "18%",
-            bottom:     "18%",
-            width:      3,
+            position: "absolute",
+            right: -1,
+            top: "18%",
+            bottom: "18%",
+            width: 3,
             borderRadius: 99,
             background: "#fff",
-            opacity:    0.55,
+            opacity: 0.55,
           }}
           transition={{ type: "spring", stiffness: 380, damping: 32 }}
         />
@@ -261,22 +261,22 @@ const LiquidBackground = () => {
 
 /* ── Main SiteLayout ─────────────────────────────────────────────────────── */
 interface SiteLayoutProps {
-  children:      React.ReactNode;
-  role:          "admin" | "employee";
-  userId:        string;
-  userEmail:     string;
+  children: React.ReactNode;
+  role: "admin" | "employee";
+  userId: string;
+  userEmail: string;
   userFullName?: string;
 }
 
 export default function SiteLayout({
   children, role, userId, userEmail, userFullName,
 }: SiteLayoutProps) {
-  const router   = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
   const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted,     setMounted]     = useState(false);
-  const [scrolled,    setScrolled]    = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
@@ -295,10 +295,10 @@ export default function SiteLayout({
   /* Design tokens 
      Read dynamic opacity directly from the ThemeContext integers 
   */
-  const alphaVal  = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
+  const alphaVal = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
   // Set transparent so the <body> background image is visible
-  const bgMain    = dark ? "transparent" : "#f0f0fa";
-  const sidebarBg = dark ? `rgba(30,30,35,0.4)`    : `rgba(252,251,255,${alphaVal})`;
+  const bgMain = dark ? "transparent" : "#f0f0fa";
+  const sidebarBg = dark ? `rgba(30,30,35,0.4)` : `rgba(252,251,255,${alphaVal})`;
   // Header: transparent background — blur alone provides the frosted effect
   const headerBg = "transparent";
   const borderCol = dark
@@ -307,8 +307,8 @@ export default function SiteLayout({
   const edgeShadow = dark
     ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 24px 48px rgba(0,0,0,0.4)"
     : "inset 0 1.5px 0 rgba(255,255,255,0.96), inset 0 -1px 0 rgba(0,0,0,0.03), inset 1px 0 0 rgba(255,255,255,0.80)";
-  const textMain  = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
-  const textMuted = dark ? "rgba(255,255,255,0.6)"  : "rgba(30,20,80,0.44)";
+  const textMain = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
+  const textMuted = dark ? "rgba(255,255,255,0.6)" : "rgba(30,20,80,0.44)";
 
   const navItems = role === "admin" ? adminNav : employeeNav;
   const displayName = userFullName ?? "Admin";
@@ -323,16 +323,16 @@ export default function SiteLayout({
   const BLUR_SIDEBAR = "none";
   // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
   const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
-  const BLUR_HEADER  = headerBlurPx > 0
+  const BLUR_HEADER = headerBlurPx > 0
     ? `blur(${headerBlurPx}px)`
     : "none";
 
   return (
     <div
-      className="flex h-screen overflow-hidden relative p-4 gap-3"
+      className="flex h-screen overflow-hidden relative px-4 pb-4 gap-3"
       style={{
         background: bgMain,
-        color:      textMain,
+        color: textMain,
         transition: "background 0.5s cubic-bezier(0.22,1,0.36,1), color 0.4s ease",
       }}
       suppressHydrationWarning
@@ -346,11 +346,11 @@ export default function SiteLayout({
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
-          borderRight:          `1px solid ${borderCol}`,
-          boxShadow:            edgeShadow,
-          willChange:           "transform, opacity",
-          overflow:             "hidden",
-          transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
+          borderRight: `1px solid ${borderCol}`,
+          boxShadow: edgeShadow,
+          willChange: "transform, opacity",
+          overflow: "hidden",
+          transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
         {/* ── Sidebar Aurora Wave ── */}
@@ -408,7 +408,7 @@ export default function SiteLayout({
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{
                 background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15)",
               }}
             >
               <Building2 className="w-4 h-4 text-white" />
@@ -473,7 +473,7 @@ export default function SiteLayout({
                 className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                 style={{
                   background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                  boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px color-mix(in srgb, var(--tc-primary) 28%, transparent)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px color-mix(in srgb, var(--tc-primary) 28%, transparent)",
                 }}
               >
                 {(userFullName ?? userEmail)?.[0]?.toUpperCase() ?? "U"}
@@ -539,21 +539,21 @@ export default function SiteLayout({
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background:           headerBg,
-                  border:               scrolled
+                  background: headerBg,
+                  border: scrolled
                     ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
                     : "1px solid transparent",
-                  borderRadius:         0,
-                  backdropFilter:       BLUR_HEADER,
+                  borderRadius: scrolled ? "0 0 12px 12px" : 0,
+                  backdropFilter: BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
                   boxShadow: scrolled
                     ? [
-                        "0 8px 32px rgba(0,0,0,0.22)",
-                        `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                        dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                      ].join(", ")
+                      "0 8px 32px rgba(0,0,0,0.22)",
+                      `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                      dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                    ].join(", ")
                     : "none",
-                  transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
+                  transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
                 }}
               />
 
@@ -568,8 +568,8 @@ export default function SiteLayout({
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {sidebarOpen
-                    ? <motion.span key="x"   initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.18 }}><X className="w-5 h-5" /></motion.span>
-                    : <motion.span key="mnu" initial={{ rotate:  90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate:-90, opacity: 0 }} transition={{ duration: 0.18 }}><Menu className="w-5 h-5" /></motion.span>
+                    ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.18 }}><X className="w-5 h-5" /></motion.span>
+                    : <motion.span key="mnu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.18 }}><Menu className="w-5 h-5" /></motion.span>
                   }
                 </AnimatePresence>
               </motion.button>
@@ -604,7 +604,7 @@ export default function SiteLayout({
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                     style={{
                       background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                      boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.22), 0 0 10px color-mix(in srgb, var(--tc-primary) 25%, transparent)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.22), 0 0 10px color-mix(in srgb, var(--tc-primary) 25%, transparent)",
                     }}
                   >
                     {(userFullName ?? userEmail)?.[0]?.toUpperCase() ?? "U"}
