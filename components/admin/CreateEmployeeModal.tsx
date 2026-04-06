@@ -207,39 +207,36 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
   return (
     <>
       {/* Backdrop */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.50)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.50)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
         onClick={step < 4 ? handleClose : undefined}>
         
         {/* Modal */}
         <motion.div
           onClick={e => e.stopPropagation()}
-          initial={{ opacity: 0, scale: 0.92, y: 32 }}
+          initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 24 }}
-          transition={{ type: "spring", stiffness: 440, damping: 32 }}
+          exit={{ opacity: 0, scale: 0.96, y: 16 }}
+          transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.8 }}
           style={{
             position: "relative",
             zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
             borderRadius: 28,
-            background: dark ? "rgba(8,6,22,0.86)" : "rgba(255,255,255,0.30)",
-            backdropFilter: "blur(56px) saturate(220%) brightness(1.07)", 
-            WebkitBackdropFilter: "blur(56px) saturate(220%) brightness(1.07)",
-            border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.85)"}`,
-            boxShadow: dark
-              ? "inset 0 2px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.18), inset 1px 0 0 rgba(255,255,255,0.10), inset -1px 0 0 rgba(255,255,255,0.05), 0 24px 80px -8px rgba(0,0,0,0.55), 0 8px 32px -4px rgba(0,0,0,0.30)"
-              : "inset 0 2px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(0,0,0,0.04), inset 1px 0 0 rgba(255,255,255,0.90), inset -1px 0 0 rgba(255,255,255,0.70), 0 16px 64px -8px rgba(0,0,0,0.12), 0 4px 16px -4px rgba(0,0,0,0.08)",
+            background: "var(--spatial-glass-bg)",
+            backdropFilter: "var(--spatial-glass-blur)", 
+            WebkitBackdropFilter: "var(--spatial-glass-blur)",
+            border: "var(--spatial-glass-border)",
+            boxShadow: "var(--spatial-glass-shadow)",
             display: "flex", flexDirection: "column", overflow: "hidden",
           }}
         >
-        {/* Inner sheen */}
-        <div aria-hidden style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: "35%",
-          background: dark ? "linear-gradient(to bottom, rgba(255,255,255,0.06), transparent)" : "linear-gradient(to bottom, rgba(255,255,255,0.80), transparent)",
-          pointerEvents: "none", borderRadius: "inherit", zIndex: 0,
-        }} />
 
         {/* Header */}
-        <div style={{ padding: "20px 24px 14px", borderBottom: `1px solid ${border}`, flexShrink: 0, position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ padding: "18px 24px 14px", borderBottom: `1px solid ${border}`, flexShrink: 0, position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: textMain, marginBottom: 2 }}>Create Employee</h2>
             <p style={{ fontSize: 11, color: textMuted }}>{steps[step]}</p>
@@ -250,14 +247,14 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         </div>
 
         {/* Step indicator */}
-        <div style={{ padding: "12px 24px 8px", display: "flex", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
+        <div style={{ padding: "10px 24px 8px", display: "flex", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
           {steps.map((s, i) => (
             <div key={s} style={{
               flex: 1, height: 4, borderRadius: 99,
               background: i <= step
                 ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))"
                 : dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-              transition: "all 0.3s ease",
+              transition: "all 0.18s ease",
             }} />
           ))}
         </div>
@@ -267,7 +264,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
           <AnimatePresence mode="wait">
             {/* Step 0: AI Auto-Fill */}
             {step === 0 && (
-              <motion.div key="ai" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <motion.div key="ai" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
                 <div className="admin-panel" style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
@@ -333,7 +330,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
 
             {/* Step 1: Essential Fields */}
             {step === 1 && (
-              <motion.div key="essential" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <motion.div key="essential" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
                 <GlassInput label="Full Name" icon={User} field="fullName" placeholder="Rajesh Kumar" required />
                 <GlassInput label="Email Address" icon={Mail} field="email" type="email" placeholder="rajesh@example.com" required />
                 <GlassInput label="Phone (10-digit)" icon={Phone} field="phone" placeholder="9876543210" required />
@@ -357,7 +354,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
 
             {/* Step 2: Optional Fields */}
             {step === 2 && (
-              <motion.div key="optional" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <motion.div key="optional" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
                 <p style={{ fontSize: 11, color: textMuted, marginBottom: 14 }}>These fields are optional — you can skip this step.</p>
                 
                 <GlassInput label="Alternate Phone" icon={Phone} field="altPhone" placeholder="9876543211" />
@@ -398,7 +395,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
 
             {/* Step 3: Preview */}
             {step === 3 && (
-              <motion.div key="preview" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <motion.div key="preview" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
                 <div className="admin-panel" style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 14 }}>
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: textMuted, textTransform: "uppercase", marginBottom: 14 }}>Employee Preview</p>
 
@@ -441,7 +438,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
 
             {/* Step 4: Success */}
             {step === 4 && result && (
-              <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
+              <motion.div key="success" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
                 <div style={{ textAlign: "center", paddingTop: 12 }}>
                   <motion.div
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -566,7 +563,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
           </div>
         )}
       </motion.div>
-      </div>
+      </motion.div>
     </>
   );
 }

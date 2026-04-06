@@ -54,8 +54,8 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
       : "rgba(255,255,255,0.45)",
     borderColor: dark ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.80)",
     boxShadow: dark
-      ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.30), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 30%, transparent)"
-      : "inset 0 1px 0 rgba(255,255,255,0.90), 0 4px 12px rgba(0,0,0,0.08), 0 0 0 2px color-mix(in srgb, var(--tc-primary) 20%, transparent)",
+      ? "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.30)"
+      : "inset 0 1px 0 rgba(255,255,255,0.90), 0 4px 12px rgba(0,0,0,0.08)",
   } : {};
 
   return (

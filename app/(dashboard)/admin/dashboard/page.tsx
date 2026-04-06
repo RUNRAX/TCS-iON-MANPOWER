@@ -6,20 +6,21 @@
  *   • 4-column glass stat cards with icon accent colors (blue, purple, green, orange)
  *   • Trend indicators with ↑/↓ percentages
  *   • Spring-physics hover states
- *   • Staggered entrance animations
- *   • Recent Bookings panel
+ *   • Monthly Shifts panel — 1-month window from April 20
+ *   • Mark Complete button on each shift row
  */
 
-import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTheme } from "@/lib/context/ThemeContext";
-import { useAdminStats, useAdminAssignments } from "@/hooks/use-api";
+import { useAdminStats, useAdminShifts, usePatchShift } from "@/hooks/use-api";
 import {
-  Users, CalendarDays, ClipboardList,
-  CheckCircle2, Clock, IndianRupee,
-  TrendingUp, ArrowUpRight,
+  Users, CalendarDays, CheckCircle2, Clock,
+  TrendingUp, ArrowUpRight, MapPin, CheckCircle,
+  Calendar, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
 const makeEdge = (dark: boolean) =>
@@ -53,26 +54,24 @@ const makeHoverEdge = (dark: boolean) =>
       ].join(", ");
 
 /* ── Status pill style map ───────────────────────────────────────────────── */
-const statusMap: Record<string, { bg: string; color: string; border: string }> = {
-  completed: { bg: "rgba(16,185,129,0.12)", color: "#34d399", border: "rgba(16,185,129,0.25)" },
-  confirmed: { bg: "rgba(99,102,241,0.12)", color: "#818cf8", border: "rgba(99,102,241,0.25)" },
-  absent:    { bg: "rgba(239,68,68,0.12)",  color: "#f87171", border: "rgba(239,68,68,0.25)"  },
-  cancelled: { bg: "rgba(239,68,68,0.12)",  color: "#f87171", border: "rgba(239,68,68,0.25)"  },
-  pending:   { bg: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "rgba(245,158,11,0.25)" },
+const statusMap: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  completed:  { bg: "rgba(16,185,129,0.12)", color: "#34d399", border: "rgba(16,185,129,0.25)", label: "COMPLETED" },
+  published:  { bg: "rgba(99,102,241,0.12)", color: "#818cf8", border: "rgba(99,102,241,0.25)", label: "PUBLISHED" },
+  draft:      { bg: "rgba(245,158,11,0.12)", color: "#fbbf24", border: "rgba(245,158,11,0.25)", label: "DRAFT" },
+  cancelled:  { bg: "rgba(239,68,68,0.12)",  color: "#f87171", border: "rgba(239,68,68,0.25)",  label: "CANCELLED" },
 };
-const defaultStatus = { bg: "rgba(100,116,139,0.12)", color: "#94a3b8", border: "rgba(100,116,139,0.22)" };
+const defaultStatus = { bg: "rgba(100,116,139,0.12)", color: "#94a3b8", border: "rgba(100,116,139,0.22)", label: "UNKNOWN" };
 
 /* ── Card accent colours matching reference: blue, purple, green, orange ── */
 const cardAccents = [
-  { icon: "#3b82f6", iconBg: "rgba(59,130,246,0.15)", glow: "rgba(59,130,246,0.35)" },   // Blue
-  { icon: "#a855f7", iconBg: "rgba(168,85,247,0.15)", glow: "rgba(168,85,247,0.35)" },   // Purple
-  { icon: "#22c55e", iconBg: "rgba(34,197,94,0.15)",  glow: "rgba(34,197,94,0.35)" },    // Green
-  { icon: "#f97316", iconBg: "rgba(249,115,22,0.15)", glow: "rgba(249,115,22,0.35)" },   // Orange
+  { icon: "#3b82f6", iconBg: "rgba(59,130,246,0.15)", glow: "rgba(59,130,246,0.35)" },
+  { icon: "#a855f7", iconBg: "rgba(168,85,247,0.15)", glow: "rgba(168,85,247,0.35)" },
+  { icon: "#22c55e", iconBg: "rgba(34,197,94,0.15)",  glow: "rgba(34,197,94,0.35)" },
+  { icon: "#f97316", iconBg: "rgba(249,115,22,0.15)", glow: "rgba(249,115,22,0.35)" },
 ];
 
 const FONT_DISPLAY = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
 const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
-const BLUR = "blur(36px) saturate(200%) brightness(1.06)";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Component
@@ -82,12 +81,13 @@ export default function AdminDashboard() {
 
   const textMain  = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
   const textMuted = dark ? "rgba(255,255,255,0.6)"  : "rgba(30,20,80,0.44)";
-  const cardBg    = dark ? "rgba(30,30,35,0.4)"     : "rgba(255,255,255,0.35)";
-  const panelBg   = dark ? "rgba(30,30,35,0.35)"    : "rgba(255,255,255,0.58)";
   const borderCol = dark ? "rgba(255,255,255,0.10)"  : "rgba(0,0,0,0.07)";
 
-  const { data: statsData, isLoading: statsLoading }  = useAdminStats();
-  const { data: assignData, isLoading: assignLoading } = useAdminAssignments({ page: 1 });
+  const { data: statsData, isLoading: statsLoading } = useAdminStats();
+  const { data: shiftsData, isLoading: shiftsLoading } = useAdminShifts({ page: 1, limit: 50 });
+  const patchShift = usePatchShift();
+
+  const [completingId, setCompletingId] = useState<string | null>(null);
 
   const stats = statsData ?? {
     totalEmployees: 0, activeEmployees: 0,
@@ -133,31 +133,64 @@ export default function AdminDashboard() {
     },
   ], [stats]);
 
-  type Assignment = {
-    id: string; employee_name?: string; shift_title?: string;
-    exam_date?: string; shift_number?: number; status: string;
-    max_employees?: number; start_time?: string; end_time?: string; venue?: string;
-  };
-  const recentAssignments = (assignData?.assignments ?? []) as Assignment[];
-  const loading = statsLoading || assignLoading;
+  /* ── Filter shifts for 1-month window starting April 20 ── */
+  const monthlyShifts = useMemo(() => {
+    if (!shiftsData?.shifts) return [];
+    const windowStart = new Date("2026-04-20");
+    const windowEnd = new Date("2026-05-20");
+    
+    return shiftsData.shifts
+      .filter((s: any) => {
+        const d = new Date(s.exam_date);
+        return d >= windowStart && d <= windowEnd && s.status !== "cancelled";
+      })
+      .sort((a: any, b: any) => new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime());
+  }, [shiftsData]);
 
-  /* ── Container variants for staggered children ── */
-  const container = {
-    hidden: {},
-    show:   { transition: { staggerChildren: 0.07 } },
+  const upcomingShifts = monthlyShifts.filter((s: any) => s.status === "published" || s.status === "draft");
+  const completedShifts = monthlyShifts.filter((s: any) => s.status === "completed");
+
+  const loading = statsLoading || shiftsLoading;
+
+  /* ── Handle mark complete ── */
+  const handleMarkComplete = async (shiftId: string) => {
+    setCompletingId(shiftId);
+    patchShift.mutate(
+      { shiftId, action: "complete" },
+      {
+        onSuccess: () => {
+          toast.success("Shift marked as completed ✓");
+          setCompletingId(null);
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to complete shift");
+          setCompletingId(null);
+        },
+      }
+    );
   };
+
+  /* ── Card animations ── */
   const cardItem = {
     hidden: { opacity: 1 },
     show:   { opacity: 1 },
   };
 
+  /* ── Format date helpers ── */
+  const fmtDate = (d: string) => {
+    const dt = new Date(d);
+    return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
+  };
+  const fmtTime = (t: string) => t?.slice(0, 5) ?? "—";
+
+  /* ── Is shift date in the past? ── */
+  const isPast = (d: string) => new Date(d) < new Date(new Date().toDateString());
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
 
       {/* ── Stat cards — 4 columns matching reference ── */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-6 relative z-10"
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-6 relative z-10">
         {cards.map((c, i) => {
           const accent = cardAccents[i % cardAccents.length];
           return (
@@ -166,7 +199,7 @@ export default function AdminDashboard() {
                 <motion.div
                   className="rounded-[22px] p-5 cursor-pointer relative overflow-hidden group admin-panel"
                   whileHover={{
-                    y:     -6,
+                    y: -6,
                     scale: 1.03,
                     boxShadow: [
                       makeHoverEdge(dark),
@@ -179,13 +212,13 @@ export default function AdminDashboard() {
                     transition: { type: "spring", stiffness: 500, damping: 22 },
                   }}
                   style={{
-                    boxShadow:            makeEdge(dark),
-                    willChange:           "transform, box-shadow",
+                    boxShadow: makeEdge(dark),
+                    willChange: "transform, box-shadow",
                   }}
                 >
                   {/* Hover glow sweep */}
                   <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
                     style={{
                       background: `radial-gradient(ellipse at 40% 20%, ${accent.iconBg} 0%, transparent 70%)`,
                       borderRadius: "inherit",
@@ -198,8 +231,8 @@ export default function AdminDashboard() {
                       className="w-11 h-11 rounded-2xl flex items-center justify-center"
                       style={{
                         background: accent.iconBg,
-                        color:      accent.icon,
-                        boxShadow:  `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px ${accent.iconBg}`,
+                        color: accent.icon,
+                        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px ${accent.iconBg}`,
                       }}
                     >
                       <c.icon className="w-5 h-5" />
@@ -243,12 +276,10 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* ── Recent Bookings panel ── */}
+      {/* ── Monthly Shifts panel ── */}
       <div
         className="rounded-2xl overflow-hidden relative admin-panel"
-        style={{
-          boxShadow:            makeEdge(dark),
-        }}
+        style={{ boxShadow: makeEdge(dark) }}
       >
         {/* Panel header */}
         <div
@@ -260,120 +291,246 @@ export default function AdminDashboard() {
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{
                 background: "rgba(99,102,241,0.14)",
-                color:      "#818cf8",
-                boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.10)",
+                color: "#818cf8",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
               }}
             >
-              <TrendingUp size={13} />
+              <Calendar size={13} />
             </div>
             <h2
               className="font-bold text-sm"
               style={{ color: textMain, fontFamily: FONT_DISPLAY }}
             >
-              Weekly Activity
+              Monthly Activity
             </h2>
           </div>
-          <Link href="/admin/payments">
-            <motion.span
-              whileHover={{ scale: 1.04, x: 2 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 420, damping: 24 }}
-              className="text-xs font-semibold cursor-pointer flex items-center gap-1"
-              style={{ color: "#818cf8", fontFamily: FONT_SYSTEM }}
-            >
-              This Week
-              <ArrowUpRight size={12} />
-            </motion.span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{
+              background: "rgba(99,102,241,0.10)",
+              color: "#818cf8",
+            }}>
+              Apr 20 — May 20
+            </span>
+            <Link href="/admin/shifts">
+              <motion.span
+                whileHover={{ scale: 1.04, x: 2 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                className="text-xs font-semibold cursor-pointer flex items-center gap-1"
+                style={{ color: "#818cf8", fontFamily: FONT_SYSTEM }}
+              >
+                All Shifts
+                <ArrowUpRight size={12} />
+              </motion.span>
+            </Link>
+          </div>
         </div>
 
-        {/* Row list */}
-        <div className="divide-y relative z-10" style={{ borderColor: borderCol }}>
-          {loading
-            ? Array(5).fill(0).map((_, i) => (
-                <div key={i} className="px-5 py-3.5 flex gap-3">
-                  <div className="w-8 h-8 rounded-full skeleton flex-shrink-0" />
+        {/* Shift sections */}
+        <div className="relative z-10">
+          {loading ? (
+            /* Skeleton */
+            <div className="divide-y" style={{ borderColor: borderCol }}>
+              {Array(4).fill(0).map((_, i) => (
+                <div key={i} className="px-5 py-3.5 flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-xl skeleton flex-shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3 rounded-md skeleton w-1/3" />
                     <div className="h-2.5 rounded-md skeleton w-1/2" />
                   </div>
+                  <div className="w-16 h-6 rounded-full skeleton" />
                 </div>
-              ))
-            : recentAssignments.length === 0
-              ? (
-                <div
-                  className="px-5 py-12 text-center text-sm"
-                  style={{ color: textMuted, fontFamily: FONT_SYSTEM }}
-                >
-                  No bookings yet
+              ))}
+            </div>
+          ) : monthlyShifts.length === 0 ? (
+            <div
+              className="px-5 py-16 text-center"
+              style={{ color: textMuted, fontFamily: FONT_SYSTEM }}
+            >
+              <Calendar size={32} style={{ margin: "0 auto 12px", opacity: 0.4 }} />
+              <p className="text-sm font-medium" style={{ marginBottom: 4 }}>No shifts in this window</p>
+              <p className="text-xs" style={{ opacity: 0.7 }}>Create shifts for the Apr 20 – May 20 period</p>
+            </div>
+          ) : (
+            <>
+              {/* Upcoming Shifts Section */}
+              {upcomingShifts.length > 0 && (
+                <div>
+                  <div className="px-5 py-2.5" style={{ background: dark ? "rgba(99,102,241,0.05)" : "rgba(99,102,241,0.04)" }}>
+                    <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#818cf8" }}>
+                      Upcoming ({upcomingShifts.length})
+                    </p>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: borderCol }}>
+                    {upcomingShifts.map((s: any, i: number) => {
+                      const pill = statusMap[s.status] ?? defaultStatus;
+                      const past = isPast(s.exam_date);
+                      const completing = completingId === s.id;
+                      return (
+                        <motion.div
+                          key={s.id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="px-5 py-3 flex items-center gap-3"
+                          style={{ transition: "background 0.15s" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          {/* Date pill */}
+                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center" style={{
+                            background: dark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.08)",
+                            border: `1px solid rgba(99,102,241,0.18)`,
+                          }}>
+                            <span className="text-[10px] font-bold leading-none" style={{ color: "#818cf8" }}>
+                              {new Date(s.exam_date).getDate()}
+                            </span>
+                            <span className="text-[8px] font-semibold uppercase" style={{ color: "#818cf8", opacity: 0.7 }}>
+                              {new Date(s.exam_date).toLocaleDateString("en", { month: "short" })}
+                            </span>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: textMain, fontFamily: FONT_SYSTEM }}>
+                              {s.title} — Shift {s.shift_number}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap" style={{ fontSize: 11, color: textMuted, fontFamily: FONT_SYSTEM }}>
+                              <span className="flex items-center gap-1">
+                                <Clock size={10} /> {fmtTime(s.start_time)}–{fmtTime(s.end_time)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin size={10} /> {s.venue}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users size={10} /> {s.confirmed_count}/{s.max_employees}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Status + Mark Complete */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span
+                              className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                              style={{
+                                background: pill.bg, color: pill.color,
+                                border: `1px solid ${pill.border}`,
+                                fontFamily: FONT_SYSTEM,
+                              }}
+                            >
+                              {pill.label}
+                            </span>
+
+                            {/* Show Mark Complete for published shifts whose date has passed */}
+                            {s.status === "published" && past && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                                onClick={() => handleMarkComplete(s.id)}
+                                disabled={completing}
+                                style={{
+                                  padding: "5px 10px", borderRadius: 10,
+                                  background: "rgba(16,185,129,0.12)",
+                                  border: "1px solid rgba(16,185,129,0.25)",
+                                  color: "#34d399", fontSize: 10, fontWeight: 700,
+                                  cursor: completing ? "not-allowed" : "pointer",
+                                  display: "flex", alignItems: "center", gap: 4,
+                                  opacity: completing ? 0.6 : 1,
+                                  fontFamily: FONT_SYSTEM,
+                                  transition: "opacity 0.15s, background 0.15s",
+                                }}
+                                onMouseEnter={e => { if (!completing) e.currentTarget.style.background = "rgba(16,185,129,0.20)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "rgba(16,185,129,0.12)"; }}
+                              >
+                                {completing ? (
+                                  <Loader2 size={10} style={{ animation: "spin 0.7s linear infinite" }} />
+                                ) : (
+                                  <CheckCircle size={10} />
+                                )}
+                                {completing ? "..." : "Complete"}
+                              </motion.button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 </div>
-              )
-              : recentAssignments.slice(0, 8).map((b, i) => {
-                  const pill = statusMap[b.status] ?? defaultStatus;
-                  return (
-                    <motion.div
-                      key={b.id}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1,  x: 0  }}
-                      transition={{ delay: 0.34 + i * 0.04, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                      whileHover={{ background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }}
-                      className="px-5 py-3.5 flex items-center gap-3 transition-colors cursor-default"
-                    >
-                      {/* Avatar */}
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                        style={{
-                          background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                          boxShadow: [
-                            "inset 0 1px 0 rgba(255,255,255,0.22)",
-                            "0 0 8px color-mix(in srgb, var(--tc-primary) 28%, transparent)",
-                          ].join(", "),
-                        }}
-                      >
-                        {b.employee_name?.[0] ?? "E"}
-                      </div>
+              )}
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="text-sm font-semibold truncate"
-                          style={{ color: textMain, fontFamily: FONT_SYSTEM }}
+              {/* Completed Shifts Section */}
+              {completedShifts.length > 0 && (
+                <div>
+                  <div className="px-5 py-2.5" style={{ background: dark ? "rgba(16,185,129,0.05)" : "rgba(16,185,129,0.04)" }}>
+                    <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#34d399" }}>
+                      Completed ({completedShifts.length})
+                    </p>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: borderCol }}>
+                    {completedShifts.map((s: any, i: number) => {
+                      const pill = statusMap.completed;
+                      return (
+                        <motion.div
+                          key={s.id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="px-5 py-3 flex items-center gap-3"
+                          style={{ transition: "background 0.15s", opacity: 0.75 }}
+                          onMouseEnter={e => { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)"; e.currentTarget.style.opacity = "1"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.opacity = "0.75"; }}
                         >
-                          {b.employee_name ?? "—"}
-                        </p>
-                        <p
-                          className="text-[11px] truncate"
-                          style={{ color: textMuted, fontFamily: FONT_SYSTEM, marginTop: 2 }}
-                        >
-                          {b.shift_title} (Shift {b.shift_number}) · {b.exam_date}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1.5 opacity-80" style={{ fontSize: 10, color: textMuted, fontFamily: FONT_SYSTEM }}>
-                          <span className="flex items-center gap-1">
-                            <Clock size={10} /> {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users size={10} /> {b.max_employees} required
-                          </span>
-                        </div>
-                      </div>
+                          {/* Date pill */}
+                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center" style={{
+                            background: dark ? "rgba(16,185,129,0.10)" : "rgba(16,185,129,0.06)",
+                            border: `1px solid rgba(16,185,129,0.16)`,
+                          }}>
+                            <span className="text-[10px] font-bold leading-none" style={{ color: "#34d399" }}>
+                              {new Date(s.exam_date).getDate()}
+                            </span>
+                            <span className="text-[8px] font-semibold uppercase" style={{ color: "#34d399", opacity: 0.7 }}>
+                              {new Date(s.exam_date).toLocaleDateString("en", { month: "short" })}
+                            </span>
+                          </div>
 
-                      {/* Status pill */}
-                      <span
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
-                        style={{
-                          background: pill.bg,
-                          color:      pill.color,
-                          border:     `1px solid ${pill.border}`,
-                          boxShadow:  "inset 0 1px 0 rgba(255,255,255,0.08)",
-                          fontFamily: FONT_SYSTEM,
-                        }}
-                      >
-                        {b.status?.toUpperCase()}
-                      </span>
-                    </motion.div>
-                  );
-                })
-          }
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: textMain, fontFamily: FONT_SYSTEM }}>
+                              {s.title} — Shift {s.shift_number}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap" style={{ fontSize: 11, color: textMuted, fontFamily: FONT_SYSTEM }}>
+                              <span className="flex items-center gap-1">
+                                <Clock size={10} /> {fmtTime(s.start_time)}–{fmtTime(s.end_time)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin size={10} /> {s.venue}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users size={10} /> {s.confirmed_count}/{s.max_employees}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Status pill */}
+                          <span
+                            className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+                            style={{
+                              background: pill.bg, color: pill.color,
+                              border: `1px solid ${pill.border}`,
+                              fontFamily: FONT_SYSTEM,
+                            }}
+                          >
+                            ✓ {pill.label}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
