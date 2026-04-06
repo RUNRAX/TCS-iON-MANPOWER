@@ -539,17 +539,21 @@ export default function SiteLayout({
               <div
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background: scrolled ? (dark ? "rgba(18, 14, 25, 0.70)" : "rgba(255, 255, 255, 0.65)") : "transparent",
-                  border: `1px solid ${scrolled ? (dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"}`,
+                  background: dark 
+                    ? `rgba(18, 14, 25, ${scrolled ? 0.70 : 0})` 
+                    : `rgba(255, 255, 255, ${scrolled ? 0.65 : 0})`,
+                  border: `1px solid ${dark 
+                    ? `rgba(255,255,255,${scrolled ? 0.08 : 0})` 
+                    : `rgba(0,0,0,${scrolled ? 0.05 : 0})`}`,
                   borderRadius: 20,
-                  backdropFilter: scrolled ? `blur(${Math.max(actualBlur, 16)}px) saturate(140%)` : "none",
-                  WebkitBackdropFilter: scrolled ? `blur(${Math.max(actualBlur, 16)}px) saturate(140%)` : "none",
+                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : (actualBlur > 0 ? 4 : 0)}px) saturate(${scrolled ? 160 : 100}%)`,
+                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 22) : (actualBlur > 0 ? 4 : 0)}px) saturate(${scrolled ? 160 : 100}%)`,
                   boxShadow: scrolled
                     ? (dark
-                        ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
-                        : "0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)")
-                    : "none",
-                  transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
+                        ? "0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+                        : "0 12px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)")
+                    : "0 0 0 rgba(0,0,0,0), inset 0 0 0 rgba(255,255,255,0), 0 0 0 transparent",
+                  transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
                 }}
               />
 
