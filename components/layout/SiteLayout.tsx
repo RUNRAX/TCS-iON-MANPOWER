@@ -542,7 +542,7 @@ export default function SiteLayout({
                   background: headerBg,
                   border: scrolled
                     ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
-                    : "none",
+                    : "transparent",
                   borderRadius: 20,
                   backdropFilter: BLUR_HEADER,
                   WebkitBackdropFilter: BLUR_HEADER,
