@@ -92,7 +92,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
               transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.75 }}
               style={{
                 position: "absolute",
-                top: "calc(100% + 14px)", right: 0,
+                top: "calc(100% + 14px)", left: "50%", x: "-50%",
                 zIndex: 9999,
                 width: 220,
                 borderRadius: 18,
