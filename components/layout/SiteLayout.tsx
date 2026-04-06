@@ -533,7 +533,7 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="pt-3 px-3 md:pt-4 md:px-5 lg:px-6" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+          <div className="z-50 px-3 md:px-5 lg:px-6" style={{ position: "sticky", top: 0 }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]">
               {/* ── Background Layer ── */}
               <div
@@ -542,8 +542,8 @@ export default function SiteLayout({
                   background: scrolled ? (dark ? "rgba(18, 14, 25, 0.70)" : "rgba(255, 255, 255, 0.65)") : "transparent",
                   border: `1px solid ${scrolled ? (dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"}`,
                   borderRadius: 20,
-                  backdropFilter: scrolled ? `blur(${Math.max(actualBlur, 24)}px) saturate(160%)` : "none",
-                  WebkitBackdropFilter: scrolled ? `blur(${Math.max(actualBlur, 24)}px) saturate(160%)` : "none",
+                  backdropFilter: scrolled ? `blur(${Math.max(actualBlur, 16)}px) saturate(140%)` : "none",
+                  WebkitBackdropFilter: scrolled ? `blur(${Math.max(actualBlur, 16)}px) saturate(140%)` : "none",
                   boxShadow: scrolled
                     ? (dark
                         ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 24px 2px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
