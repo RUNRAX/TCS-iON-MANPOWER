@@ -294,10 +294,8 @@ export default function SiteLayout({
      Read dynamic opacity directly from the ThemeContext integers
   */
   const alphaVal = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
-  // Set transparent so the <body> background image is visible
   const bgMain = dark ? "transparent" : "#f0f0fa";
   const sidebarBg = dark ? `rgba(30,30,35,0.4)` : `rgba(252,251,255,${alphaVal})`;
-  // Header: transparent background — blur alone provides the frosted effect
   const headerBg = "transparent";
   const borderCol = dark
     ? "rgba(255,255,255,0.10)"
@@ -317,13 +315,9 @@ export default function SiteLayout({
   };
 
   const actualBlur = glassFrost ? glassBlur : 0;
-  // Sidebar: NO blur — background stays sharp
   const BLUR_SIDEBAR = "none";
-  // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
   const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
-  const BLUR_HEADER = headerBlurPx > 0
-    ? `blur(${headerBlurPx}px)`
-    : "none";
+  const BLUR_HEADER = headerBlurPx > 0 ? `blur(${headerBlurPx}px)` : "none";
 
   return (
     <div
@@ -353,28 +347,24 @@ export default function SiteLayout({
       >
         {/* ── Sidebar Aurora Wave ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Aurora gradient layer 1 */}
           <div style={{
             position: "absolute", inset: 0,
             background: `linear-gradient(160deg, color-mix(in srgb, var(--tc-primary) 18%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--tc-secondary) 14%, transparent) 70%, transparent 100%)`,
             animation: "auroraShift1 12s ease-in-out infinite",
             willChange: "opacity", transform: "translateZ(0)",
           }} />
-          {/* Aurora gradient layer 2 — counter-flow */}
           <div style={{
             position: "absolute", inset: 0,
             background: `linear-gradient(340deg, transparent 0%, color-mix(in srgb, var(--tc-accent) 12%, transparent) 30%, transparent 60%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 90%)`,
             animation: "auroraShift2 16s ease-in-out infinite",
             willChange: "opacity", transform: "translateZ(0)",
           }} />
-          {/* Aurora gradient layer 3 — diagonal sweep */}
           <div style={{
             position: "absolute", inset: "-50%",
             background: `conic-gradient(from 180deg at 50% 50%, color-mix(in srgb, var(--tc-primary) 10%, transparent) 0deg, transparent 60deg, color-mix(in srgb, var(--tc-secondary) 8%, transparent) 120deg, transparent 180deg, color-mix(in srgb, var(--tc-accent) 10%, transparent) 240deg, transparent 300deg, color-mix(in srgb, var(--tc-primary) 10%, transparent) 360deg)`,
             animation: "auroraRotate 25s linear infinite",
             willChange: "transform", transform: "translateZ(0)",
           }} />
-          {/* Soft edge vignette for depth */}
           <div style={{
             position: "absolute", inset: 0,
             background: dark
@@ -436,10 +426,7 @@ export default function SiteLayout({
         <div className="px-4 py-1 relative z-10">
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase"
-            style={{
-              color: "var(--tc-primary)",
-              letterSpacing: "0.12em",
-            }}
+            style={{ color: "var(--tc-primary)", letterSpacing: "0.12em" }}
           >
             {role === "admin" ? "ADMINISTRATOR" : "EMPLOYEE"}
           </span>
@@ -528,32 +515,43 @@ export default function SiteLayout({
 
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
-        {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
-          <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
+          <div style={{ position: "sticky", top: 0, zIndex: 50 }}>
             <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
 
-              {/* ── Background Layer ── opacity: 0 at rest, fades in on scroll ── */}
-              {/* FIX: Using opacity to fully suppress the compositing layer at rest.        */}
-              {/* border/transparent alone leaves a faint GPU layer outline in dark mode.    */}
-              <div
-                style={{
-                  position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background: headerBg,
-                  border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"}`,
-                  borderRadius: 16,
-                  backdropFilter: BLUR_HEADER,
-                  WebkitBackdropFilter: BLUR_HEADER,
-                  boxShadow: [
-                    "0 8px 32px rgba(0,0,0,0.22)",
-                    `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                    dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                  ].join(", "),
-                  opacity: scrolled ? 1 : 0,
-                  transition: "opacity 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
-                }}
-              />
+              {/*
+                ── Header Background Layer ──
+                FINAL FIX: The div is conditionally mounted/unmounted via AnimatePresence.
+                When not scrolled, the element does not exist in the DOM at all — meaning
+                no GPU compositing layer is created, no border outline, no artifact.
+                Previous approaches (opacity:0, transparent border) failed because any
+                element with backdropFilter forces a compositing layer even when invisible.
+              */}
+              <AnimatePresence>
+                {scrolled && (
+                  <motion.div
+                    key="header-bg"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    style={{
+                      position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+                      background: headerBg,
+                      border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"}`,
+                      borderRadius: 16,
+                      backdropFilter: BLUR_HEADER,
+                      WebkitBackdropFilter: BLUR_HEADER,
+                      boxShadow: [
+                        "0 8px 32px rgba(0,0,0,0.22)",
+                        `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                        dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                      ].join(", "),
+                    }}
+                  />
+                )}
+              </AnimatePresence>
 
               {/* Mobile toggle */}
               <motion.button
@@ -572,7 +570,7 @@ export default function SiteLayout({
                 </AnimatePresence>
               </motion.button>
 
-              {/* Greeting — Good Morning, Admin + Date */}
+              {/* Greeting */}
               <div className="hidden md:block relative z-10" suppressHydrationWarning>
                 {mounted ? (
                   <>
@@ -584,19 +582,14 @@ export default function SiteLayout({
                     </p>
                   </>
                 ) : (
-                  <div className="h-10 w-32" /> // Placeholder to match layout
+                  <div className="h-10 w-32" />
                 )}
               </div>
 
-              {/* Actions — Only notification bell + ThemePanel + user */}
+              {/* Actions */}
               <div className="flex items-center gap-2 ml-auto relative z-10">
-                {/* Notification Panel (functional) */}
                 <NotificationPanel role={role} userId={userId} />
-
-                {/* Theme panel */}
                 <ThemePanel size="sm" />
-
-                {/* User avatar in header */}
                 <div className="flex items-center gap-2.5 ml-1">
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -616,13 +609,10 @@ export default function SiteLayout({
             </header>
           </div>
 
-          {/* Page content — always render same DOM structure to avoid hydration mismatch */}
+          {/* Page content */}
           <div style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
-              <div
-                key={pathname}
-                style={{ minHeight: "100%" }}
-              >
+              <div key={pathname} style={{ minHeight: "100%" }}>
                 <ErrorBoundary key={pathname}>
                   {children}
                 </ErrorBoundary>
