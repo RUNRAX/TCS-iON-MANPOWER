@@ -338,6 +338,7 @@ export default function SiteLayout({
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
+          borderRight: 0,
           boxShadow: edgeShadow,
           willChange: "transform, opacity",
           overflow: "hidden",
@@ -514,10 +515,10 @@ export default function SiteLayout({
 
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ border: "none", outline: "none" }} suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
-          <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0.5rem 1rem" }}>
-            <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
+          <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0.5rem 1rem", border: "none", outline: "none" }}>
+            <header className="h-14 flex items-center justify-between px-5 md:px-6 relative" style={{ border: "none", outline: "none" }}>
 
               {/*
                 ── Header Background Layer ──
@@ -535,19 +536,19 @@ export default function SiteLayout({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                      background: headerBg,
-                      border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"}`,
-                      borderRadius: 16,
-                      backdropFilter: BLUR_HEADER,
-                      WebkitBackdropFilter: BLUR_HEADER,
-                      boxShadow: [
-                        "0 8px 32px rgba(0,0,0,0.22)",
-                        `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                        dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                      ].join(", "),
-                    }}
+                      style={{
+                        position:       "absolute",
+                        inset:          0,
+                        zIndex:         0,
+                        pointerEvents:  "none",
+                        background:     headerBg,
+                        border:         "none",
+                        outline:        "none",
+                        borderRadius:   16,
+                        backdropFilter: BLUR_HEADER,
+                        WebkitBackdropFilter: BLUR_HEADER,
+                        boxShadow:      "0 8px 32px rgba(0,0,0,0.22)",
+                      }}
                   />
                 )}
               </AnimatePresence>
