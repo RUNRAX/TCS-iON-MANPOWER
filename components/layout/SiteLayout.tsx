@@ -534,28 +534,26 @@ export default function SiteLayout({
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Sticky frosted glass pill */}
           <div style={{ position: "sticky", top: 0, zIndex: 50, padding: "0 0 0 0" }}>
-            <header className="h-14 flex items-center justify-between px-5 md:px-6 relative">
-              {/* ── Background Layer — reduced blur + ambient edge glow ── */}
-              <div
-                style={{
-                  position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
-                  background:           headerBg,
-                  border:               scrolled
-                    ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
-                    : "1px solid transparent",
-                  borderRadius:         20,
-                  backdropFilter:       BLUR_HEADER,
-                  WebkitBackdropFilter: BLUR_HEADER,
-                  boxShadow: scrolled
-                    ? [
-                        "0 8px 32px rgba(0,0,0,0.22)",
-                        `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
-                        dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
-                      ].join(", ")
-                    : "none",
-                  transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
-                }}
-              />
+            <header 
+              className="h-14 flex items-center justify-between px-5 md:px-6"
+              style={{
+                background:           headerBg,
+                border:               scrolled
+                  ? `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)"}`
+                  : "1px solid transparent",
+                borderRadius:         20,
+                backdropFilter:       BLUR_HEADER,
+                WebkitBackdropFilter: BLUR_HEADER,
+                boxShadow: scrolled
+                  ? [
+                      "0 8px 32px rgba(0,0,0,0.22)",
+                      `0 0 0 1px ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                      dark ? "0 1px 0 inset rgba(255,255,255,0.08)" : "0 1px 0 inset rgba(255,255,255,0.5)",
+                    ].join(", ")
+                  : "none",
+                transition:           "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
 
               {/* Mobile toggle */}
               <motion.button
