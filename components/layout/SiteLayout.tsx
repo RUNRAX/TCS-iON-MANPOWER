@@ -540,8 +540,8 @@ export default function SiteLayout({
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: dark 
-                    ? `rgba(18, 14, 25, ${scrolled ? 0.70 : 0})` 
-                    : `rgba(255, 255, 255, ${scrolled ? 0.65 : 0})`,
+                    ? `rgba(18, 14, 25, ${scrolled ? 0.30 : 0})` 
+                    : `rgba(255, 255, 255, ${scrolled ? 0.40 : 0})`,
                   border: `1px solid ${dark 
                     ? `rgba(255,255,255,${scrolled ? 0.08 : 0})` 
                     : `rgba(0,0,0,${scrolled ? 0.05 : 0})`}`,
