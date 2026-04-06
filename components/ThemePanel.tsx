@@ -91,8 +91,8 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
               exit={{    opacity: 0, y: -8,   scale: 0.95 }}
               transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.75 }}
               style={{
-                position: "fixed",
-                top: topOffset, right: 16,
+                position: "absolute",
+                top: "calc(100% + 14px)", right: 0,
                 zIndex: 9999,
                 width: 220,
                 borderRadius: 18,
