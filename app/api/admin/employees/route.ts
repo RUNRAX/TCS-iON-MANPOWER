@@ -71,7 +71,7 @@ export const GET = withAdmin(async (request) => {
   }
 
   const { data, error, count } = await query.range(from, from + limit - 1);
-  if (error) { console.error("[Admin/Employees GET]:", error); return serverError(); }
+  if (error) { console.error("[Admin/Employees GET]:", error); return serverError(`DB Error: ${error.message}`); }
 
   // ── Step 3: flatten + apply status filter ─────────────────────────────────
   const employees = (data ?? []).flatMap((u: Record<string, unknown>) => {

@@ -79,7 +79,7 @@ export const POST = withAdmin(async (request) => {
   } catch (err) {
     console.error("[ParseEmployee] AI error:", err);
     return NextResponse.json(
-      { status: "error", message: "AI parsing failed. Please fill in the details manually." },
+      { status: "error", message: `AI Error: ${err instanceof Error ? err.message : String(err)}` },
       { status: 500 }
     );
   }
