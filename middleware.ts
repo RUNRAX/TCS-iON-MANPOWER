@@ -98,11 +98,23 @@ export async function middleware(request: NextRequest) {
   // Fall back to "employee" if role not in metadata yet
   const userRole  = (session.user.user_metadata?.role as string) ?? "employee";
 
-  response.headers.set("x-user-id",    userId);
-  response.headers.set("x-user-email", userEmail);
-  response.headers.set("x-user-role",  userRole);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-user-id",    userId);
+  requestHeaders.set("x-user-email", userEmail);
+  requestHeaders.set("x-user-role",  userRole);
 
-  return withSecurityHeaders(response);
+  const finalResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+
+  // Keep any cookies set above
+  response.cookies.getAll().forEach(cookie => {
+    finalResponse.cookies.set(cookie.name, cookie.value);
+  });
+
+  return withSecurityHeaders(finalResponse);
 }
 
 function withSecurityHeaders(res: NextResponse): NextResponse {

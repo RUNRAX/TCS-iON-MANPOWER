@@ -285,7 +285,8 @@ export default function SiteLayout({
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-    const onScroll = () => setScrolled(el.scrollTop > 24);
+    // Using 45px so the *visual* text elements (bypassing padding & line-height gaps) hit the header
+    const onScroll = () => setScrolled(el.scrollTop > 45);
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
