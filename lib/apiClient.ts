@@ -147,6 +147,14 @@ export const adminApi = {
   getActivity: () =>
     apiFetch<{ activity: unknown[] }>("/api/admin/activity"),
 
+  /** GET /api/admin/bookings — attendance data for a specific date */
+  getBookings: async (date: string) => {
+    const res = await fetch(`/api/admin/bookings?date=${date}`);
+    if (!res.ok) throw new Error("Failed to fetch bookings");
+    const json = await res.json();
+    return json.data;
+  },
+
   /** GET /api/admin/notifications — admin broadcast notifications */
   getNotifications: () =>
     apiFetch<{ notifications: unknown[] }>("/api/admin/notifications"),

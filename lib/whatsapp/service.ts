@@ -24,8 +24,9 @@ export const MESSAGE_TEMPLATES = {
   customMessage: (d: { employeeName:string; message:string }) =>
     `*TCS ION MANPOWER*\n\nHi ${d.employeeName},\n\n${d.message}\n\n- TCS ION Admin`,
 
+  // Issue 12: Password removed from WhatsApp — credentials sent only via email
   welcomeInvite: (d: { fullName:string; phone:string; tempPassword:string; loginUrl:string }) =>
-    `*TCS ION MANPOWER PORTAL*\n\nHello ${d.fullName},\n\nYou have been added to the TCS ION Manpower Portal.\n\nLOGIN: ${d.phone}\nPASSWORD: ${d.tempPassword}\n\nAccess your portal here:\n${d.loginUrl}/login\n\nPlease change your password after your first login.\n\n- TCS ION Admin`,
+    `*TCS ION MANPOWER PORTAL*\n\nHello ${d.fullName},\n\nYou have been registered on the TCS ION Manpower Portal.\n\nAccess your portal here:\n${d.loginUrl}/login\n\nYour login credentials have been sent to your registered email address. Please check your email.\n\n- TCS ION Admin`,
 };
 
 async function sendWhatsApp(toPhone: string, message: string): Promise<boolean> {
@@ -58,27 +59,29 @@ async function sendWhatsApp(toPhone: string, message: string): Promise<boolean> 
   }
 }
 
+// Issue 26: Fixed — insert notification first, get ID, then update by ID.
+// Previous code used .order()/.limit() on .update() which is unsupported in PostgREST
+// and would silently update ALL notifications of that type for the employee.
 export async function notifyEmployee({ employeeId, toPhone, type, title, message }: {
   employeeId: string; toPhone: string; type: string; title: string; message: string;
 }): Promise<boolean> {
   const supabase = createAdminClient();
 
-  // Store notification in DB
-  await supabase.from("notifications").insert({
+  // Insert notification first, get the ID
+  const { data: notif } = await supabase.from("notifications").insert({
     employee_id: employeeId, type, title, message,
     whatsapp_sent: false, read: false,
-  }).then(null, () => {});
+  }).select("id").single();
 
   const sent = await sendWhatsApp(toPhone, message);
 
-  // Update WhatsApp status
-  await supabase.from("notifications")
-    .update({ whatsapp_sent: sent, whatsapp_status: sent ? "sent" : "failed" })
-    .eq("employee_id", employeeId)
-    .eq("type", type)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .then(null, () => {});
+  // Update by ID — safe and precise
+  if (notif?.id) {
+    await supabase.from("notifications")
+      .update({ whatsapp_sent: sent, whatsapp_status: sent ? "sent" : "failed" })
+      .eq("id", notif.id)
+      .then(null, () => {});
+  }
 
   return sent;
 }

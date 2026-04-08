@@ -115,7 +115,11 @@ function hexToBytes(hex: string): Uint8Array {
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes));
+  let str = "";
+  for (let i = 0; i < bytes.length; i++) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return btoa(str);
 }
 
 function base64ToBytes(base64: string): Uint8Array {

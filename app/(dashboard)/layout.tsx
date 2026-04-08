@@ -34,10 +34,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const role = (dbUser?.role ?? "employee") as "admin" | "employee";
 
-  // Sync role into JWT metadata for faster middleware reads (fire-and-forget)
-  if (!session.user.user_metadata?.role || session.user.user_metadata.role !== role) {
-    supabase.auth.updateUser({ data: { role } }).catch(() => {});
-  }
+  // Role is synced into app_metadata during login (server-side only).
+  // No client-side sync needed — app_metadata cannot be modified by the client.
 
   // Prefetch all dashboard routes so navigations are instant after first load
   const prefetchRoutes =

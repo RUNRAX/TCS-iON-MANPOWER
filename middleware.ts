@@ -92,11 +92,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── 5. Inject user info headers for API routes (avoids repeated DB lookups)
-  // Role is read from user_metadata in the JWT (set during login via updateUser)
+  // Role is read from app_metadata in the JWT (set during login via admin.updateUserById)
+  // app_metadata is server-only writable — prevents client-side privilege escalation
   const userId    = session.user.id;
   const userEmail = session.user.email ?? "";
-  // Fall back to "employee" if role not in metadata yet
-  const userRole  = (session.user.user_metadata?.role as string) ?? "employee";
+  const userRole  = (session.user.app_metadata?.role as string) ?? "employee";
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id",    userId);
@@ -121,6 +121,7 @@ function withSecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set("X-Frame-Options",         "DENY");
   res.headers.set("X-Content-Type-Options",  "nosniff");
   res.headers.set("Referrer-Policy",         "strict-origin-when-cross-origin");
+  res.headers.set("X-XSS-Protection",        "1; mode=block");
   return res;
 }
 

@@ -5,9 +5,10 @@ import { logger } from "@/lib/logger";
 
 /**
  * lib/ratelimit.ts
- * 
+ *
  * Production-ready rate limiting bridge.
- * - Uses Upstash Redis if available (Distributed, MNC-standard).
+ * - Uses Upstash Redis if available (distributed, production-grade).
+ * - Per-prefix limiters with appropriate windows per route category.
  * - Falls back to a local Map in dev/stg if Redis is missing.
  */
 
@@ -19,15 +20,12 @@ const redis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_R
     })
   : null;
 
-// Initialize the Upstash Ratelimit (sliding window) if redis is available
-const ratelimiter = redis
-  ? new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(30, "10 s"), // Example: 30 requests per 10s
-      analytics: true,
-      prefix: "@upstash/ratelimit",
-    })
-  : null;
+// Per-prefix limiters with correct sliding windows
+const ratelimiters = redis ? {
+  "/api/auth":     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"),  prefix: "rl:auth",     analytics: true }),
+  "/api/admin":    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60 s"), prefix: "rl:admin",    analytics: true }),
+  "/api/employee": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"),  prefix: "rl:employee", analytics: true }),
+} : null;
 
 // Local fallback Map for development/testing without Redis
 const localLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -41,10 +39,11 @@ export async function rateLimit(
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "127.0.0.1";
   const id = `${ip}:${limiterKey}`;
 
-  // 1. If Redis is available, use the distributed limiter
-  if (ratelimiter) {
+  // 1. If Redis is available, use the correct per-prefix distributed limiter
+  if (ratelimiters) {
+    const limiter = ratelimiters[limiterKey as keyof typeof ratelimiters] ?? ratelimiters["/api/employee"];
     try {
-      const { success, limit: l, remaining, reset } = await ratelimiter.limit(id);
+      const { success, limit: l, remaining, reset } = await limiter.limit(id);
       if (!success) {
         logger.warn(`Cloud Rate Limit Hit: ${id}`, { remaining, reset });
         return NextResponse.json(
@@ -59,7 +58,7 @@ export async function rateLimit(
     }
   }
 
-  // 2. Local Fallback (In-memory)
+  // 2. Local Fallback (In-memory) — works in dev, resets per serverless invocation in prod
   const now = Date.now();
   const entry = localLimitMap.get(id);
 

@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
-import { useAdminShifts } from "@/hooks/use-api";
+import { useAdminShifts, QK } from "@/hooks/use-api";
+import { useQueryClient } from "@tanstack/react-query";
 import { Send, Clock, ChevronDown, Check, Zap, Users, Radio, Mail, MessageCircle, Wallet, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -152,6 +153,7 @@ export default function AdminBroadcast() {
   const [targetGroup, setTargetGroup]     = useState("all");
   const [customMsg, setCustomMsg]         = useState("");
   const [sending, setSending]             = useState(false);
+  const qc = useQueryClient();
 
   const shifts = (data?.shifts ?? []) as Array<{ id: string; title: string; examDate: string; shiftNumber: number }>;
   const shiftOptions = shifts.map(s => ({ value: s.id, label: s.title, sub: `${s.examDate} · Shift ${s.shiftNumber}` }));
@@ -174,6 +176,8 @@ export default function AdminBroadcast() {
       if (!res.ok) throw new Error(json.message);
       toast.success(`Broadcast sent to ${json.data?.sent ?? "?"} employees ✓`);
       setCustomMsg("");
+      // Invalidate broadcast history so the history panel updates
+      void qc.invalidateQueries({ queryKey: QK.adminBroadcastHist });
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Broadcast failed");
     } finally { setSending(false); }

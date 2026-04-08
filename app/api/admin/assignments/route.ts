@@ -15,7 +15,7 @@ export const GET = withAdmin(async () => {
       employee:employee_profiles!shift_assignments_employee_id_fkey(full_name)
     `)
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(500);
 
   if (error) { console.error("[Admin/Assignments GET]:", error); return serverError(); }
   

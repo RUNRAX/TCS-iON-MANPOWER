@@ -76,7 +76,14 @@ export async function POST(request: NextRequest) {
       return unauthorized("Your account has been deactivated. Contact your admin.");
     }
 
-    // ── 6. Update last login
+    // ── 6. Sync role into app_metadata (server-only, not client-writable)
+    // This ensures middleware reads the correct role from the JWT
+    const adminForMeta = createAdminClient();
+    await adminForMeta.auth.admin.updateUserById(authData.user.id, {
+      app_metadata: { role: dbUser.role },
+    }).catch((e) => console.warn("[Auth] app_metadata sync failed:", e));
+
+    // ── 7. Update last login
     await adminClient
       .from("users")
       .update({ last_login_at: new Date().toISOString() })

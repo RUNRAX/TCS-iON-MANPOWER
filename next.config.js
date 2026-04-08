@@ -15,7 +15,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live",
+      "script-src 'self' 'unsafe-inline' https://vercel.live",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://*.vercel.app",
@@ -73,17 +73,17 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        // Cache static assets aggressively
+        source: "/_next/static/(.*)",
         headers: [
-          ...securityHeaders,
-          // Tell browser to cache static assets aggressively
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
       {
-        // Don't cache HTML/API responses
+        // Don't cache HTML/API responses — apply security headers here
         source: "/((?!_next/static|_next/image).*)",
         headers: [
+          ...securityHeaders,
           { key: "Cache-Control", value: "no-store, must-revalidate" },
         ],
       },

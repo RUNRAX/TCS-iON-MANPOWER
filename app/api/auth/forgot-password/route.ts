@@ -17,8 +17,10 @@ export async function POST(request: NextRequest) {
       .eq("email", email.trim().toLowerCase())
       .single();
 
-    // Check if the email exists in our users table
-    if (!userExists) return badRequest("Email not found in our database. Please check and try again.");
+    // Don't reveal whether the email exists — prevents email enumeration attacks
+    if (!userExists) {
+      return ok({ message: "If this email is registered, you will receive a reset link." });
+    }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 

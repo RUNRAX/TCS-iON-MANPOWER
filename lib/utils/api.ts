@@ -177,7 +177,7 @@ export function withAuth(
         const user = await getUser();
         if (!user) return unauthorized();
 
-        const fallbackRole = (user.user_metadata?.role ?? "employee") as "admin" | "employee";
+        const fallbackRole = (user.app_metadata?.role ?? "employee") as "admin" | "employee";
         if (requiredRole && fallbackRole !== requiredRole) {
           return forbidden();
         }

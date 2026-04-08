@@ -25,6 +25,7 @@ export const QK = {
   adminShifts:         (p?: object) => ["admin", "shifts", p]    as const,
   adminAssignments:    (p?: object) => ["admin", "assignments", p] as const,
   adminPayments:       (p?: object) => ["admin", "payments", p]  as const,
+  adminBookings:       (date?: string) => ["admin", "bookings", date] as const,
   adminActivity:       ["admin", "activity"]                     as const,
   adminBroadcastHist:  ["admin", "broadcast", "history"]         as const,
   employeeProfile:     ["employee", "profile"]                   as const,
@@ -139,6 +140,16 @@ export function useClearPayment() {
   });
 }
 
+/** Admin bookings for a specific date */
+export function useAdminBookings(date: string | undefined) {
+  return useQuery({
+    queryKey: QK.adminBookings(date),
+    queryFn: () => date ? adminApi.getBookings(date) : Promise.resolve(null),
+    enabled: !!date,
+    staleTime: 10_000,
+  });
+}
+
 /** Recent activity (audit log) */
 export function useAdminActivity() {
   return useQuery({
@@ -184,7 +195,7 @@ export function useConfirmShift() {
         return {
           ...old,
           shifts: old.shifts.map(s =>
-            s.id === shiftId ? { ...s, myStatus: "pending" as const } : s
+            s.id === shiftId ? { ...s, myStatus: "confirmed" as const } : s
           ),
         };
       });

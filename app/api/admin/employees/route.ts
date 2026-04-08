@@ -13,6 +13,7 @@ import {
 import { AddEmployeeSchema } from "@/lib/validations/schemas";
 import { sendEmail } from "@/lib/email/send";
 import { employeeWelcomeEmail } from "@/lib/email/templates";
+import { encrypt } from "@/lib/utils/encryption";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3018";
 
@@ -155,7 +156,7 @@ export const POST = withAdmin(async (request, { userId }) => {
   }
 
   // ── Generate temporary password ──
-  const tempPassword = `Tc${generatePassword()}9!`;
+  const tempPassword = generatePassword();
 
   // ── Create auth user ──
   const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
@@ -174,6 +175,21 @@ export const POST = withAdmin(async (request, { userId }) => {
   // ── Update users table ──
   await supabase.from("users").update({ phone, created_by_admin: userId }).eq("id", newUser.user.id);
 
+  // ── Encrypt and store bank details ──
+  let bankAccountEncrypted: string | null = null;
+  let bankIfscEncrypted: string | null = null;
+
+  if (bankAccount) {
+    try { bankAccountEncrypted = await encrypt(bankAccount); } catch (e) {
+      console.warn("[Employees] Bank account encryption failed:", e);
+    }
+  }
+  if (bankIfsc) {
+    try { bankIfscEncrypted = await encrypt(bankIfsc); } catch (e) {
+      console.warn("[Employees] IFSC encryption failed:", e);
+    }
+  }
+
   // ── Create employee profile ──
   const { error: profileError } = await supabase.from("employee_profiles").insert({
     user_id:       newUser.user.id,
@@ -191,8 +207,9 @@ export const POST = withAdmin(async (request, { userId }) => {
     status:        "approved",  // Admin-created employees are auto-approved
     approved_by:   userId,
     approved_at:   new Date().toISOString(),
-    // Bank details stored as plain text for now (encryption can be added later)
-    bank_name:     bankName || null,
+    bank_account_encrypted: bankAccountEncrypted,
+    bank_ifsc_encrypted:    bankIfscEncrypted,
+    bank_name:              bankName || null,
   });
 
   if (profileError) {
@@ -239,10 +256,7 @@ export const POST = withAdmin(async (request, { userId }) => {
 });
 
 // ── PATCH /api/admin/employees — Approve / reject / toggle / edit ─────────────
-export async function PATCH(request: NextRequest) {
-  const role = request.headers.get("x-user-role");
-  if (role !== "admin" && role !== "super_admin") return unauthorized("ADMIN ONLY");
-
+export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
   const supabase = createAdminClient();
   const body = await request.json().catch(() => ({})) as Record<string, string>;
   const { employeeId, action, reason, fullName, phone, city } = body;
@@ -297,13 +311,37 @@ export async function PATCH(request: NextRequest) {
   }
 
   return badRequest("INVALID ACTION");
-}
+});
 
-function generatePassword() {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  let p = "";
-  const arr = new Uint8Array(8);
+function generatePassword(): string {
+  const lower  = "abcdefghjkmnpqrstuvwxyz";
+  const upper  = "ABCDEFGHJKMNPQRSTUVWXYZ";
+  const digits = "23456789";
+  const special = "@#$%&*!";
+  const all = lower + upper + digits + special;
+
+  const arr = new Uint8Array(12);
   crypto.getRandomValues(arr);
-  for (const b of arr) p += chars[b % chars.length];
-  return p;
+
+  // Guarantee at least one of each character class
+  const pwd = [
+    lower[arr[0] % lower.length],
+    upper[arr[1] % upper.length],
+    digits[arr[2] % digits.length],
+    special[arr[3] % special.length],
+  ];
+
+  for (let i = 4; i < 12; i++) {
+    pwd.push(all[arr[i] % all.length]);
+  }
+
+  // Fisher-Yates shuffle (using crypto randomness)
+  const shuffleBytes = new Uint8Array(pwd.length);
+  crypto.getRandomValues(shuffleBytes);
+  for (let i = pwd.length - 1; i > 0; i--) {
+    const j = shuffleBytes[i] % (i + 1);
+    [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+  }
+
+  return pwd.join("");
 }
