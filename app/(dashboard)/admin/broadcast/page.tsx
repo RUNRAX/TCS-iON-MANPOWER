@@ -155,8 +155,12 @@ export default function AdminBroadcast() {
   const [sending, setSending]             = useState(false);
   const qc = useQueryClient();
 
-  const shifts = (data?.shifts ?? []) as Array<{ id: string; title: string; examDate: string; shiftNumber: number }>;
-  const shiftOptions = shifts.map(s => ({ value: s.id, label: s.title, sub: `${s.examDate} · Shift ${s.shiftNumber}` }));
+  const shifts = (data?.shifts ?? []) as Array<{ id: string; title: string; examDate: string; shiftNumber: number; start_time?: string; end_time?: string; venue?: string }>;
+  const shiftOptions = shifts.map(s => ({ 
+    value: s.id, 
+    label: s.title, 
+    sub: `${s.examDate} · Shift ${s.shiftNumber} · ${s.start_time ?? s.endTime ?? ""}–${s.end_time ?? s.startTime ?? ""} · ${s.venue ?? ""}` 
+  }));
 
   const targetGroups = [
     { id: "all",         label: "All",         icon: Users,  desc: "Every assigned" },

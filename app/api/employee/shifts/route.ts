@@ -12,7 +12,13 @@ export const GET = withEmployee(async (_req: NextRequest, { userId }) => {
   const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: shifts, error } = await supabase
+  const { data: myAssignments } = await supabase
+    .from("shift_assignments")
+    .select("shift_id")
+    .eq("employee_id", userId);
+  const myShiftIds = myAssignments?.map(a => a.shift_id) || [];
+
+  let query = supabase
     .from("exam_shifts")
     .select(`
       id, title, exam_date, shift_number, start_time, end_time,
@@ -20,10 +26,16 @@ export const GET = withEmployee(async (_req: NextRequest, { userId }) => {
       response_deadline,
       shift_assignments(id, status, employee_id)
     `)
-    .eq("status", "published")
-    .gte("exam_date", today)
     .order("exam_date", { ascending: true })
     .order("shift_number", { ascending: true });
+
+  if (myShiftIds.length > 0) {
+    query = query.or(`and(status.eq.published,exam_date.gte.${today}),id.in.(${myShiftIds.join(",")})`);
+  } else {
+    query = query.eq("status", "published").gte("exam_date", today);
+  }
+
+  const { data: shifts, error } = await query;
 
   if (error) { console.error("[Employee/Shifts GET]:", error); return serverError(); }
 

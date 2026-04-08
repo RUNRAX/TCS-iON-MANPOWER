@@ -21,6 +21,8 @@ export default function EmployeeShifts() {
   const shifts = useMemo(() => data?.shifts ?? [], [data]);
   const available = shifts.filter(s => s.status === "published" && !s.myStatus);
   const booked    = shifts.filter(s => s.myStatus);
+  const upcomingBooked = booked.filter(s => s.myStatus !== "completed");
+  const completedBooked = booked.filter(s => s.myStatus === "completed");
 
   const handleBook = (shiftId: string) => {
     confirm(shiftId, {
@@ -38,9 +40,21 @@ export default function EmployeeShifts() {
       absent:    { bg: "rgba(239,68,68,0.15)",   fg: "#f87171" },
     }[s.myStatus as "pending" | "confirmed" | "completed" | "absent"] ?? null;
 
+    const isCompleted = s.myStatus === "completed";
+
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="admin-panel rounded-2xl p-5" style={{ position: "relative" }}>
+        className="admin-panel rounded-2xl p-5" 
+        style={{ 
+          position: "relative",
+          ...(isCompleted ? {
+            background: dark ? "rgba(20,18,40,0.4)" : "rgba(255,255,255,0.4)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.6)"}`,
+            boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 8px 32px rgba(31,38,135,0.07)"
+          } : {})
+        }}>
         <div className="flex items-start justify-between mb-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{ background: `color-mix(in srgb, var(--tc-primary) 13%, transparent)`, color: "var(--tc-primary)" }}>
@@ -85,11 +99,23 @@ export default function EmployeeShifts() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-8">
-      {booked.length > 0 && (
+      {upcomingBooked.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold mb-4" style={{ color: textMain }}>My Bookings</h2>
+          <div className="mb-4">
+            <h2 className="text-lg font-bold" style={{ color: textMain }}>Upcoming Shifts</h2>
+            <p className="text-sm mt-1" style={{ color: textMuted }}>Details of your booked shifts</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {booked.map(s => <ShiftCard key={s.id} s={s} showAction={false} />)}
+            {upcomingBooked.map(s => <ShiftCard key={s.id} s={s} showAction={false} />)}
+          </div>
+        </section>
+      )}
+
+      {completedBooked.length > 0 && (
+        <section>
+          <h2 className="text-lg font-bold mb-4" style={{ color: textMain }}>Completed Shifts</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {completedBooked.map(s => <ShiftCard key={s.id} s={s} showAction={false} />)}
           </div>
         </section>
       )}
