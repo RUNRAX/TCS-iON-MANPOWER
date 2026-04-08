@@ -544,8 +544,8 @@ export default function SiteLayout({
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: dark 
-                    ? `rgba(18, 14, 25, 0.10)` 
-                    : `rgba(255, 255, 255, 0.10)`,
+                    ? `rgba(18, 14, 25, 0.03)` 
+                    : `rgba(255, 255, 255, 0.03)`,
                   border: `1px solid ${dark 
                     ? `rgba(255,255,255,0.08)` 
                     : `rgba(0,0,0,0.05)`}`,
