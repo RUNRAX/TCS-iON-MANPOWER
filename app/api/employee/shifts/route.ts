@@ -11,6 +11,7 @@ import { withEmployee, ok, created, conflict, forbidden, notFound, serverError }
 export const GET = withEmployee(async (_req: NextRequest, { userId }) => {
   const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
 
   const { data: myAssignments } = await supabase
     .from("shift_assignments")
@@ -39,10 +40,40 @@ export const GET = withEmployee(async (_req: NextRequest, { userId }) => {
 
   if (error) { console.error("[Employee/Shifts GET]:", error); return serverError(); }
 
+  // ── Auto-complete: mark published shifts as "completed" if end_time + 18 min has passed ──
+  const toAutoComplete: string[] = [];
+  (shifts ?? []).forEach((s: any) => {
+    if (s.status === "published" && s.end_time && s.exam_date) {
+      try {
+        const shiftEnd = new Date(`${s.exam_date}T${s.end_time}`);
+        shiftEnd.setMinutes(shiftEnd.getMinutes() + 18);
+        if (now > shiftEnd) {
+          toAutoComplete.push(s.id);
+        }
+      } catch {}
+    }
+  });
+
+  // Fire-and-forget: auto-mark expired shifts as completed
+  if (toAutoComplete.length > 0) {
+    supabase
+      .from("exam_shifts")
+      .update({ status: "completed" })
+      .in("id", toAutoComplete)
+      .then(
+        () => console.log(`[Auto-Complete] Marked ${toAutoComplete.length} shifts as completed`),
+        () => console.warn("[Auto-Complete] Failed")
+      );
+  }
+
   const annotated = (shifts ?? []).map((s: any) => {
     const assignments = Array.isArray(s.shift_assignments) ? s.shift_assignments : [];
     const mine = assignments.find((a: any) => a.employee_id === userId);
     const confirmedCount = assignments.filter((a: any) => a.status === "confirmed").length;
+    
+    // If auto-completed, reflect in response immediately
+    const effectiveStatus = toAutoComplete.includes(s.id) ? "completed" : s.status;
+    
     return {
       id:               s.id,
       title:            s.title,
@@ -54,7 +85,7 @@ export const GET = withEmployee(async (_req: NextRequest, { userId }) => {
       venueAddress:     s.venue_address,
       maxEmployees:     s.max_employees,
       minEmployees:     s.min_employees ?? 1,
-      status:           s.status,
+      status:           effectiveStatus,
       notes:            s.notes,
       pay_amount:       s.pay_amount ?? 800,
       responseDeadline: s.response_deadline,

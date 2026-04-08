@@ -1,6 +1,7 @@
 /**
  * GET /api/employee/shifts/history
- * Returns all past and present shift assignments for the logged-in employee
+ * Returns all shift assignments for the logged-in employee
+ * with proper shift details and payment info
  */
 import { createAdminClient } from "@/lib/supabase/server";
 import { withEmployee, ok, serverError } from "@/lib/utils/api";
@@ -8,23 +9,34 @@ import { withEmployee, ok, serverError } from "@/lib/utils/api";
 export const GET = withEmployee(async (_req, { userId }) => {
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
+  // Get all assignments for this employee with shift details
+  const { data: assignments, error } = await supabase
     .from("shift_assignments")
     .select(`
       id, status, confirmed_at, created_at,
       shift:exam_shifts!shift_id(
         id, title, exam_date, shift_number, start_time, end_time, venue, pay_amount
-      ),
-      payment:payments!left(status, reference_number, cleared_at)
+      )
     `)
     .eq("employee_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) { console.error("[Employee/History GET]:", error); return serverError(); }
 
-  const history = (data ?? []).map((a: any) => {
+  // Separately fetch payments for this employee (avoid broken join)
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("shift_id, status, reference_number, cleared_at")
+    .eq("employee_id", userId);
+
+  const paymentMap = new Map<string, { status: string; reference_number: string | null; cleared_at: string | null }>();
+  (payments ?? []).forEach((p: any) => {
+    paymentMap.set(p.shift_id, p);
+  });
+
+  const history = (assignments ?? []).map((a: any) => {
     const s = a.shift;
-    const p = Array.isArray(a.payment) ? a.payment[0] : a.payment;
+    const p = paymentMap.get(s?.id);
     return {
       id: a.id,
       shiftId: s?.id,
