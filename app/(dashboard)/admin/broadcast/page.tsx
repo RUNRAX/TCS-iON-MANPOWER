@@ -159,7 +159,7 @@ export default function AdminBroadcast() {
   const shiftOptions = shifts.map(s => ({ 
     value: s.id, 
     label: s.title, 
-    sub: `${s.examDate} · Shift ${s.shiftNumber} · ${s.start_time ?? s.endTime ?? ""}–${s.end_time ?? s.startTime ?? ""} · ${s.venue ?? ""}` 
+    sub: `${s.examDate} · Shift ${s.shiftNumber} · ${s.start_time ?? ""}–${s.end_time ?? ""} · ${s.venue ?? ""}` 
   }));
 
   const targetGroups = [
