@@ -536,25 +536,25 @@ export default function SiteLayout({
           {/* Header — Floating frosted glass pill */}
           <div className="z-50 px-3 md:px-5 lg:px-6" style={{ position: "sticky", top: 0 }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]">
-              {/* ── Background Layer ── */}
-              <div
+              {/* ── Background Layer (Smooth GPU Opacity Crossfade) ── */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: scrolled ? 1 : 0 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
                   background: dark 
-                    ? `rgba(18, 14, 25, ${scrolled ? 0.10 : 0})` 
-                    : `rgba(255, 255, 255, ${scrolled ? 0.10 : 0})`,
+                    ? `rgba(18, 14, 25, 0.10)` 
+                    : `rgba(255, 255, 255, 0.10)`,
                   border: `1px solid ${dark 
-                    ? `rgba(255,255,255,${scrolled ? 0.08 : 0})` 
-                    : `rgba(0,0,0,${scrolled ? 0.05 : 0})`}`,
+                    ? `rgba(255,255,255,0.08)` 
+                    : `rgba(0,0,0,0.05)`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${scrolled ? Math.max(actualBlur, 12) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
-                  WebkitBackdropFilter: `blur(${scrolled ? Math.max(actualBlur, 12) : 0}px) saturate(${scrolled ? 160 : 100}%)`,
-                  boxShadow: scrolled
-                    ? (dark
-                        ? "inset 0 1.5px 2px rgba(255,255,255,0.18), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
-                        : "inset 0 1.5px 2px rgba(255,255,255,0.90), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 12%, transparent)")
-                    : "inset 0 0 0 rgba(255,255,255,0), inset 0 0 0 rgba(0,0,0,0), inset 0 0 0 transparent",
-                  transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+                  backdropFilter: `blur(${Math.max(actualBlur, 12)}px) saturate(160%)`,
+                  WebkitBackdropFilter: `blur(${Math.max(actualBlur, 12)}px) saturate(160%)`,
+                  boxShadow: dark
+                    ? "inset 0 1.5px 2px rgba(255,255,255,0.18), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+                    : "inset 0 1.5px 2px rgba(255,255,255,0.90), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 12%, transparent)"
                 }}
               />
 
