@@ -20,7 +20,7 @@ function getClient(): GoogleGenerativeAI {
 /** Returns the Gemini Flash model (fast, generous free tier) */
 export function getModel(): GenerativeModel {
   if (!_model) {
-    _model = getClient().getGenerativeModel({ model: "gemini-1.5-flash" });
+    _model = getClient().getGenerativeModel({ model: "gemini-1.5-flash-latest" });
   }
   return _model;
 }
