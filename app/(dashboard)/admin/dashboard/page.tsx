@@ -76,6 +76,17 @@ const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outf
 /* ─────────────────────────────────────────────────────────────────────────────
    Component
 ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Format date & time helpers ── */
+const fmtDate = (d: string) => {
+  const dt = new Date(d);
+  return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
+};
+const fmtTime = (t: string) => t?.slice(0, 5) ?? "—";
+
+/* ── Is shift date in the past? ── */
+const isPast = (d: string) => new Date(d) < new Date(new Date().toDateString());
+
 export default function AdminDashboard() {
   const { dark } = useTheme();
 
@@ -182,16 +193,6 @@ export default function AdminDashboard() {
     hidden: { opacity: 1 },
     show:   { opacity: 1 },
   };
-
-  /* ── Format date helpers ── */
-  const fmtDate = (d: string) => {
-    const dt = new Date(d);
-    return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", weekday: "short" });
-  };
-  const fmtTime = (t: string) => t?.slice(0, 5) ?? "—";
-
-  /* ── Is shift date in the past? ── */
-  const isPast = (d: string) => new Date(d) < new Date(new Date().toDateString());
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
