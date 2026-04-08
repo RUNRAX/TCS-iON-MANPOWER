@@ -84,8 +84,10 @@ const fmtDate = (d: string) => {
 };
 const fmtTime = (t: string) => t?.slice(0, 5) ?? "—";
 
-/* ── Is shift date in the past? ── */
+/* ── Date helpers ── */
 const isPast = (d: string) => new Date(d) < new Date(new Date().toDateString());
+const isToday = (d: string) => d === new Date().toISOString().split("T")[0];
+const isFuture = (d: string) => !isPast(d) && !isToday(d);
 
 export default function AdminDashboard() {
   const { dark } = useTheme();
@@ -164,7 +166,8 @@ export default function AdminDashboard() {
       .sort((a: any, b: any) => new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime());
   }, [shiftsData]);
 
-  const upcomingShifts = monthlyShifts.filter((s: any) => (s.status === "published" || s.status === "draft") && !isPast(s.exam_date));
+  const ongoingShifts = monthlyShifts.filter((s: any) => (s.status === "published") && isToday(s.exam_date));
+  const upcomingShifts = monthlyShifts.filter((s: any) => (s.status === "published" || s.status === "draft") && isFuture(s.exam_date));
   const pendingActionShifts = monthlyShifts.filter((s: any) => s.status === "published" && isPast(s.exam_date));
   const completedShifts = monthlyShifts.filter((s: any) => s.status === "completed");
 
@@ -361,6 +364,61 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <>
+              {/* Ongoing Shifts Section (Today) */}
+              {ongoingShifts.length > 0 && (
+                <div>
+                  <div className="px-5 py-2.5" style={{ background: dark ? "rgba(59,130,246,0.05)" : "rgba(59,130,246,0.04)" }}>
+                    <p className="text-[10px] font-bold tracking-widest uppercase flex items-center gap-2" style={{ color: "#60a5fa" }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3b82f6", display: "inline-block", animation: "pulse 2s infinite" }} />
+                      Ongoing Today ({ongoingShifts.length})
+                    </p>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: borderCol }}>
+                    {ongoingShifts.map((s: any, i: number) => {
+                      return (
+                        <motion.div
+                          key={s.id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="px-5 py-3 flex items-center gap-3"
+                          style={{ transition: "background 0.15s", borderLeft: "3px solid #3b82f6" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(59,130,246,0.06)" : "rgba(59,130,246,0.03)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center" style={{
+                            background: dark ? "rgba(59,130,246,0.15)" : "rgba(59,130,246,0.10)",
+                            border: "1px solid rgba(59,130,246,0.25)",
+                          }}>
+                            <span className="text-[10px] font-bold leading-none" style={{ color: "#60a5fa" }}>
+                              {new Date(s.exam_date).getDate()}
+                            </span>
+                            <span className="text-[8px] font-semibold uppercase" style={{ color: "#60a5fa", opacity: 0.7 }}>
+                              {new Date(s.exam_date).toLocaleDateString("en", { month: "short" })}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate" style={{ color: textMain, fontFamily: FONT_SYSTEM }}>
+                              {s.title} — Shift {s.shift_number}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1 flex-wrap" style={{ fontSize: 11, color: textMuted, fontFamily: FONT_SYSTEM }}>
+                              <span className="flex items-center gap-1"><Clock size={10} /> {fmtTime(s.start_time)}–{fmtTime(s.end_time)}</span>
+                              <span className="flex items-center gap-1"><MapPin size={10} /> {s.venue}</span>
+                              <span className="flex items-center gap-1"><Users size={10} /> {s.confirmed_count}/{s.max_employees}</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0" style={{
+                            background: "rgba(59,130,246,0.12)", color: "#60a5fa",
+                            border: "1px solid rgba(59,130,246,0.25)",
+                            fontFamily: FONT_SYSTEM,
+                          }}>🔴 ONGOING</span>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Upcoming Shifts Section */}
               {upcomingShifts.length > 0 && (
                 <div>
