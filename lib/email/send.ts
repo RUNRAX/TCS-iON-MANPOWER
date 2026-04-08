@@ -5,7 +5,7 @@
 
 const MAILJET_API_KEY = process.env.MAILJET_API_KEY || "f360cb341a4d293d6d034b26d2dd8610";
 const MAILJET_SECRET_KEY = process.env.MAILJET_SECRET_KEY || "c169daa38bb8973bcb518961548e5004";
-const FROM_EMAIL = process.env.FROM_EMAIL || "rakshitawati7@gmail.com";
+const FROM_EMAIL = process.env.FROM_EMAIL || "rakshitawati5@gmail.com";
 const FROM_NAME = "TCS iON Portal";
 
 interface SendEmailOpts {
