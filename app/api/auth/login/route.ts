@@ -101,7 +101,9 @@ export async function POST(request: NextRequest) {
     }
 
     const redirectTo =
-      dbUser.role === "admin"
+      dbUser.role === "super_admin"
+        ? "/super/dashboard"
+        : dbUser.role === "admin"
         ? "/admin/dashboard"
         : !profileStatus
         ? "/employee/profile"
