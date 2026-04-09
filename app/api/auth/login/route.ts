@@ -52,14 +52,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (authError) {
-      console.warn(`[Auth] Failed login for ${identifier}:`, authError.message);
-      if (authError.message.includes("Invalid login credentials")) {
+      const errMsg = authError.message.toLowerCase();
+      // @ts-ignore - Supabase AuthError may have a code field
+      const errCode = (authError.code || "").toLowerCase();
+
+      console.warn(`[Auth] Failed login for ${identifier} | Code: ${errCode} | Message: ${authError.message}`);
+
+      if (errMsg.includes("invalid login credentials") || errCode === "invalid_grant" || errMsg.includes("invalid_grant")) {
         return unauthorized("Invalid credentials. Please check your email/phone and password.");
       }
-      if (authError.message.includes("Email not confirmed")) {
+      if (errMsg.includes("email not confirmed") || errCode === "email_not_confirmed" || errMsg.includes("email_not_confirmed")) {
         return unauthorized("Please verify your email before logging in.");
       }
-      return unauthorized("Login failed. Please try again.");
+      return unauthorized(`Login failed. Please try again. (${authError.message})`);
     }
 
     if (!authData.user || !authData.session) return unauthorized("Invalid credentials");
