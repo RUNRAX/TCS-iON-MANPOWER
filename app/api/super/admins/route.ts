@@ -56,7 +56,7 @@ export const GET = withSuperAdmin(async (request) => {
     .from("users")
     .select(`
       id, email, phone, role, is_active, center_code, last_login_at, created_at,
-      employee_profiles!employee_profiles_user_id_fkey(full_name)
+      employee_profiles(full_name)
     `)
     .in("role", ["admin", "super_admin"])
     .order("created_at", { ascending: false });
