@@ -239,7 +239,6 @@ export default function SuperDashboardPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 14px",
-                borderRadius: 12,
                 ...masterGlass,
                 borderRadius: 12,
               }}

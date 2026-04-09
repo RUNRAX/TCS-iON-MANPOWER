@@ -21,7 +21,7 @@ interface NotifItem {
 }
 
 interface Props {
-  role: "admin" | "employee";
+  role: "admin" | "employee" | "super_admin";
   userId: string;
 }
 
@@ -66,7 +66,7 @@ export default function NotificationPanel({ role, userId }: Props) {
   const fetchNotifs = useCallback(async () => {
     setLoading(true);
     try {
-      if (role === "admin") {
+      if (role === "admin" || role === "super_admin") {
         const [profilesRes, shiftsRes, activityRes] = await Promise.all([
           fetch("/api/admin/employees?status=pending&limit=5"),
           fetch("/api/admin/shifts?status=published&limit=5"),
