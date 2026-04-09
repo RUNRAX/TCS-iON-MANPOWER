@@ -83,6 +83,9 @@ export async function POST(request: NextRequest) {
       app_metadata: { role: dbUser.role },
     }).catch((e) => console.warn("[Auth] app_metadata sync failed:", e));
 
+    // Refresh the session to ensure the JWT in the cookie has the updated app_metadata
+    await ssrClient.auth.refreshSession();
+
     // ── 7. Update last login
     await adminClient
       .from("users")
