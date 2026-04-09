@@ -159,7 +159,7 @@ export default function SuperAdminsPage() {
           {/* Search */}
           <div style={{
             flex: 1, minWidth: 240, display: "flex", alignItems: "center", gap: 10,
-            padding: "10px 16px", borderRadius: 14, ...masterGlass, borderRadius: 14,
+            padding: "10px 16px", ...masterGlass, borderRadius: 14,
           }}>
             <Search size={16} color={dimText} />
             <input
