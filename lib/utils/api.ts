@@ -146,7 +146,7 @@ function formatZodErrors(error: ZodError): Record<string, string[]> {
 
 interface AuthContext {
   userId: string;
-  userRole: "admin" | "employee";
+  userRole: "super_admin" | "admin" | "employee";
   userEmail: string;
 }
 
@@ -169,7 +169,7 @@ export function withAuth(
     try {
       // Prefer injected headers from middleware (faster)
       const userId    = request.headers.get("x-user-id");
-      const userRole  = request.headers.get("x-user-role") as "admin" | "employee" | null;
+      const userRole  = request.headers.get("x-user-role") as "super_admin" | "admin" | "employee" | null;
       const userEmail = request.headers.get("x-user-email") ?? "";
 
       if (!userId || !userRole) {
@@ -177,7 +177,7 @@ export function withAuth(
         const user = await getUser();
         if (!user) return unauthorized();
 
-        const fallbackRole = (user.app_metadata?.role ?? "employee") as "admin" | "employee";
+        const fallbackRole = (user.app_metadata?.role ?? "employee") as "super_admin" | "admin" | "employee";
         if (requiredRole && fallbackRole !== requiredRole) {
           return forbidden();
         }
