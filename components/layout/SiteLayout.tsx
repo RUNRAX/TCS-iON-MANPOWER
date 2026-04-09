@@ -21,6 +21,7 @@ import {
   FileSpreadsheet, UserCheck, MessageSquare,
   Bell, Settings, Grid3X3,
   Search, BarChart3, ClipboardCheck,
+  ShieldCheck, Activity, Radio,
 } from "lucide-react";
 
 /* ── Nav config ──────────────────────────────────────────────────────────── */
@@ -41,6 +42,16 @@ const employeeNav = [
   { label: "My Profile", icon: UserCheck, href: "/employee/profile" },
   { label: "Payments", icon: FileSpreadsheet, href: "/employee/payments" },
   { label: "Settings", icon: Settings, href: "/employee/settings" },
+];
+
+const superAdminNav = [
+  { label: "Command Center",  icon: ShieldCheck,      href: "/super/dashboard" },
+  { label: "Admin Accounts",  icon: Users,             href: "/super/admins" },
+  { label: "System Activity", icon: Activity,          href: "/super/activity" },
+  { label: "Sys Broadcast",   icon: Radio,             href: "/super/broadcast" },
+  { label: "Platform",        icon: Settings,          href: "/super/settings" },
+  // Separator: regular admin panel link (rendered with warm brand colour)
+  { label: "Admin Panel",     icon: LayoutDashboard,   href: "/admin/dashboard" },
 ];
 
 /* ── Helper: get greeting ────────────────────────────────────────────────── */
@@ -262,7 +273,7 @@ const LiquidBackground = () => {
 /* ── Main SiteLayout ─────────────────────────────────────────────────────── */
 interface SiteLayoutProps {
   children: React.ReactNode;
-  role: "admin" | "employee";
+  role: "admin" | "employee" | "super_admin";
   userId: string;
   userEmail: string;
   userFullName?: string;
@@ -311,8 +322,13 @@ export default function SiteLayout({
   const textMain = dark ? "rgba(255,255,255,0.95)" : "#0f0a2e";
   const textMuted = dark ? "rgba(255,255,255,0.6)" : "rgba(30,20,80,0.44)";
 
-  const navItems = role === "admin" ? adminNav : employeeNav;
+  const navItems = role === "super_admin"
+    ? superAdminNav
+    : role === "admin"
+      ? adminNav
+      : employeeNav;
   const displayName = userFullName ?? "Admin";
+  const isSuperAdmin = role === "super_admin";
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -394,31 +410,53 @@ export default function SiteLayout({
           pointerEvents: "none", zIndex: 0,
         }} />
 
-        {/* Logo */}
+        {/* Logo / Master Admin badge */}
         <div className="px-4 py-4 relative z-10" style={{ borderBottom: `1px solid ${borderCol}` }}>
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{
-                boxShadow: [
-                  "0 0 16px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
-                  "0 0 32px color-mix(in srgb, var(--tc-primary) 20%, transparent)",
-                  "0 0 16px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
-                ],
-              }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15)",
-              }}
-            >
-              <Building2 className="w-4 h-4 text-white" />
-            </motion.div>
-            <div>
-              <h1 className="font-black text-[14px] tracking-tight" style={{ color: textMain }}>TCS iON</h1>
-              <p className="text-[9px] tracking-widest font-mono" style={{ color: "var(--tc-primary)", opacity: 0.85 }}>Manpower Portal</p>
+          {isSuperAdmin ? (
+            /* ── MASTER CONTROL badge — cold-ice style for super_admin ── */
+            <div style={{
+              padding: "10px 12px", borderRadius: 14, marginBottom: 0,
+              background: dark
+                ? "linear-gradient(135deg, rgba(10,30,100,0.9), rgba(4,12,50,0.95))"
+                : "linear-gradient(135deg, rgba(20,80,180,0.15), rgba(10,40,120,0.08))",
+              border: "1px solid rgba(100,180,255,0.20)",
+              boxShadow: "0 0 20px rgba(30,100,255,0.15)",
+            }}>
+              <p style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: 3,
+                textTransform: "uppercase", color: "#67e8f9",
+                fontFamily: "var(--font-jetbrains-mono)",
+              }}>◈ MASTER CONTROL</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#a0d4ff", marginTop: 2 }}>
+                super_admin
+              </p>
             </div>
-          </div>
+          ) : (
+            /* ── Normal TCS iON logo for admin/employee ── */
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{
+                  boxShadow: [
+                    "0 0 16px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
+                    "0 0 32px color-mix(in srgb, var(--tc-primary) 20%, transparent)",
+                    "0 0 16px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
+                  ],
+                }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15)",
+                }}
+              >
+                <Building2 className="w-4 h-4 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="font-black text-[14px] tracking-tight" style={{ color: textMain }}>TCS iON</h1>
+                <p className="text-[9px] tracking-widest font-mono" style={{ color: "var(--tc-primary)", opacity: 0.85 }}>Manpower Portal</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search bar */}
@@ -444,7 +482,7 @@ export default function SiteLayout({
               letterSpacing: "0.12em",
             }}
           >
-            {role === "admin" ? "ADMINISTRATOR" : "EMPLOYEE"}
+            {role === "super_admin" ? "MASTER ADMIN" : role === "admin" ? "ADMINISTRATOR" : "EMPLOYEE"}
           </span>
         </div>
 
@@ -612,7 +650,7 @@ export default function SiteLayout({
                   </div>
                   <div className="hidden lg:block">
                     <p className="text-xs font-semibold" style={{ color: textMain }}>{displayName}</p>
-                    <p className="text-[10px]" style={{ color: textMuted }}>{role === "admin" ? "Admin" : "Employee"}</p>
+                    <p className="text-[10px]" style={{ color: textMuted }}>{role === "super_admin" ? "Master Admin" : role === "admin" ? "Admin" : "Employee"}</p>
                   </div>
                 </div>
               </div>

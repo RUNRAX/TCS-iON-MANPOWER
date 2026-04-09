@@ -214,6 +214,49 @@ export function withEmployee(handler: RouteHandler) {
   return withAuth(handler, "employee");
 }
 
+// ── withSuperAdmin — restricts to super_admin role only
+
+export function withSuperAdmin(handler: RouteHandler) {
+  return async (
+    request: NextRequest,
+    { params }: { params?: Record<string, string> } = {}
+  ): Promise<NextResponse> => {
+    try {
+      // Prefer injected headers from middleware (faster)
+      const userId    = request.headers.get("x-user-id");
+      const userRole  = request.headers.get("x-user-role");
+      const userEmail = request.headers.get("x-user-email") ?? "";
+
+      if (userId && userRole === "super_admin") {
+        return handler(request, { userId, userRole: "admin", userEmail }, params);
+      }
+
+      // Fallback: verify with Supabase directly
+      const user = await getUser();
+      if (!user) return unauthorized();
+
+      const supabase = createAdminClient();
+      const { data: dbUser } = await supabase
+        .from("users")
+        .select("role, is_active")
+        .eq("id", user.id)
+        .single();
+
+      if (!dbUser?.is_active) return unauthorized("Account deactivated");
+      if (dbUser.role !== "super_admin") return forbidden("Super admin access required");
+
+      return handler(request, {
+        userId: user.id,
+        userRole: "admin",
+        userEmail: user.email ?? "",
+      }, params);
+    } catch (err) {
+      console.error("[Super Admin Guard]:", err);
+      return serverError();
+    }
+  };
+}
+
 // ── Write audit log from API route
 
 export async function auditLog({

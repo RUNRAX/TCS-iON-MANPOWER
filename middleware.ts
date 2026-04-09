@@ -33,6 +33,7 @@ import { rateLimit } from "@/lib/ratelimit";
 
 const RL_CONFIG: Record<string, number> = {
   "/api/auth": 30,
+  "/api/super": 300,
   "/api/admin": 300,
   "/api/employee": 120,
 };
@@ -98,9 +99,28 @@ export async function middleware(request: NextRequest) {
   const userEmail = session.user.email ?? "";
   const userRole  = (session.user.app_metadata?.role as string) ?? "employee";
 
+  // ── 5a. Super admin role handling
+  // super_admin inherits all admin access — they can reach /admin/* and /super/*
+  const isSuperAdmin = userRole === "super_admin";
+  const isAdmin      = userRole === "admin" || isSuperAdmin;
+
+  // Block non-admins from /admin routes
+  if (pathname.startsWith("/admin") && !isAdmin) {
+    return NextResponse.redirect(new URL("/employee/dashboard", request.url));
+  }
+
+  // Block non-super-admins from /super routes
+  if (pathname.startsWith("/super") && !isSuperAdmin) {
+    return NextResponse.redirect(new URL(isAdmin ? "/admin/dashboard" : "/employee/dashboard", request.url));
+  }
+
+  // Block non-employees from /employee routes (admins/super should use admin panel)
+  // Note: admins CAN access /api/employee/* endpoints but not the employee pages
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id",    userId);
   requestHeaders.set("x-user-email", userEmail);
+  // Pass raw role — withSuperAdmin guard checks for "super_admin" specifically
   requestHeaders.set("x-user-role",  userRole);
 
   const finalResponse = NextResponse.next({

@@ -275,6 +275,26 @@ export const BroadcastSchema = z.object({
   customMessage: z.string().max(1000).optional(),
 });
 
+/** Schema for super_admin system-wide broadcast */
+export const SystemBroadcastSchema = z.object({
+  subject: z
+    .string()
+    .min(3, "Subject must be at least 3 characters")
+    .max(200, "Subject cannot exceed 200 characters"),
+  message: z
+    .string()
+    .min(10, "Message must be at least 10 characters")
+    .max(2000, "Message cannot exceed 2000 characters"),
+  targets: z
+    .enum(["all_employees", "all_admins", "everyone"])
+    .default("all_employees"),
+  centerCode: z
+    .string()
+    .length(3, "Center code must be exactly 3 letters")
+    .regex(/^[A-Z]{3}$/, "Center code must be 3 uppercase letters")
+    .optional(),
+});
+
 // ─────────────────────────────────────────────────────────
 // EMPLOYEE — SHIFT ACTIONS
 // ─────────────────────────────────────────────────────────
@@ -325,13 +345,16 @@ export const PaginationSchema = z.object({
 // TYPE EXPORTS
 // ─────────────────────────────────────────────────────────
 
-export type LoginInput           = z.infer<typeof LoginSchema>;
-export type VerifyOtpInput       = z.infer<typeof VerifyOtpSchema>;
-export type AddEmployeeInput     = z.infer<typeof AddEmployeeSchema>;
-export type ApproveEmployeeInput = z.infer<typeof ApproveEmployeeSchema>;
-export type EmployeeProfileInput = z.infer<typeof EmployeeProfileSchema>;
-export type CreateShiftInput     = z.infer<typeof CreateShiftSchema>;
-export type BroadcastInput       = z.infer<typeof BroadcastSchema>;
-export type ConfirmShiftInput    = z.infer<typeof ConfirmShiftSchema>;
-export type ClearPaymentInput    = z.infer<typeof ClearPaymentSchema>;
-export type PaginationInput      = z.infer<typeof PaginationSchema>;
+export type LoginInput              = z.infer<typeof LoginSchema>;
+export type VerifyOtpInput          = z.infer<typeof VerifyOtpSchema>;
+export type AddEmployeeInput        = z.infer<typeof AddEmployeeSchema>;
+export type ApproveEmployeeInput    = z.infer<typeof ApproveEmployeeSchema>;
+export type EmployeeProfileInput    = z.infer<typeof EmployeeProfileSchema>;
+export type CreateShiftInput        = z.infer<typeof CreateShiftSchema>;
+export type BroadcastInput          = z.infer<typeof BroadcastSchema>;
+export type SystemBroadcastInput    = z.infer<typeof SystemBroadcastSchema>;
+export type CreateAdminInput        = z.infer<typeof CreateAdminSchema>;
+export type ConfirmShiftInput       = z.infer<typeof ConfirmShiftSchema>;
+export type ClearPaymentInput       = z.infer<typeof ClearPaymentSchema>;
+export type PaginationInput         = z.infer<typeof PaginationSchema>;
+
