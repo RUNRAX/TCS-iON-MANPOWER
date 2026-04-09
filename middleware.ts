@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── 2. Allow public routes with no auth check
-  if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
+  if (pathname === "/" || PUBLIC_ROUTES.filter(r => r !== "/").some(r => pathname.startsWith(r))) {
     return withSecurityHeaders(NextResponse.next());
   }
 

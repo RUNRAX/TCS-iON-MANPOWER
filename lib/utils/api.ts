@@ -190,11 +190,17 @@ export function withAuth(
       }
 
       // Role check
-      if (requiredRole && userRole !== requiredRole) {
-        return forbidden();
+      if (requiredRole) {
+        const isSuperAdmin = userRole === "super_admin";
+        if (requiredRole === "admin" && userRole !== "admin" && !isSuperAdmin) {
+          return forbidden();
+        }
+        if (requiredRole === "employee" && userRole !== "employee") {
+          return forbidden();
+        }
       }
 
-      return handler(request, { userId, userRole, userEmail }, params);
+      return handler(request, { userId, userRole: userRole as "admin" | "employee", userEmail }, params);
     } catch (error) {
       console.error("[API] Unhandled error:", error);
       return serverError();
