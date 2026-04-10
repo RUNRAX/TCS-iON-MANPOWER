@@ -66,19 +66,28 @@ export const GET = withSuperAdmin(async (request) => {
     return serverError();
   }
 
-  const admins = (data ?? []).map((u: any) => ({
-    id:          u.id,
-    email:       u.email,
-    phone:       u.phone,
-    role:        u.role,
-    isActive:    u.is_active,
-    centerCode:  u.center_code,
-    fullName:    Array.isArray(u.employee_profiles)
-                   ? u.employee_profiles[0]?.full_name
-                   : u.employee_profiles?.full_name ?? "—",
-    lastLoginAt: u.last_login_at,
-    createdAt:   u.created_at,
-  }));
+  const admins = (data ?? []).map((u: any) => {
+    // employee_profiles can be null (no profile), an object, or an array
+    const profiles = u.employee_profiles;
+    let fullName = "—";
+    if (Array.isArray(profiles) && profiles.length > 0) {
+      fullName = profiles[0]?.full_name ?? "—";
+    } else if (profiles && typeof profiles === "object" && !Array.isArray(profiles)) {
+      fullName = profiles.full_name ?? "—";
+    }
+
+    return {
+      id:          u.id,
+      email:       u.email,
+      phone:       u.phone ?? "—",
+      role:        u.role,
+      isActive:    u.is_active ?? true,
+      centerCode:  u.center_code ?? "—",
+      fullName,
+      lastLoginAt: u.last_login_at,
+      createdAt:   u.created_at,
+    };
+  });
 
   return ok({ admins });
 });

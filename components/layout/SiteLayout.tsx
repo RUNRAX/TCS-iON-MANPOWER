@@ -14,7 +14,6 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
-import MilkyWayBackground from "@/components/layout/MilkyWayBackground";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -354,7 +353,7 @@ export default function SiteLayout({
       suppressHydrationWarning
     >
       {/* ── Premium Realistic 3D Liquid Orbs Background (Client-only) ── */}
-      {mounted && (isSuperAdmin ? <MilkyWayBackground /> : <LiquidBackground />)}
+      {mounted && <LiquidBackground />}
 
       {/* ── Sidebar ── */}
       <aside
@@ -369,35 +368,28 @@ export default function SiteLayout({
           transition: "background 0.4s cubic-bezier(0.22,1,0.36,1), border-color 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        {/* ── Sidebar Aurora Wave ── */}
+        {/* ── Sidebar Abstract Geometric Pattern ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Aurora gradient layer 1 */}
+          {/* Abstract diagonal mesh — subtle geometric lines */}
+          <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, opacity: dark ? 0.06 : 0.04 }}>
+            <defs>
+              <pattern id="abstract-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 40" stroke="var(--tc-primary)" strokeWidth="0.5" fill="none" />
+                <path d="M 20 0 L 0 20" stroke="var(--tc-secondary)" strokeWidth="0.3" fill="none" />
+                <circle cx="20" cy="20" r="1" fill="var(--tc-accent)" opacity="0.4" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#abstract-grid)" />
+          </svg>
+          {/* Corner accent — top-left radial */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(160deg, color-mix(in srgb, var(--tc-primary) 18%, transparent) 0%, transparent 40%, color-mix(in srgb, var(--tc-secondary) 14%, transparent) 70%, transparent 100%)`,
-            animation: "auroraShift1 12s ease-in-out infinite",
-            willChange: "opacity", transform: "translateZ(0)",
+            position: "absolute", top: 0, left: 0, width: "60%", height: "40%",
+            background: `radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--tc-primary) 12%, transparent) 0%, transparent 70%)`,
           }} />
-          {/* Aurora gradient layer 2 — counter-flow */}
+          {/* Corner accent — bottom-right radial */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(340deg, transparent 0%, color-mix(in srgb, var(--tc-accent) 12%, transparent) 30%, transparent 60%, color-mix(in srgb, var(--tc-primary) 16%, transparent) 90%)`,
-            animation: "auroraShift2 16s ease-in-out infinite",
-            willChange: "opacity", transform: "translateZ(0)",
-          }} />
-          {/* Aurora gradient layer 3 — diagonal sweep */}
-          <div style={{
-            position: "absolute", inset: "-50%",
-            background: `conic-gradient(from 180deg at 50% 50%, color-mix(in srgb, var(--tc-primary) 10%, transparent) 0deg, transparent 60deg, color-mix(in srgb, var(--tc-secondary) 8%, transparent) 120deg, transparent 180deg, color-mix(in srgb, var(--tc-accent) 10%, transparent) 240deg, transparent 300deg, color-mix(in srgb, var(--tc-primary) 10%, transparent) 360deg)`,
-            animation: "auroraRotate 25s linear infinite",
-            willChange: "transform", transform: "translateZ(0)",
-          }} />
-          {/* Soft edge vignette for depth */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: dark
-              ? "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(0,0,0,0.15) 100%)"
-              : "radial-gradient(ellipse at 50% 0%, transparent 0%, rgba(255,255,255,0.25) 100%)",
+            position: "absolute", bottom: 0, right: 0, width: "50%", height: "35%",
+            background: `radial-gradient(ellipse at 100% 100%, color-mix(in srgb, var(--tc-secondary) 10%, transparent) 0%, transparent 70%)`,
           }} />
         </div>
         {/* Inner top sheen */}
@@ -571,8 +563,8 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50 px-3 md:px-5 lg:px-6" style={{ position: "sticky", top: 0 }}>
-            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]">
+          <div className="z-50 px-3 md:px-5 lg:px-6" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "hidden" }}>
               {/* ── Background Layer (Smooth GPU Opacity Crossfade) ── */}
               <motion.div
                 initial={{ opacity: 0 }}

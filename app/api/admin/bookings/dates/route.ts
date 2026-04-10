@@ -11,6 +11,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
   let q = supabase
     .from("exam_shifts")
     .select("exam_date, status, title")
+    .neq("status", "cancelled")
     .order("exam_date");
     
   if (userRole !== "super_admin") {

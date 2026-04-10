@@ -378,11 +378,14 @@ export default function AdminBookingsPage() {
             display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column",
           }}>
           {day}
-          {examInfo && examInfo.statuses.includes("completed") && (
+          {examInfo && (
             <span style={{
               position: "absolute", bottom: 3, left: "50%", transform: "translateX(-50%)",
               width: 5, height: 5, borderRadius: "50%",
-              background: isSelected ? "rgba(255,255,255,0.8)" : "var(--tc-primary)",
+              background: isSelected ? "rgba(255,255,255,0.8)"
+                : examInfo.statuses.includes("completed") ? "#22c55e"
+                : examInfo.statuses.includes("published") ? "var(--tc-primary)"
+                : "var(--tc-accent)",
               boxShadow: `0 0 4px currentColor`,
             }} />
           )}
@@ -455,7 +458,9 @@ export default function AdminBookingsPage() {
                 <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${border}` }}>
                   <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: textMuted, marginBottom: 8, textTransform: "uppercase" }}>Legend</p>
                   {[
-                    { color: "var(--tc-primary)",  label: "Completed shift" },
+                    { color: "#22c55e",  label: "Completed shift" },
+                    { color: "var(--tc-primary)",  label: "Published shift" },
+                    { color: "var(--tc-accent)",  label: "Draft shift" },
                   ].map(l => (
                     <div key={l.label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
                       <div style={{ width: 6, height: 6, borderRadius: "50%", background: l.color, flexShrink: 0 }} />
