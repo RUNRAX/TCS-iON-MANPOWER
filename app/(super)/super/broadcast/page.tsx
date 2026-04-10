@@ -33,9 +33,11 @@ import {
 
 /* ── Master palette ───────────────────────────────────────────────────────── */
 const MASTER_PALETTE = {
-  primary: "#1a6fff",
-  secondary: "#0a3fa8",
-  accent: "#67e8f9",
+  primary: "var(--tc-primary)",
+  secondary: "var(--tc-secondary)",
+  accent: "var(--tc-accent)",
+  glow: "color-mix(in srgb, var(--tc-primary) 18%, transparent)",
+  glowStrong: "color-mix(in srgb, var(--tc-primary) 35%, transparent)",
 };
 
 /* ── Target options ───────────────────────────────────────────────────────── */
@@ -165,7 +167,7 @@ export default function SuperBroadcastPage() {
               width: 40, height: 40, borderRadius: 12,
               background: `linear-gradient(135deg, ${MASTER_PALETTE.primary}, ${MASTER_PALETTE.secondary})`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 4px 16px rgba(26,111,255,0.35)",
+              boxShadow: "0 4px 16px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
             }}>
               <Radio size={18} color="#fff" />
             </div>
@@ -207,7 +209,7 @@ export default function SuperBroadcastPage() {
                         padding: "14px 10px",
                         borderRadius: 14,
                         background: selected
-                          ? (dark ? "rgba(26,111,255,0.12)" : "rgba(26,111,255,0.06)")
+                          ? (dark ? "color-mix(in srgb, var(--tc-primary) 12%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)")
                           : (dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)"),
                         border: selected
                           ? `2px solid ${MASTER_PALETTE.accent}`
@@ -285,9 +287,9 @@ export default function SuperBroadcastPage() {
                 }}>MESSAGE BODY</p>
                 <span style={{
                   fontSize: 9, padding: "2px 8px", borderRadius: 4,
-                  background: dark ? "rgba(26,111,255,0.10)" : "rgba(26,111,255,0.06)",
+                  background: dark ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)",
                   color: MASTER_PALETTE.accent, fontFamily: "var(--font-jetbrains-mono)",
-                  border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.15)"}`,
+                  border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "color-mix(in srgb, var(--tc-primary) 15%, transparent)"}`,
                 }}>
                   {"{name}"} = recipient name
                 </span>
@@ -336,7 +338,7 @@ export default function SuperBroadcastPage() {
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.03, boxShadow: "0 12px 40px rgba(26,111,255,0.50)" }}
+                whileHover={{ scale: 1.03, boxShadow: "0 12px 40px color-mix(in srgb, var(--tc-primary) 50%, transparent)" }}
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSend}
                 disabled={sending || !subject.trim() || message.length < 10}
@@ -348,7 +350,7 @@ export default function SuperBroadcastPage() {
                   border: "none", borderRadius: 14, padding: "12px 28px",
                   fontSize: 14, fontWeight: 700, cursor: sending ? "wait" : "pointer",
                   display: "flex", alignItems: "center", gap: 10,
-                  boxShadow: sending ? "none" : "0 6px 24px rgba(26,111,255,0.35), inset 0 1px 0 rgba(255,255,255,0.20)",
+                  boxShadow: sending ? "none" : "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)",
                   transition: "all 0.2s ease",
                 }}
               >
@@ -460,8 +462,8 @@ export default function SuperBroadcastPage() {
             {/* Placeholder hint */}
             <div style={{
               marginTop: 14, padding: "10px 14px", borderRadius: 10,
-              background: dark ? "rgba(26,111,255,0.06)" : "rgba(26,111,255,0.03)",
-              border: `1px solid ${dark ? "rgba(26,111,255,0.12)" : "rgba(26,111,255,0.10)"}`,
+              background: dark ? "color-mix(in srgb, var(--tc-primary) 6%, transparent)" : "color-mix(in srgb, var(--tc-primary) 3%, transparent)",
+              border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 12%, transparent)" : "color-mix(in srgb, var(--tc-primary) 10%, transparent)"}`,
             }}>
               <p style={{ fontSize: 11, color: dimText, lineHeight: 1.5 }}>
                 <strong style={{ color: MASTER_PALETTE.accent }}>Placeholders:</strong>{" "}
@@ -513,7 +515,7 @@ export default function SuperBroadcastPage() {
                     const after = log.after_value ?? {};
                     return (
                       <tr key={log.id}
-                        onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(26,111,255,0.04)" : "rgba(20,80,200,0.03)")}
+                        onMouseEnter={e => (e.currentTarget.style.background = dark ? "color-mix(in srgb, var(--tc-primary) 4%, transparent)" : "rgba(20,80,200,0.03)")}
                         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                         style={{ transition: "background 0.15s ease" }}>
                         <td style={{
@@ -535,9 +537,9 @@ export default function SuperBroadcastPage() {
                         }}>
                           <span style={{
                             fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6,
-                            background: dark ? "rgba(26,111,255,0.10)" : "rgba(26,111,255,0.06)",
+                            background: dark ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)",
                             color: MASTER_PALETTE.accent, fontFamily: "var(--font-jetbrains-mono)",
-                            border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.15)"}`,
+                            border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "color-mix(in srgb, var(--tc-primary) 15%, transparent)"}`,
                           }}>{after.targets ?? "—"}</span>
                         </td>
                         <td style={{

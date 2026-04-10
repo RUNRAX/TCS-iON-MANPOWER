@@ -29,11 +29,11 @@ import {
 
 /* ── Master palette ───────────────────────────────────────────────────────── */
 const MASTER_PALETTE = {
-  primary: "#1a6fff",
-  secondary: "#0a3fa8",
-  accent: "#67e8f9",
-  glow: "rgba(26,111,255,0.18)",
-  glowStrong: "rgba(26,111,255,0.35)",
+  primary: "var(--tc-primary)",
+  secondary: "var(--tc-secondary)",
+  accent: "var(--tc-accent)",
+  glow: "color-mix(in srgb, var(--tc-primary) 18%, transparent)",
+  glowStrong: "color-mix(in srgb, var(--tc-primary) 35%, transparent)",
 };
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
@@ -294,7 +294,7 @@ export default function SuperDashboardPage() {
                 variants={item}
                 whileHover={{
                   y: -3,
-                  boxShadow: `0 20px 60px rgba(26,111,255,0.25), ${masterGlass.boxShadow}`,
+                  boxShadow: `0 20px 60px color-mix(in srgb, var(--tc-primary) 25%, transparent), ${masterGlass.boxShadow}`,
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 style={{
@@ -329,7 +329,7 @@ export default function SuperDashboardPage() {
                     height: 2,
                     borderRadius: 2,
                     background:
-                      "linear-gradient(90deg, transparent, #1a6fff, #67e8f9, #1a6fff, transparent)",
+                      "linear-gradient(90deg, transparent, var(--tc-primary), var(--tc-accent), var(--tc-primary), transparent)",
                     opacity: 0.6,
                   }}
                 />
@@ -453,7 +453,7 @@ export default function SuperDashboardPage() {
                         key={code}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background = dark
-                            ? "rgba(26,111,255,0.06)"
+                            ? "color-mix(in srgb, var(--tc-primary) 6%, transparent)"
                             : "rgba(20,80,200,0.04)")
                         }
                         onMouseLeave={(e) =>
@@ -533,9 +533,9 @@ export default function SuperDashboardPage() {
                   padding: "5px 12px",
                   borderRadius: 8,
                   background: dark
-                    ? "rgba(26,111,255,0.15)"
-                    : "rgba(26,111,255,0.08)",
-                  border: `1px solid ${dark ? "rgba(26,111,255,0.25)" : "rgba(26,111,255,0.20)"}`,
+                    ? "color-mix(in srgb, var(--tc-primary) 15%, transparent)"
+                    : "color-mix(in srgb, var(--tc-primary) 8%, transparent)",
+                  border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 25%, transparent)" : "color-mix(in srgb, var(--tc-primary) 20%, transparent)"}`,
                 }}
               >
                 <Sparkles size={12} color={MASTER_PALETTE.accent} />
@@ -616,7 +616,7 @@ export default function SuperDashboardPage() {
                 key={action.label}
                 whileHover={{
                   scale: 1.02,
-                  boxShadow: `0 12px 40px rgba(26,111,255,0.30), ${masterGlass.boxShadow}`,
+                  boxShadow: `0 12px 40px color-mix(in srgb, var(--tc-primary) 30%, transparent), ${masterGlass.boxShadow}`,
                 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
@@ -646,7 +646,7 @@ export default function SuperDashboardPage() {
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
-                    boxShadow: `0 4px 12px rgba(26,111,255,0.30)`,
+                    boxShadow: `0 4px 12px color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
                   }}
                 >
                   <action.icon size={16} color="#fff" />

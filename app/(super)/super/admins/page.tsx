@@ -31,9 +31,11 @@ import {
 
 /* ── Master palette ───────────────────────────────────────────────────────── */
 const MASTER_PALETTE = {
-  primary: "#1a6fff",
-  secondary: "#0a3fa8",
-  accent: "#67e8f9",
+  primary: "var(--tc-primary)",
+  secondary: "var(--tc-secondary)",
+  accent: "var(--tc-accent)",
+  glow: "color-mix(in srgb, var(--tc-primary) 18%, transparent)",
+  glowStrong: "color-mix(in srgb, var(--tc-primary) 35%, transparent)",
 };
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
@@ -169,14 +171,14 @@ export default function SuperAdminsPage() {
           </div>
           {/* Create button */}
           <motion.button
-            whileHover={{ scale: 1.02, boxShadow: "0 12px 40px rgba(26,111,255,0.50)" }}
+            whileHover={{ scale: 1.02, boxShadow: "0 12px 40px color-mix(in srgb, var(--tc-primary) 50%, transparent)" }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setShowCreate(true)}
             style={{
               background: `linear-gradient(135deg, ${MASTER_PALETTE.primary}, ${MASTER_PALETTE.secondary})`,
               color: "#fff", border: "none", borderRadius: 14, padding: "10px 20px",
               fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-              boxShadow: "0 6px 24px rgba(26,111,255,0.35), inset 0 1px 0 rgba(255,255,255,0.20)",
+              boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)",
             }}
           >
             <Plus size={16} /> Create New Admin
@@ -189,7 +191,7 @@ export default function SuperAdminsPage() {
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} style={{ ...masterGlass, padding: 20, height: 80, animation: "shimmer 1.4s ease infinite",
                 background: dark
-                  ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, rgba(26,111,255,0.12) 50%, rgba(10,30,80,0.4) 75%)"
+                  ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, color-mix(in srgb, var(--tc-primary) 12%, transparent) 50%, rgba(10,30,80,0.4) 75%)"
                   : "linear-gradient(90deg, rgba(200,220,255,0.4) 25%, rgba(100,180,255,0.2) 50%, rgba(200,220,255,0.4) 75%)",
                 backgroundSize: "400px 100%",
               }} />
@@ -201,16 +203,16 @@ export default function SuperAdminsPage() {
           ) : (
             filtered.map((admin: any) => (
               <motion.div key={admin.id} variants={item}
-                whileHover={{ y: -2, boxShadow: `0 16px 48px rgba(26,111,255,0.15), ${masterGlass.boxShadow}` }}
+                whileHover={{ y: -2, boxShadow: `0 16px 48px color-mix(in srgb, var(--tc-primary) 15%, transparent), ${masterGlass.boxShadow}` }}
                 style={{ ...masterGlass, padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, cursor: "default" }}>
                 {/* Avatar */}
                 <div style={{
                   width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                   background: admin.role === "super_admin"
-                    ? "linear-gradient(135deg, #1a6fff, #0a3fa8)"
-                    : `linear-gradient(135deg, ${MASTER_PALETTE.primary}80, ${MASTER_PALETTE.secondary}80)`,
+                    ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))"
+                    : `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 50%, transparent), color-mix(in srgb, var(--tc-secondary) 50%, transparent))`,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: `0 4px 12px rgba(26,111,255,0.25)`,
+                  boxShadow: `0 4px 12px color-mix(in srgb, var(--tc-primary) 35%, transparent)`,
                   fontSize: 16, fontWeight: 800, color: "#fff",
                 }}>
                   {admin.fullName?.[0]?.toUpperCase() ?? "A"}
@@ -226,8 +228,8 @@ export default function SuperAdminsPage() {
                       <span style={{
                         fontSize: 9, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase",
                         padding: "2px 8px", borderRadius: 6, color: MASTER_PALETTE.accent,
-                        background: dark ? "rgba(26,111,255,0.15)" : "rgba(26,111,255,0.08)",
-                        border: `1px solid ${dark ? "rgba(26,111,255,0.25)" : "rgba(26,111,255,0.20)"}`,
+                        background: dark ? "color-mix(in srgb, var(--tc-primary) 15%, transparent)" : "color-mix(in srgb, var(--tc-primary) 8%, transparent)",
+                        border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 25%, transparent)" : "color-mix(in srgb, var(--tc-primary) 20%, transparent)"}`,
                         fontFamily: "var(--font-jetbrains-mono)",
                       }}>SUPER</span>
                     )}
@@ -238,8 +240,8 @@ export default function SuperAdminsPage() {
                 {/* Center code badge */}
                 <div style={{
                   padding: "6px 14px", borderRadius: 8,
-                  background: dark ? "rgba(26,111,255,0.10)" : "rgba(26,111,255,0.06)",
-                  border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.18)"}`,
+                  background: dark ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)",
+                  border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "color-mix(in srgb, var(--tc-primary) 18%, transparent)"}`,
                 }}>
                   <span style={{
                     fontSize: 13, fontWeight: 700, color: MASTER_PALETTE.accent,
@@ -485,8 +487,8 @@ function CreateAdminModal({
             </p>
             <div style={{
               padding: "20px", borderRadius: 16,
-              background: dark ? "rgba(26,111,255,0.08)" : "rgba(26,111,255,0.04)",
-              border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.15)"}`,
+              background: dark ? "color-mix(in srgb, var(--tc-primary) 8%, transparent)" : "color-mix(in srgb, var(--tc-primary) 4%, transparent)",
+              border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "color-mix(in srgb, var(--tc-primary) 15%, transparent)"}`,
               display: "flex", flexDirection: "column", gap: 12,
             }}>
               <div>
@@ -588,7 +590,7 @@ function CreateAdminModal({
 
             {/* Submit */}
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 12px 40px rgba(26,111,255,0.50)" }}
+              whileHover={{ scale: 1.02, boxShadow: "0 12px 40px color-mix(in srgb, var(--tc-primary) 50%, transparent)" }}
               whileTap={{ scale: 0.97 }}
               onClick={handleSubmit}
               disabled={submitting || centerAvailable === false}
@@ -599,7 +601,7 @@ function CreateAdminModal({
                 color: submitting || centerAvailable === false ? dimText : "#fff",
                 border: "none", borderRadius: 14, padding: "14px 24px",
                 fontSize: 14, fontWeight: 700, cursor: submitting ? "wait" : "pointer",
-                boxShadow: submitting ? "none" : "0 6px 24px rgba(26,111,255,0.35), inset 0 1px 0 rgba(255,255,255,0.20)",
+                boxShadow: submitting ? "none" : "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.20)",
                 marginTop: 8, transition: "all 0.2s ease",
               }}
             >

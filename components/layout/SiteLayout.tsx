@@ -14,6 +14,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
+import AbstractTorusBackground from "@/components/layout/AbstractTorusBackground";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -169,8 +170,8 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: "#a855f7",
-            boxShadow: "0 0 8px rgba(168,85,247,0.6)",
+            background: "var(--tc-primary)",
+            boxShadow: "0 0 8px color-mix(in srgb, var(--tc-primary) 60%, transparent)",
           }}
         />
       )}
@@ -352,8 +353,8 @@ export default function SiteLayout({
       }}
       suppressHydrationWarning
     >
-      {/* ── Premium Realistic 3D Liquid Orbs Background (Client-only) ── */}
-      {mounted && <LiquidBackground />}
+      {/* ── Background (Client-only) ── */}
+      {mounted && (isSuperAdmin ? <AbstractTorusBackground /> : <LiquidBackground />)}
 
       {/* ── Sidebar ── */}
       <aside
@@ -408,17 +409,17 @@ export default function SiteLayout({
             <div style={{
               padding: "10px 12px", borderRadius: 14, marginBottom: 0,
               background: dark
-                ? "linear-gradient(135deg, rgba(10,30,100,0.9), rgba(4,12,50,0.95))"
-                : "linear-gradient(135deg, rgba(20,80,180,0.15), rgba(10,40,120,0.08))",
-              border: "1px solid rgba(100,180,255,0.20)",
-              boxShadow: "0 0 20px rgba(30,100,255,0.15)",
+                ? `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 35%, rgba(0,0,0,0.9)), color-mix(in srgb, var(--tc-secondary) 20%, rgba(0,0,0,0.95)))`
+                : `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 15%, transparent), color-mix(in srgb, var(--tc-secondary) 8%, transparent))`,
+              border: `1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)`,
+              boxShadow: `0 0 20px color-mix(in srgb, var(--tc-primary) 15%, transparent)`,
             }}>
               <p style={{
                 fontSize: 9, fontWeight: 800, letterSpacing: 3,
-                textTransform: "uppercase", color: "#67e8f9",
+                textTransform: "uppercase", color: "var(--tc-accent)",
                 fontFamily: "var(--font-jetbrains-mono)",
               }}>◈ MASTER CONTROL</p>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#a0d4ff", marginTop: 2 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--tc-primary)", marginTop: 2 }}>
                 super_admin
               </p>
             </div>
@@ -563,7 +564,12 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50 px-3 md:px-5 lg:px-6" style={{ position: "sticky", top: 0, zIndex: 50 }}>
+          <div className="z-50 px-3 md:px-5 lg:px-6" style={{
+            position: "sticky", top: 0, zIndex: 50,
+            /* Mask that fades content scrolling behind the curved header edges */
+            maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+          }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "hidden" }}>
               {/* ── Background Layer (Smooth GPU Opacity Crossfade) ── */}
               <motion.div

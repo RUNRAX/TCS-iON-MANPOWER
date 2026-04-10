@@ -177,7 +177,7 @@ export default function SuperActivityPage() {
               <div key={i} style={{
                 ...masterGlass, borderRadius: 14, padding: "14px 18px", height: 56,
                 background: dark
-                  ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, rgba(26,111,255,0.12) 50%, rgba(10,30,80,0.4) 75%)"
+                  ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, color-mix(in srgb, var(--tc-primary) 12%, transparent) 50%, rgba(10,30,80,0.4) 75%)"
                   : "linear-gradient(90deg, rgba(200,220,255,0.4) 25%, rgba(100,180,255,0.2) 50%, rgba(200,220,255,0.4) 75%)",
                 backgroundSize: "400px 100%", animation: "shimmer 1.4s ease infinite",
               }} />
@@ -198,7 +198,7 @@ export default function SuperActivityPage() {
                     onClick={() => setExpandedId(isExpanded ? null : log.id)}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background = dark
-                        ? "rgba(26,111,255,0.04)"
+                        ? "color-mix(in srgb, var(--tc-primary) 4%, transparent)"
                         : "rgba(20,80,200,0.03)")
                     }
                     onMouseLeave={(e) =>
@@ -251,7 +251,7 @@ export default function SuperActivityPage() {
                       {userInfo?.center_code && (
                         <span style={{
                           fontSize: 10, fontWeight: 700, marginLeft: 6, padding: "1px 6px",
-                          borderRadius: 4, background: dark ? "rgba(26,111,255,0.10)" : "rgba(26,111,255,0.06)",
+                          borderRadius: 4, background: dark ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)",
                           color: MASTER_PALETTE.accent, fontFamily: "var(--font-jetbrains-mono)",
                         }}>{userInfo.center_code}</span>
                       )}
@@ -344,8 +344,8 @@ export default function SuperActivityPage() {
             <span style={{
               padding: "8px 16px", borderRadius: 10, fontSize: 12, fontWeight: 700,
               color: MASTER_PALETTE.accent, fontFamily: "var(--font-jetbrains-mono)",
-              background: dark ? "rgba(26,111,255,0.10)" : "rgba(26,111,255,0.06)",
-              border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.15)"}`,
+              background: dark ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "color-mix(in srgb, var(--tc-primary) 6%, transparent)",
+              border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "color-mix(in srgb, var(--tc-primary) 15%, transparent)"}`,
             }}>{page} / {totalPages}</span>
             <motion.button
               whileTap={{ scale: 0.95 }}

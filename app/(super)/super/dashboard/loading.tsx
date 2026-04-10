@@ -24,7 +24,7 @@ function ShimmerBlock({
         height,
         borderRadius: radius,
         background: dark
-          ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, rgba(26,111,255,0.12) 50%, rgba(10,30,80,0.4) 75%)"
+          ? "linear-gradient(90deg, rgba(10,30,80,0.4) 25%, color-mix(in srgb, var(--tc-primary) 12%, transparent) 50%, rgba(10,30,80,0.4) 75%)"
           : "linear-gradient(90deg, rgba(200,220,255,0.4) 25%, rgba(100,180,255,0.2) 50%, rgba(200,220,255,0.4) 75%)",
         backgroundSize: "400px 100%",
         animation: "shimmer 1.4s ease infinite",
