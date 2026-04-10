@@ -14,6 +14,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
+import MilkyWayBackground from "@/components/layout/MilkyWayBackground";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -353,7 +354,7 @@ export default function SiteLayout({
       suppressHydrationWarning
     >
       {/* ── Premium Realistic 3D Liquid Orbs Background (Client-only) ── */}
-      {mounted && <LiquidBackground />}
+      {mounted && (isSuperAdmin ? <MilkyWayBackground /> : <LiquidBackground />)}
 
       {/* ── Sidebar ── */}
       <aside

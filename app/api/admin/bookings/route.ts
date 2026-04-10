@@ -93,7 +93,7 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
     employeeId: string; shiftId: string;
     status?: string; dutyRole?: string; duty_role?: string; notes?: string;
   };
-  const resolvedRole = dutyRole ?? duty_role ?? null;
+  const resolvedRole = (dutyRole || duty_role) ? (dutyRole || duty_role) : null;
 
   if (!employeeId || !shiftId) return badRequest("employeeId and shiftId required");
 
