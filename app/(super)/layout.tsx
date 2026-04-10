@@ -2,7 +2,7 @@
 /**
  * app/(super)/layout.tsx — Cinematic Master Admin Layout
  *
- * Fully dynamic Glass Frost Theme with Fire Background aesthetics.
+ * Fully dynamic Glass Frost Theme with Orbital Rings Background.
  * Verifies super_admin role via /api/auth/me before rendering.
  */
 
@@ -11,7 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
-import FireBackground from "@/components/layout/FireBackground";
+import OrbitalRingsBackground from "@/components/layout/OrbitalRingsBackground";
 import {
   LayoutDashboard,
   Users,
@@ -20,6 +20,7 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
+  BarChart3,
 } from "lucide-react";
 
 /* ── Master admin nav ─────────────────────────────────────────────────────── */
@@ -28,6 +29,7 @@ const superNav = [
   { label: "Admin Accounts", icon: Users, href: "/super/admins" },
   { label: "System Activity", icon: Activity, href: "/super/activity" },
   { label: "Broadcast", icon: Radio, href: "/super/broadcast" },
+  { label: "Reports", icon: BarChart3, href: "/super/reports" },
   { label: "Platform Settings", icon: Settings, href: "/super/settings" },
 ];
 
@@ -90,8 +92,8 @@ export default function SuperLayout({ children }: { children: React.ReactNode })
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", position: "relative" }}>
-      {/* ── Dynamic Fire Background ── */}
-      <FireBackground />
+      {/* ── Orbital Rings Background ── */}
+      <OrbitalRingsBackground />
 
       {/* ── Sidebar ── */}
       <motion.aside
@@ -216,47 +218,6 @@ export default function SuperLayout({ children }: { children: React.ReactNode })
               </Link>
             );
           })}
-
-          {/* ── Separator line ── */}
-          <div
-            style={{
-              height: 1,
-              margin: "12px 8px",
-              background: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)",
-            }}
-          />
-
-          {/* ── Back to Admin Panel link ── */}
-          <Link href="/admin/dashboard" style={{ textDecoration: "none" }}>
-            <motion.div
-              whileHover={{ x: 3, scale: 1.012 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "10px 14px",
-                borderRadius: 13,
-                cursor: "pointer",
-                background: "transparent",
-                border: "1px solid transparent",
-                transition: "all 0.22s cubic-bezier(0.4,0,0.2,1)",
-              }}
-            >
-              <LayoutDashboard size={16} color="var(--tc-primary)" />
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: "var(--tc-primary)",
-                  letterSpacing: 0.2,
-                }}
-              >
-                Admin Panel
-              </span>
-            </motion.div>
-          </Link>
         </nav>
 
         {/* ── Footer — user info ── */}

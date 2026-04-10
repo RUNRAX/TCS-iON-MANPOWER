@@ -2,15 +2,16 @@
 /**
  * app/(super)/super/settings/page.tsx — Platform Settings
  *
+ * Aesthetic Engine (glass frost controls + theme picker),
  * Environment status checker, active center codes list,
- * security settings, Theme Engine override, and the Danger Zone.
+ * security settings, and the Danger Zone.
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useTheme } from "@/lib/context/ThemeContext";
+import { useTheme, THEMES } from "@/lib/context/ThemeContext";
 import ThemePanel from "@/components/ThemePanel";
 import {
   Shield,
@@ -23,6 +24,11 @@ import {
   Database,
   RefreshCw,
   Palette,
+  Sun,
+  Moon,
+  Sparkles,
+  Eye,
+  Layers,
 } from "lucide-react";
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
@@ -53,7 +59,14 @@ const ENV_VARS = [
 ] as const;
 
 export default function SuperSettingsPage() {
-  const { dark } = useTheme();
+  const {
+    dark, setDark,
+    glassFrost, setGlassFrost,
+    glassBlur, setGlassBlur,
+    glassOpacity, setGlassOpacity,
+    themeKey, setThemeKey,
+    theme,
+  } = useTheme();
 
   // Glass frost bindings
   const dimText = dark
@@ -109,6 +122,52 @@ export default function SuperSettingsPage() {
     return !!envKeys[key];
   };
 
+  /* ── Slider component ─────────────────────────────────────────────────── */
+  const Slider = ({ label, value, onChange, min = 0, max = 100, icon: Icon }: {
+    label: string; value: number; onChange: (v: number) => void;
+    min?: number; max?: number; icon: React.ElementType;
+  }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+      <Icon size={14} color="var(--tc-primary)" style={{ flexShrink: 0 }} />
+      <span style={{
+        fontSize: 11, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)",
+        width: 70, flexShrink: 0, letterSpacing: 0.5,
+      }}>{label}</span>
+      <div style={{ flex: 1, position: "relative", height: 6, borderRadius: 3, overflow: "hidden",
+        background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}>
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0,
+          width: `${((value - min) / (max - min)) * 100}%`,
+          background: `linear-gradient(90deg, var(--tc-primary), var(--tc-secondary))`,
+          borderRadius: 3, transition: "width 0.15s ease",
+        }} />
+      </div>
+      <input
+        type="range" min={min} max={max} value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{
+          position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
+          opacity: 0, cursor: "pointer",
+        }}
+      />
+      {/* Overlay invisible range input */}
+      <div style={{ position: "relative", flex: 1, height: 24, marginLeft: -14, marginRight: -14 }}>
+        <input
+          type="range" min={min} max={max} value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={{
+            position: "absolute", left: 0, top: 0, width: "100%", height: "100%",
+            opacity: 0, cursor: "pointer", zIndex: 2, margin: 0,
+          }}
+        />
+      </div>
+      <span style={{
+        fontSize: 12, fontWeight: 700, color: "var(--tc-accent)",
+        fontFamily: "var(--font-jetbrains-mono)", width: 32, textAlign: "right", flexShrink: 0,
+      }}>{value}</span>
+    </div>
+  );
+
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
       <motion.div
@@ -124,7 +183,10 @@ export default function SuperSettingsPage() {
         }}
       >
         {/* ── Header ── */}
-        <motion.div variants={item} style={{ marginBottom: 32, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <motion.div variants={item} style={{
+          marginBottom: 32, display: "flex", justifyContent: "space-between", alignItems: "center",
+          position: "relative", zIndex: 100,
+        }}>
           <div>
             <h1
               style={{
@@ -150,13 +212,232 @@ export default function SuperSettingsPage() {
             </p>
           </div>
           
-          {/* Aesthetic Engine settings */}
+          {/* Quick theme toggle in header */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ textAlign: "right" }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--tc-primary)", letterSpacing: 1, textTransform: "uppercase" }}>Theme Engine</p>
               <p style={{ fontSize: 9, color: dimText }}>Aesthetic Control</p>
             </div>
             <ThemePanel size="md" />
+          </div>
+        </motion.div>
+
+        {/* ═══════════════════════════════════════════════════════
+            SECTION 0: AESTHETIC ENGINE — Glass Frost Controls
+            ═══════════════════════════════════════════════════════ */}
+        <motion.div variants={item} style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20, position: "relative", zIndex: 50 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22 }}>
+            <Sparkles size={16} color="var(--tc-accent)" />
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: 2,
+                textTransform: "uppercase",
+                color: dark ? "#fff" : "var(--tc-primary)",
+                fontFamily: "var(--font-jetbrains-mono)",
+              }}
+            >
+              AESTHETIC ENGINE
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {/* Left — Toggles */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Dark mode toggle */}
+              <div
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "14px 18px", borderRadius: 14,
+                  background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {dark ? <Moon size={14} color="var(--tc-primary)" /> : <Sun size={14} color="var(--tc-primary)" />}
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
+                      {dark ? "Dark Mode" : "Light Mode"}
+                    </p>
+                    <p style={{ fontSize: 10, color: dimText, marginTop: 1 }}>Toggle appearance</p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setDark(!dark)}
+                  style={{
+                    width: 44, height: 24, borderRadius: 12, position: "relative", cursor: "pointer",
+                    background: dark
+                      ? `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`
+                      : "rgba(0,0,0,0.15)",
+                    border: "none", transition: "background 0.3s ease",
+                  }}
+                >
+                  <motion.div
+                    animate={{ left: dark ? 22 : 3 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    style={{
+                      position: "absolute", top: 3, width: 18, height: 18,
+                      borderRadius: "50%", background: "#fff",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                    }}
+                  />
+                </motion.button>
+              </div>
+
+              {/* Glass Frost toggle */}
+              <div
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "14px 18px", borderRadius: 14,
+                  background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Layers size={14} color="var(--tc-primary)" />
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
+                      Glass Frost Effect
+                    </p>
+                    <p style={{ fontSize: 10, color: dimText, marginTop: 1 }}>Frosted glass UI</p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setGlassFrost(!glassFrost)}
+                  style={{
+                    width: 44, height: 24, borderRadius: 12, position: "relative", cursor: "pointer",
+                    background: glassFrost
+                      ? `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`
+                      : "rgba(0,0,0,0.15)",
+                    border: "none", transition: "background 0.3s ease",
+                  }}
+                >
+                  <motion.div
+                    animate={{ left: glassFrost ? 22 : 3 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    style={{
+                      position: "absolute", top: 3, width: 18, height: 18,
+                      borderRadius: "50%", background: "#fff",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                    }}
+                  />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Right — Sliders + Theme indicator */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Blur control */}
+              <div
+                style={{
+                  padding: "14px 18px", borderRadius: 14,
+                  background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <Eye size={14} color="var(--tc-primary)" />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
+                    Blur Intensity
+                  </span>
+                  <span style={{
+                    marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "var(--tc-accent)",
+                    fontFamily: "var(--font-jetbrains-mono)",
+                  }}>{glassBlur}</span>
+                </div>
+                <div style={{ position: "relative", height: 6, borderRadius: 3 }}>
+                  <div style={{
+                    position: "absolute", inset: 0, borderRadius: 3,
+                    background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                  }} />
+                  <div style={{
+                    position: "absolute", left: 0, top: 0, bottom: 0,
+                    width: `${glassBlur}%`, borderRadius: 3,
+                    background: `linear-gradient(90deg, var(--tc-primary), var(--tc-secondary))`,
+                    transition: "width 0.15s ease",
+                  }} />
+                  <input
+                    type="range" min={0} max={100} value={glassBlur}
+                    onChange={(e) => setGlassBlur(Number(e.target.value))}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: 20, top: -7,
+                      opacity: 0, cursor: "pointer", margin: 0,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Opacity control */}
+              <div
+                style={{
+                  padding: "14px 18px", borderRadius: 14,
+                  background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                  border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                  <Palette size={14} color="var(--tc-primary)" />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
+                    Glass Opacity
+                  </span>
+                  <span style={{
+                    marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "var(--tc-accent)",
+                    fontFamily: "var(--font-jetbrains-mono)",
+                  }}>{glassOpacity}</span>
+                </div>
+                <div style={{ position: "relative", height: 6, borderRadius: 3 }}>
+                  <div style={{
+                    position: "absolute", inset: 0, borderRadius: 3,
+                    background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                  }} />
+                  <div style={{
+                    position: "absolute", left: 0, top: 0, bottom: 0,
+                    width: `${glassOpacity}%`, borderRadius: 3,
+                    background: `linear-gradient(90deg, var(--tc-primary), var(--tc-secondary))`,
+                    transition: "width 0.15s ease",
+                  }} />
+                  <input
+                    type="range" min={0} max={100} value={glassOpacity}
+                    onChange={(e) => setGlassOpacity(Number(e.target.value))}
+                    style={{
+                      position: "absolute", inset: 0, width: "100%", height: 20, top: -7,
+                      opacity: 0, cursor: "pointer", margin: 0,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Active theme indicator */}
+          <div style={{
+            marginTop: 16, padding: "10px 16px", borderRadius: 10,
+            background: `color-mix(in srgb, var(--tc-primary) 8%, transparent)`,
+            border: `1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)`,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: 6,
+                background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`,
+                boxShadow: `0 2px 8px color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
+              }} />
+              <span style={{
+                fontSize: 11, fontWeight: 700, color: "var(--tc-primary)",
+                letterSpacing: 1, textTransform: "uppercase",
+                fontFamily: "var(--font-jetbrains-mono)",
+              }}>
+                {THEMES[themeKey as keyof typeof THEMES]?.name ?? "Custom"}
+              </span>
+            </div>
+            <span style={{ fontSize: 10, color: dimText, fontFamily: "var(--font-jetbrains-mono)" }}>
+              Frost: {glassFrost ? "ON" : "OFF"} · Blur: {glassBlur} · Opacity: {glassOpacity}
+            </span>
           </div>
         </motion.div>
 

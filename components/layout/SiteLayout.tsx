@@ -50,8 +50,6 @@ const superAdminNav = [
   { label: "System Activity", icon: Activity,          href: "/super/activity" },
   { label: "Sys Broadcast",   icon: Radio,             href: "/super/broadcast" },
   { label: "Platform",        icon: Settings,          href: "/super/settings" },
-  // Separator: regular admin panel link (rendered with warm brand colour)
-  { label: "Admin Panel",     icon: LayoutDashboard,   href: "/admin/dashboard" },
 ];
 
 /* ── Helper: get greeting ────────────────────────────────────────────────── */
