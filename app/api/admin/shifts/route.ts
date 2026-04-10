@@ -22,7 +22,7 @@ const CreateSchema = z.object({
   notes:        z.string().optional(),
 });
 
-export const GET = withAdmin(async (request: NextRequest) => {
+export const GET = withAdmin(async (request: NextRequest, { userId, userRole }) => {
   const url    = new URL(request.url);
   const status = url.searchParams.get("status") ?? "all";
   const page   = Math.max(1, parseInt(url.searchParams.get("page") ?? "1"));
@@ -36,6 +36,8 @@ export const GET = withAdmin(async (request: NextRequest) => {
     .order("shift_number", { ascending: true });
 
   if (status !== "all") q = q.eq("status", status);
+  if (userRole !== "super_admin") q = q.eq("created_by", userId);
+  
   const from = (page - 1) * limit;
   const { data, error, count } = await q.range(from, from + limit - 1);
   if (error) { console.error("[Admin/Shifts GET]:", error); return serverError(); }

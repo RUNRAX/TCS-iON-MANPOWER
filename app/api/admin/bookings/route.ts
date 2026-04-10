@@ -9,7 +9,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { withAdmin, ok, created, badRequest, serverError } from "@/lib/utils/api";
 
 // GET: all employees + shifts for a given date
-export const GET = withAdmin(async (request: NextRequest) => {
+export const GET = withAdmin(async (request: NextRequest, { userId, userRole }) => {
   const url  = new URL(request.url);
   const date = url.searchParams.get("date");
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -19,22 +19,34 @@ export const GET = withAdmin(async (request: NextRequest) => {
   const supabase = createAdminClient();
 
   // 1. Shifts for this date
-  const { data: shifts, error: shiftErr } = await supabase
+  let shiftsQuery = supabase
     .from("exam_shifts")
     .select("id, title, shift_number, start_time, end_time, venue, status, max_employees")
     .eq("exam_date", date)
     .neq("status", "cancelled")
     .order("shift_number");
+  
+  if (userRole !== "super_admin") {
+    shiftsQuery = shiftsQuery.eq("created_by", userId);
+  }
+
+  const { data: shifts, error: shiftErr } = await shiftsQuery;
   if (shiftErr) { console.error("[Bookings GET shifts]:", shiftErr); return serverError(); }
 
   // 2. All approved employees
-  const { data: employees, error: empErr } = await supabase
+  let employeesQuery = supabase
     .from("employee_profiles")
     .select(`id, full_name, email, phone, user_id, status,
-             users!employee_profiles_user_id_fkey(id, email, is_active)`)
+             users(id, email, is_active)`)
     .eq("status", "approved")
     .eq("is_deleted", false)
     .order("full_name");
+
+  if (userRole !== "super_admin") {
+    employeesQuery = employeesQuery.eq("approved_by", userId);
+  }
+
+  const { data: employees, error: empErr } = await employeesQuery;
   if (empErr) { console.error("[Bookings GET employees]:", empErr); return serverError(); }
 
   // 3. Existing assignments for these shifts

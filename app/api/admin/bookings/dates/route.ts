@@ -5,12 +5,19 @@
 import { withAdmin, ok, serverError } from "@/lib/utils/api";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export const GET = withAdmin(async () => {
+export const GET = withAdmin(async (request, { userId, userRole }) => {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  
+  let q = supabase
     .from("exam_shifts")
     .select("exam_date, status, title")
     .order("exam_date");
+    
+  if (userRole !== "super_admin") {
+    q = q.eq("created_by", userId);
+  }
+
+  const { data, error } = await q;
   if (error) return serverError();
 
   // Deduplicate by date, keeping distinct statuses

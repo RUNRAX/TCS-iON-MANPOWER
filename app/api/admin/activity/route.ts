@@ -11,16 +11,21 @@ const ACTION_META: Record<string, { icon: string; label: string }> = {
   "notification.broadcast": { icon: "📣", label: "Broadcast sent" },
 };
 
-export const GET = withAdmin(async (request) => {
+export const GET = withAdmin(async (request, { userId, userRole }) => {
   const url = new URL(request.url);
   const limit = Math.min(20, parseInt(url.searchParams.get("limit") ?? "10"));
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
+  let q = supabase
     .from("audit_logs")
     .select("id, action, entity_type, entity_id, after_value, created_at")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false });
+
+  if (userRole !== "super_admin") {
+    q = q.eq("user_id", userId);
+  }
+
+  const { data, error } = await q.limit(limit);
 
   if (error) return serverError();
 

@@ -18,7 +18,7 @@ import { encrypt } from "@/lib/utils/encryption";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3018";
 
 // ── GET /api/admin/employees ─────────────────────────────────────────────────
-export const GET = withAdmin(async (request) => {
+export const GET = withAdmin(async (request, { userId, userRole }) => {
   const url    = new URL(request.url);
   const status = url.searchParams.get("status") ?? "all";
   const search = (url.searchParams.get("search") ?? "").trim();
@@ -32,17 +32,23 @@ export const GET = withAdmin(async (request) => {
   let matchedUserIds: string[] | null = null;
 
   if (search) {
-    const [userRes, profileRes] = await Promise.all([
-      supabase
-        .from("users")
-        .select("id")
-        .or("role.is.null,and(role.neq.admin,role.neq.super_admin)")
-        .or(`email.ilike.%${search}%,phone.ilike.%${search}%`),
-      supabase
-        .from("employee_profiles")
-        .select("user_id")
-        .or(`full_name.ilike.%${search}%,employee_code.ilike.%${search}%`),
-    ]);
+    let usersQuery = supabase
+      .from("users")
+      .select("id")
+      .or("role.is.null,and(role.neq.admin,role.neq.super_admin)")
+      .or(`email.ilike.%${search}%,phone.ilike.%${search}%`);
+    
+    let profilesQuery = supabase
+      .from("employee_profiles")
+      .select("user_id")
+      .or(`full_name.ilike.%${search}%,employee_code.ilike.%${search}%`);
+
+    if (userRole !== "super_admin") {
+      usersQuery = usersQuery.eq("created_by_admin", userId);
+      profilesQuery = profilesQuery.eq("approved_by", userId);
+    }
+
+    const [userRes, profileRes] = await Promise.all([usersQuery, profilesQuery]);
 
     const fromUsers    = (userRes.data ?? []).map((u: { id: string }) => u.id);
     const fromProfiles = (profileRes.data ?? []).map((p: { user_id: string }) => p.user_id);
@@ -58,7 +64,7 @@ export const GET = withAdmin(async (request) => {
     .from("users")
     .select(
       `id, email, phone, is_active, created_at,
-       employee_profiles!employee_profiles_user_id_fkey(
+       employee_profiles(
          id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
        )`,
@@ -66,6 +72,10 @@ export const GET = withAdmin(async (request) => {
     )
     .or("role.is.null,and(role.neq.admin,role.neq.super_admin)")
     .order("created_at", { ascending: false });
+
+  if (userRole !== "super_admin") {
+    query = query.eq("created_by_admin", userId);
+  }
 
   if (matchedUserIds !== null) {
     query = query.in("id", matchedUserIds);
