@@ -56,23 +56,17 @@ export default function SuperAdminsPage() {
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(null);
 
   // ── Style tokens
-  const iceBorder = dark ? "rgba(100,200,255,0.12)" : "rgba(80,160,255,0.25)";
-  const dimText = dark ? "rgba(160,200,255,0.50)" : "rgba(20,80,180,0.55)";
+  // Glass frost bindings
+  const dimText = dark
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
 
   const masterGlass = {
-    background: dark
-      ? `rgba(4, 8, 32, ${(0.78 * glassOpacity / 100).toFixed(2)})`
-      : `rgba(220, 235, 255, ${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    WebkitBackdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark
-      ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 24px 64px rgba(0,5,30,0.65), 0 4px 20px rgba(0,0,0,0.4)`
-      : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10), 0 2px 8px rgba(0,0,0,0.06)`,
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 
@@ -285,7 +279,7 @@ export default function SuperAdminsPage() {
                       }}
                       title={admin.isActive ? "Deactivate" : "Activate"}
                       style={{
-                        background: "transparent", border: `1px solid ${iceBorder}`,
+                        background: "transparent", border: "var(--spatial-glass-border)",
                         borderRadius: 8, padding: "6px 8px", cursor: "pointer",
                         color: admin.isActive ? "#ef4444" : "#22c55e",
                       }}
@@ -298,7 +292,7 @@ export default function SuperAdminsPage() {
                       onClick={() => resetMutation.mutate({ id: admin.id, email: admin.email })}
                       title="Reset password"
                       style={{
-                        background: "transparent", border: `1px solid ${iceBorder}`,
+                        background: "transparent", border: "var(--spatial-glass-border)",
                         borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: dimText,
                       }}
                     >
@@ -338,7 +332,7 @@ export default function SuperAdminsPage() {
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
                   <motion.button whileTap={{ scale: 0.95 }} onClick={() => setConfirmDeactivate(null)}
                     style={{
-                      background: "transparent", border: `1px solid ${iceBorder}`, borderRadius: 12,
+                      background: "transparent", border: "var(--spatial-glass-border)", borderRadius: 12,
                       padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer",
                       color: dark ? "#daeeff" : "#0a2060",
                     }}>Cancel</motion.button>
@@ -365,7 +359,6 @@ export default function SuperAdminsPage() {
           <CreateAdminModal
             dark={dark}
             masterGlass={masterGlass}
-            iceBorder={iceBorder}
             dimText={dimText}
             glassOpacity={glassOpacity}
             onClose={() => { setShowCreate(false); refetch(); }}
@@ -385,11 +378,10 @@ export default function SuperAdminsPage() {
    CREATE ADMIN MODAL — Full-screen frosted overlay
    ══════════════════════════════════════════════════════════════════════════════ */
 function CreateAdminModal({
-  dark, masterGlass, iceBorder, dimText, glassOpacity, onClose,
+  dark, masterGlass, dimText, glassOpacity, onClose,
 }: {
   dark: boolean;
   masterGlass: Record<string, any>;
-  iceBorder: string;
   dimText: string;
   glassOpacity: number;
   onClose: () => void;
@@ -506,7 +498,7 @@ function CreateAdminModal({
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
                   <p style={{ fontSize: 18, fontWeight: 800, color: "#ef4444", fontFamily: "var(--font-jetbrains-mono)", letterSpacing: 1 }}>{result.tempPassword}</p>
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={copyPassword}
-                    style={{ background: "transparent", border: `1px solid ${iceBorder}`, borderRadius: 8, padding: "4px 8px", cursor: "pointer", color: copied ? "#22c55e" : dimText }}>
+                    style={{ background: "transparent", border: "var(--spatial-glass-border)", borderRadius: 8, padding: "4px 8px", cursor: "pointer", color: copied ? "#22c55e" : dimText }}>
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </motion.button>
                 </div>
@@ -529,7 +521,7 @@ function CreateAdminModal({
                 style={{
                   width: "100%", padding: "10px 14px", borderRadius: 12,
                   background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                  border: `1px solid ${iceBorder}`, outline: "none", fontSize: 13,
+                  border: "var(--spatial-glass-border)", outline: "none", fontSize: 13,
                   color: dark ? "#daeeff" : "#0a2060", fontFamily: "var(--font-outfit)",
                 }} />
             </div>
@@ -543,7 +535,7 @@ function CreateAdminModal({
                 style={{
                   width: "100%", padding: "10px 14px", borderRadius: 12,
                   background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                  border: `1px solid ${iceBorder}`, outline: "none", fontSize: 13,
+                  border: "var(--spatial-glass-border)", outline: "none", fontSize: 13,
                   color: dark ? "#daeeff" : "#0a2060", fontFamily: "var(--font-outfit)",
                 }} />
             </div>
@@ -559,7 +551,7 @@ function CreateAdminModal({
                   style={{
                     flex: 1, padding: "10px 14px", borderRadius: 12,
                     background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                    border: `1px solid ${iceBorder}`, outline: "none", fontSize: 13,
+                    border: "var(--spatial-glass-border)", outline: "none", fontSize: 13,
                     color: dark ? "#daeeff" : "#0a2060", fontFamily: "var(--font-jetbrains-mono)",
                   }} />
               </div>
@@ -584,7 +576,7 @@ function CreateAdminModal({
                     border: `1px solid ${
                       centerAvailable === true ? "rgba(34,197,94,0.40)"
                         : centerAvailable === false ? "rgba(239,68,68,0.40)"
-                        : iceBorder
+                        : "var(--tc-primary)"
                     }`,
                     outline: "none", fontSize: 18, fontWeight: 800, letterSpacing: 4,
                     color: dark ? "#daeeff" : "#0a2060", fontFamily: "var(--font-jetbrains-mono)",

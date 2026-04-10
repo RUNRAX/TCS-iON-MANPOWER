@@ -36,24 +36,17 @@ function ShimmerBlock({
 export default function SuperDashboardLoading() {
   const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
 
-  const iceBorder = dark
-    ? "rgba(100,200,255,0.12)"
-    : "rgba(80,160,255,0.25)";
+  // Glass frost bindings
+  const dimText = dark
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
 
   const masterGlass = {
-    background: dark
-      ? `rgba(4, 8, 32, ${(0.78 * glassOpacity / 100).toFixed(2)})`
-      : `rgba(220, 235, 255, ${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    WebkitBackdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark
-      ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 24px 64px rgba(0,5,30,0.65)`
-      : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10)`,
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 

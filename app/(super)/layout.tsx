@@ -2,9 +2,8 @@
 /**
  * app/(super)/layout.tsx — Cinematic Master Admin Layout
  *
- * Cold-ice glass sidebar with independent navigation.
+ * Fully dynamic Glass Frost Theme with Fire Background aesthetics.
  * Verifies super_admin role via /api/auth/me before rendering.
- * Uses a completely separate aesthetic from the regular admin (ice-blue, not warm-orange).
  */
 
 import { useEffect, useState } from "react";
@@ -12,6 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
+import FireBackground from "@/components/layout/FireBackground";
 import {
   LayoutDashboard,
   Users,
@@ -31,27 +31,11 @@ const superNav = [
   { label: "Platform Settings", icon: Settings, href: "/super/settings" },
 ];
 
-/* ── Master palette — cold ice, NOT warm orange ───────────────────────────── */
-const MASTER_PALETTE = {
-  primary: "#1a6fff",
-  secondary: "#0a3fa8",
-  accent: "#67e8f9",
-  glow: "rgba(26,111,255,0.18)",
-  glowStrong: "rgba(26,111,255,0.35)",
-};
-
-export default function SuperLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
+export default function SuperLayout({ children }: { children: React.ReactNode }) {
+  const { dark, theme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<{
-    email: string;
-    role: string;
-  } | null>(null);
+  const [user, setUser] = useState<{ email: string; role: string; } | null>(null);
   const [verified, setVerified] = useState(false);
 
   // ── Verify super_admin role on mount
@@ -69,22 +53,6 @@ export default function SuperLayout({
       .catch(() => router.replace("/login"));
   }, [router]);
 
-  // ── Style tokens
-  const iceBorder = dark
-    ? "rgba(100,200,255,0.18)"
-    : "rgba(100,180,255,0.40)";
-  const iceAccent = dark ? "#a0d4ff" : "#1a5fa8";
-  const iceGlow = "rgba(100,180,255,0.12)";
-
-  const panelBg = (opacity: number) =>
-    dark
-      ? `rgba(3, 2, 16, ${(0.9 * opacity / 100).toFixed(2)})`
-      : `rgba(220, 230, 255, ${(0.72 * opacity / 100).toFixed(2)})`;
-
-  const blur = glassFrost
-    ? `blur(${glassBlur + 20}px) saturate(240%) brightness(${dark ? 1.07 : 1.03})`
-    : "none";
-
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
@@ -99,9 +67,7 @@ export default function SuperLayout({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: dark
-            ? "radial-gradient(ellipse at 20% 10%, rgba(20,30,80,0.9) 0%, #030210 60%)"
-            : "radial-gradient(ellipse at 20% 10%, rgba(180,200,255,0.6) 0%, #e8eeff 60%)",
+          background: dark ? "#030210" : "#e8eeff",
         }}
       >
         <motion.div
@@ -111,8 +77,8 @@ export default function SuperLayout({
             fontSize: 13,
             fontWeight: 700,
             letterSpacing: 3,
-            textTransform: "uppercase" as const,
-            color: iceAccent,
+            textTransform: "uppercase",
+            color: "var(--tc-primary)",
             fontFamily: "var(--font-jetbrains-mono)",
           }}
         >
@@ -123,15 +89,10 @@ export default function SuperLayout({
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: dark
-          ? "radial-gradient(ellipse at 20% 10%, rgba(20,30,80,0.9) 0%, #030210 60%)"
-          : "radial-gradient(ellipse at 20% 10%, rgba(180,200,255,0.6) 0%, #e8eeff 60%)",
-      }}
-    >
+    <div style={{ display: "flex", minHeight: "100vh", position: "relative" }}>
+      {/* ── Dynamic Fire Background ── */}
+      <FireBackground />
+
       {/* ── Sidebar ── */}
       <motion.aside
         initial={{ x: -20, opacity: 0 }}
@@ -146,13 +107,12 @@ export default function SuperLayout({
           display: "flex",
           flexDirection: "column",
           padding: "24px 16px",
-          background: panelBg(glassOpacity + 15),
-          backdropFilter: blur,
-          WebkitBackdropFilter: blur,
-          borderRight: `1px solid ${iceBorder}`,
-          boxShadow: dark
-            ? `inset -1px 0 0 ${iceGlow}, 4px 0 40px rgba(0,10,40,0.5)`
-            : `inset -1px 0 0 rgba(100,180,255,0.3), 4px 0 20px rgba(0,0,0,0.08)`,
+          background: "var(--spatial-glass-bg)",
+          backdropFilter: "var(--spatial-glass-blur)",
+          WebkitBackdropFilter: "var(--spatial-glass-blur)",
+          borderRight: "var(--spatial-glass-border)",
+          boxShadow: "var(--spatial-glass-shadow)",
+          zIndex: 10,
         }}
       >
         {/* ── Master badge ── */}
@@ -164,11 +124,9 @@ export default function SuperLayout({
               gap: 10,
               padding: "12px 14px",
               borderRadius: 16,
-              background: dark
-                ? "linear-gradient(135deg, rgba(30,60,120,0.8), rgba(10,20,60,0.9))"
-                : "linear-gradient(135deg, rgba(20,80,180,0.15), rgba(10,40,120,0.08))",
-              border: `1px solid ${iceBorder}`,
-              boxShadow: `0 0 20px ${iceGlow}`,
+              background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+              border: `1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
+              boxShadow: `0 0 20px color-mix(in srgb, var(--tc-primary) 15%, transparent)`,
             }}
           >
             <div
@@ -177,11 +135,11 @@ export default function SuperLayout({
                 height: 36,
                 borderRadius: 10,
                 flexShrink: 0,
-                background: "linear-gradient(135deg, #1a6fff, #0a3fa8)",
+                background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 16px rgba(30,100,255,0.40)",
+                boxShadow: `0 4px 16px color-mix(in srgb, var(--tc-primary) 40%, transparent)`,
               }}
             >
               <ShieldCheck size={18} color="#fff" />
@@ -192,8 +150,8 @@ export default function SuperLayout({
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: 2,
-                  textTransform: "uppercase" as const,
-                  color: iceAccent,
+                  textTransform: "uppercase",
+                  color: "var(--tc-primary)",
                   fontFamily: "var(--font-jetbrains-mono)",
                 }}
               >
@@ -202,9 +160,7 @@ export default function SuperLayout({
               <p
                 style={{
                   fontSize: 10,
-                  color: dark
-                    ? "rgba(160,200,255,0.5)"
-                    : "rgba(30,80,180,0.5)",
+                  color: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
                   letterSpacing: 0.5,
                 }}
               >
@@ -215,23 +171,12 @@ export default function SuperLayout({
         </div>
 
         {/* ── Nav items ── */}
-        <nav
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
+        <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
           {superNav.map((item) => {
             const active = pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{ textDecoration: "none" }}
-              >
+              <Link key={item.href} href={item.href} style={{ textDecoration: "none" }}>
                 <motion.div
                   whileHover={{ x: 3, scale: 1.012 }}
                   whileTap={{ scale: 0.97 }}
@@ -244,39 +189,24 @@ export default function SuperLayout({
                     borderRadius: 13,
                     cursor: "pointer",
                     background: active
-                      ? "linear-gradient(135deg, rgba(30,90,220,0.8), rgba(15,50,160,0.7))"
+                      ? `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 80%, transparent), color-mix(in srgb, var(--tc-secondary) 70%, transparent))`
                       : "transparent",
-                    border: active
-                      ? `1px solid ${iceBorder}`
-                      : "1px solid transparent",
+                    border: active ? `1px solid color-mix(in srgb, var(--tc-primary) 40%, transparent)` : "1px solid transparent",
                     boxShadow: active
-                      ? `0 4px 20px rgba(30,100,255,0.25), inset 0 1px 0 rgba(255,255,255,0.12)`
+                      ? `0 4px 20px color-mix(in srgb, var(--tc-primary) 25%, transparent), inset 0 1px 0 rgba(255,255,255,0.12)`
                       : "none",
-                    transition:
-                      "all 0.22s cubic-bezier(0.4,0,0.2,1)",
+                    transition: "all 0.22s cubic-bezier(0.4,0,0.2,1)",
                   }}
                 >
                   <Icon
                     size={16}
-                    color={
-                      active
-                        ? "#a0d4ff"
-                        : dark
-                          ? "rgba(160,200,255,0.50)"
-                          : "rgba(30,80,180,0.55)"
-                    }
+                    color={active ? "#fff" : (dark ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.55)")}
                   />
                   <span
                     style={{
                       fontSize: 13,
                       fontWeight: active ? 700 : 500,
-                      color: active
-                        ? dark
-                          ? "#daeeff"
-                          : "#1040a0"
-                        : dark
-                          ? "rgba(180,210,255,0.65)"
-                          : "rgba(30,80,180,0.65)",
+                      color: active ? "#fff" : (dark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)"),
                       letterSpacing: 0.2,
                     }}
                   >
@@ -292,9 +222,7 @@ export default function SuperLayout({
             style={{
               height: 1,
               margin: "12px 8px",
-              background: dark
-                ? "rgba(100,180,255,0.12)"
-                : "rgba(30,80,180,0.12)",
+              background: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)",
             }}
           />
 
@@ -316,10 +244,7 @@ export default function SuperLayout({
                 transition: "all 0.22s cubic-bezier(0.4,0,0.2,1)",
               }}
             >
-              <LayoutDashboard
-                size={16}
-                color="var(--tc-primary)"
-              />
+              <LayoutDashboard size={16} color="var(--tc-primary)" />
               <span
                 style={{
                   fontSize: 13,
@@ -340,15 +265,16 @@ export default function SuperLayout({
             padding: "12px 14px",
             borderRadius: 13,
             background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-            border: `1px solid ${iceBorder}`,
+            border: `1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)`,
           }}
         >
           <p
             style={{
               fontSize: 11,
-              color: iceAccent,
+              color: "var(--tc-primary)",
               fontWeight: 700,
               letterSpacing: 1,
+              wordBreak: "break-all",
               fontFamily: "var(--font-jetbrains-mono)",
             }}
           >
@@ -357,10 +283,8 @@ export default function SuperLayout({
           <p
             style={{
               fontSize: 10,
-              color: dark
-                ? "rgba(160,200,255,0.4)"
-                : "rgba(30,80,180,0.4)",
-              marginTop: 2,
+              color: dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+              marginTop: 4,
             }}
           >
             All systems access
@@ -377,9 +301,7 @@ export default function SuperLayout({
               padding: "6px 10px",
               borderRadius: 8,
               border: `1px solid ${dark ? "rgba(239,68,68,0.25)" : "rgba(239,68,68,0.30)"}`,
-              background: dark
-                ? "rgba(239,68,68,0.08)"
-                : "rgba(239,68,68,0.06)",
+              background: dark ? "rgba(239,68,68,0.08)" : "rgba(239,68,68,0.06)",
               color: "#f87171",
               fontSize: 11,
               fontWeight: 600,
@@ -394,7 +316,7 @@ export default function SuperLayout({
       </motion.aside>
 
       {/* ── Main content ── */}
-      <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+      <main style={{ flex: 1, position: "relative", zIndex: 10, overflowY: "auto", overflowX: "hidden" }}>
         {children}
       </main>
     </div>

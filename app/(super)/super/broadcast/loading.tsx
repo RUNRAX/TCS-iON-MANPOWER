@@ -19,13 +19,16 @@ function Shimmer({ width, height, radius = 12, dark }: { width?: string | number
 
 export default function SuperBroadcastLoading() {
   const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
-  const iceBorder = dark ? "rgba(100,200,255,0.12)" : "rgba(80,160,255,0.25)";
-  const mg = {
-    background: dark ? `rgba(4,8,32,${(0.78 * glassOpacity / 100).toFixed(2)})` : `rgba(220,235,255,${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost ? `blur(${glassBlur + 24}px) saturate(250%)` : "none",
-    WebkitBackdropFilter: glassFrost ? `blur(${glassBlur + 24}px) saturate(250%)` : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 24px 64px rgba(0,5,30,0.65)` : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10)`,
+  const dimText = dark
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
+
+  const masterGlass = {
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 
@@ -49,7 +52,7 @@ export default function SuperBroadcastLoading() {
         {/* Two column */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
           {/* Compose skeleton */}
-          <div style={{ ...mg, padding: "24px 26px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ ...masterGlass, padding: "24px 26px", display: "flex", flexDirection: "column", gap: 20 }}>
             {/* Target selector */}
             <div>
               <Shimmer width={120} height={10} radius={4} dark={dark} />
@@ -82,7 +85,7 @@ export default function SuperBroadcastLoading() {
           </div>
 
           {/* Preview skeleton */}
-          <div style={{ ...mg, padding: "24px 26px", display: "flex", flexDirection: "column" }}>
+          <div style={{ ...masterGlass, padding: "24px 26px", display: "flex", flexDirection: "column" }}>
             <Shimmer width={120} height={14} radius={6} dark={dark} />
             <div style={{ marginTop: 18, flex: 1 }}>
               <Shimmer height={46} radius={0} dark={dark} />
@@ -95,7 +98,7 @@ export default function SuperBroadcastLoading() {
         </div>
 
         {/* History skeleton */}
-        <div style={{ ...mg, padding: "24px 26px" }}>
+        <div style={{ ...masterGlass, padding: "24px 26px" }}>
           <Shimmer width={180} height={14} radius={6} dark={dark} />
           <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
             {Array.from({ length: 4 }).map((_, i) => (

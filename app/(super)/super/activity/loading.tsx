@@ -18,8 +18,7 @@ function Shimmer({ width, height, radius = 12, dark }: { width?: string | number
 }
 
 export default function SuperActivityLoading() {
-  const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
-  const iceBorder = dark ? "rgba(100,200,255,0.12)" : "rgba(80,160,255,0.25)";
+  const { dark } = useTheme();
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
@@ -46,8 +45,8 @@ export default function SuperActivityLoading() {
             <div key={i} style={{
               display: "flex", alignItems: "center", gap: 14,
               padding: "12px 18px", borderRadius: 14,
-              borderLeft: `3px solid ${dark ? "rgba(100,200,255,0.15)" : "rgba(80,160,255,0.20)"}`,
-              border: `1px solid ${iceBorder}`, borderLeftWidth: 3,
+              borderLeft: "3px solid var(--tc-primary)",
+              border: "var(--spatial-glass-border)", borderLeftWidth: 3,
             }}>
               <Shimmer width={130} height={14} radius={4} dark={dark} />
               <Shimmer width={70} height={22} radius={6} dark={dark} />

@@ -74,24 +74,17 @@ export default function SuperActivityPage() {
   const [filterAction, setFilterAction] = useState("");
   const limit = 30;
 
-  // ── Style tokens
-  const iceBorder = dark ? "rgba(100,200,255,0.12)" : "rgba(80,160,255,0.25)";
-  const dimText = dark ? "rgba(160,200,255,0.50)" : "rgba(20,80,180,0.55)";
+  // Glass frost bindings
+  const dimText = dark
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
 
   const masterGlass = {
-    background: dark
-      ? `rgba(4, 8, 32, ${(0.78 * glassOpacity / 100).toFixed(2)})`
-      : `rgba(220, 235, 255, ${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    WebkitBackdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark
-      ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 24px 64px rgba(0,5,30,0.65), 0 4px 20px rgba(0,0,0,0.4)`
-      : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10), 0 2px 8px rgba(0,0,0,0.06)`,
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 
@@ -151,7 +144,7 @@ export default function SuperActivityPage() {
               style={{
                 padding: "8px 14px", borderRadius: 10,
                 background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                border: `1px solid ${iceBorder}`, outline: "none", fontSize: 12,
+                border: "var(--spatial-glass-border)", outline: "none", fontSize: 12,
                 color: dark ? "#daeeff" : "#0a2060", fontFamily: "var(--font-jetbrains-mono)",
                 cursor: "pointer",
               }}
@@ -166,7 +159,7 @@ export default function SuperActivityPage() {
             whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.9 }}
             onClick={() => refetch()}
             style={{
-              background: "transparent", border: `1px solid ${iceBorder}`,
+              background: "transparent", border: "var(--spatial-glass-border)",
               borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: dimText,
             }}
           >
@@ -218,7 +211,7 @@ export default function SuperActivityPage() {
                       padding: "12px 18px",
                       borderRadius: 14,
                       borderLeft: `3px solid ${color}`,
-                      border: `1px solid ${iceBorder}`,
+                      border: "var(--spatial-glass-border)",
                       borderLeftWidth: 3,
                       borderLeftColor: color,
                       cursor: "pointer",
@@ -291,7 +284,7 @@ export default function SuperActivityPage() {
                           padding: "14px 18px",
                           borderRadius: 12,
                           background: dark ? "rgba(4,8,32,0.60)" : "rgba(220,235,255,0.50)",
-                          border: `1px solid ${iceBorder}`,
+                          border: "var(--spatial-glass-border)",
                           fontSize: 11,
                           fontFamily: "var(--font-jetbrains-mono)",
                           color: dark ? "rgba(160,200,255,0.70)" : "rgba(20,60,140,0.60)",
@@ -343,7 +336,7 @@ export default function SuperActivityPage() {
               disabled={page <= 1}
               style={{
                 padding: "8px 18px", borderRadius: 10, fontSize: 12, fontWeight: 600,
-                background: "transparent", border: `1px solid ${iceBorder}`,
+                background: "transparent", border: "var(--spatial-glass-border)",
                 color: page <= 1 ? dimText : (dark ? "#daeeff" : "#0a2060"),
                 cursor: page <= 1 ? "not-allowed" : "pointer", opacity: page <= 1 ? 0.4 : 1,
               }}
@@ -360,7 +353,7 @@ export default function SuperActivityPage() {
               disabled={page >= totalPages}
               style={{
                 padding: "8px 18px", borderRadius: 10, fontSize: 12, fontWeight: 600,
-                background: "transparent", border: `1px solid ${iceBorder}`,
+                background: "transparent", border: "var(--spatial-glass-border)",
                 color: page >= totalPages ? dimText : (dark ? "#daeeff" : "#0a2060"),
                 cursor: page >= totalPages ? "not-allowed" : "pointer", opacity: page >= totalPages ? 0.4 : 1,
               }}

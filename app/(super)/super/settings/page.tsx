@@ -3,14 +3,15 @@
  * app/(super)/super/settings/page.tsx — Platform Settings
  *
  * Environment status checker, active center codes list,
- * security settings, and the red Danger Zone.
+ * security settings, Theme Engine override, and the Danger Zone.
  */
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useTheme } from "@/lib/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTheme } from "@/lib/context/ThemeContext";
+import ThemePanel from "@/components/ThemePanel";
 import {
   Shield,
   Key,
@@ -21,14 +22,8 @@ import {
   AlertTriangle,
   Database,
   RefreshCw,
+  Palette,
 } from "lucide-react";
-
-/* ── Master palette ───────────────────────────────────────────────────────── */
-const MASTER_PALETTE = {
-  primary: "#1a6fff",
-  secondary: "#0a3fa8",
-  accent: "#67e8f9",
-};
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
 const container = {
@@ -58,30 +53,19 @@ const ENV_VARS = [
 ] as const;
 
 export default function SuperSettingsPage() {
-  const { dark, glassFrost, glassBlur, glassOpacity } = useTheme();
+  const { dark } = useTheme();
 
-  // ── Style tokens
-  const iceBorder = dark
-    ? "rgba(100,200,255,0.12)"
-    : "rgba(80,160,255,0.25)";
+  // Glass frost bindings
   const dimText = dark
-    ? "rgba(160,200,255,0.50)"
-    : "rgba(20,80,180,0.55)";
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
 
   const masterGlass = {
-    background: dark
-      ? `rgba(4, 8, 32, ${(0.78 * glassOpacity / 100).toFixed(2)})`
-      : `rgba(220, 235, 255, ${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    WebkitBackdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark
-      ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 24px 64px rgba(0,5,30,0.65), 0 4px 20px rgba(0,0,0,0.4)`
-      : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10), 0 2px 8px rgba(0,0,0,0.06)`,
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 
@@ -119,32 +103,14 @@ export default function SuperSettingsPage() {
       ]
     : [];
 
-  // ── Determine env var presence from health check
   const getEnvStatus = (key: string): boolean | null => {
     if (!healthData) return null;
-    // The health endpoint may return env keys; we check if it mentions them
     const envKeys = healthData.env ?? healthData.data?.env ?? {};
     return !!envKeys[key];
   };
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      {/* Grid overlay */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 0,
-          backgroundImage: `
-            linear-gradient(rgba(100,180,255,0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(100,180,255,0.08) 1px, transparent 1px)
-          `,
-          backgroundSize: "40px 40px",
-          animation: "gridPulse 4s ease-in-out infinite",
-        }}
-      />
-
       <motion.div
         variants={container}
         initial="hidden"
@@ -158,55 +124,56 @@ export default function SuperSettingsPage() {
         }}
       >
         {/* ── Header ── */}
-        <motion.div variants={item} style={{ marginBottom: 32 }}>
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 800,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: dark ? "#e8f4ff" : "#0a2060",
-              fontFamily: "var(--font-jetbrains-mono)",
-            }}
-          >
-            PLATFORM SETTINGS
-          </h1>
-          <p
-            style={{
-              fontSize: 12,
-              color: dimText,
-              marginTop: 4,
-              fontFamily: "var(--font-jetbrains-mono)",
-            }}
-          >
-            System configuration & environment status
-          </p>
+        <motion.div variants={item} style={{ marginBottom: 32, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                letterSpacing: 4,
+                textTransform: "uppercase",
+                color: dark ? "#fff" : "var(--tc-primary)",
+                fontFamily: "var(--font-jetbrains-mono)",
+              }}
+            >
+              PLATFORM SETTINGS
+            </h1>
+            <p
+              style={{
+                fontSize: 12,
+                color: dimText,
+                marginTop: 4,
+                fontFamily: "var(--font-jetbrains-mono)",
+              }}
+            >
+              System configuration, aesthetics & environment status
+            </p>
+          </div>
+          
+          {/* Aesthetic Engine settings */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--tc-primary)", letterSpacing: 1, textTransform: "uppercase" }}>Theme Engine</p>
+              <p style={{ fontSize: 9, color: dimText }}>Aesthetic Control</p>
+            </div>
+            <ThemePanel size="md" />
+          </div>
         </motion.div>
 
         {/* ═══════════════════════════════════════════════════════
             SECTION 1: Environment Status
             ═══════════════════════════════════════════════════════ */}
-        <motion.div
-          variants={item}
-          style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 20,
-            }}
-          >
+        <motion.div variants={item} style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Server size={16} color={MASTER_PALETTE.accent} />
+              <Server size={16} color="var(--tc-accent)" />
               <p
                 style={{
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: 2,
                   textTransform: "uppercase",
-                  color: dark ? "#a0d4ff" : "#1a5fa8",
+                  color: dark ? "#fff" : "var(--tc-primary)",
                   fontFamily: "var(--font-jetbrains-mono)",
                 }}
               >
@@ -222,7 +189,7 @@ export default function SuperSettingsPage() {
               }}
               style={{
                 background: "transparent",
-                border: `1px solid ${iceBorder}`,
+                border: `1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
                 borderRadius: 8,
                 padding: "6px 8px",
                 cursor: "pointer",
@@ -252,43 +219,27 @@ export default function SuperSettingsPage() {
                     gap: 12,
                     padding: "12px 16px",
                     borderRadius: 14,
-                    background: dark
-                      ? "rgba(255,255,255,0.02)"
-                      : "rgba(0,0,0,0.02)",
-                    border: `1px solid ${dark ? "rgba(100,200,255,0.08)" : "rgba(80,160,255,0.12)"}`,
+                    background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+                    border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
                   }}
                 >
                   <Icon
                     size={14}
-                    color={
-                      status === null
-                        ? dimText
-                        : status
-                          ? "#22c55e"
-                          : "#ef4444"
-                    }
+                    color={status === null ? dimText : status ? "#22c55e" : "#ef4444"}
                   />
                   <span
                     style={{
                       flex: 1,
                       fontSize: 12,
                       fontWeight: 600,
-                      color: dark ? "#daeeff" : "#0a2060",
+                      color: dark ? "#fff" : "var(--tc-primary)",
                       fontFamily: "var(--font-jetbrains-mono)",
                     }}
                   >
                     {envVar.label}
                   </span>
                   {status === null ? (
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: dimText,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      checking...
-                    </span>
+                    <span style={{ fontSize: 10, color: dimText, fontStyle: "italic" }}>checking...</span>
                   ) : status ? (
                     <CheckCircle2 size={16} color="#22c55e" />
                   ) : (
@@ -299,14 +250,7 @@ export default function SuperSettingsPage() {
             })}
           </div>
 
-          <p
-            style={{
-              fontSize: 11,
-              color: dimText,
-              marginTop: 14,
-              fontStyle: "italic",
-            }}
-          >
+          <p style={{ fontSize: 11, color: dimText, marginTop: 14, fontStyle: "italic" }}>
             Only presence is checked — actual values are never exposed.
           </p>
         </motion.div>
@@ -314,26 +258,16 @@ export default function SuperSettingsPage() {
         {/* ═══════════════════════════════════════════════════════
             SECTION 2: Active Center Codes
             ═══════════════════════════════════════════════════════ */}
-        <motion.div
-          variants={item}
-          style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 18,
-            }}
-          >
-            <MapPin size={16} color={MASTER_PALETTE.accent} />
+        <motion.div variants={item} style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+            <MapPin size={16} color="var(--tc-accent)" />
             <p
               style={{
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: 2,
                 textTransform: "uppercase",
-                color: dark ? "#a0d4ff" : "#1a5fa8",
+                color: dark ? "#fff" : "var(--tc-primary)",
                 fontFamily: "var(--font-jetbrains-mono)",
               }}
             >
@@ -342,30 +276,20 @@ export default function SuperSettingsPage() {
           </div>
 
           {centerCodes.length === 0 ? (
-            <p style={{ fontSize: 13, color: dimText }}>
-              No center codes found. Create an admin to assign one.
-            </p>
+            <p style={{ fontSize: 13, color: dimText }}>No center codes found. Create an admin to assign one.</p>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-              }}
-            >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {centerCodes.map((code) => (
                 <div
                   key={code as string}
                   style={{
                     padding: "8px 16px",
                     borderRadius: 10,
-                    background: dark
-                      ? "rgba(26,111,255,0.10)"
-                      : "rgba(26,111,255,0.06)",
-                    border: `1px solid ${dark ? "rgba(26,111,255,0.20)" : "rgba(26,111,255,0.18)"}`,
+                    background: `color-mix(in srgb, var(--tc-primary) 15%, transparent)`,
+                    border: `1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)`,
                     fontSize: 14,
                     fontWeight: 700,
-                    color: MASTER_PALETTE.accent,
+                    color: "var(--tc-accent)",
                     fontFamily: "var(--font-jetbrains-mono)",
                     letterSpacing: 2,
                   }}
@@ -376,41 +300,24 @@ export default function SuperSettingsPage() {
             </div>
           )}
 
-          <p
-            style={{
-              fontSize: 11,
-              color: dimText,
-              marginTop: 14,
-            }}
-          >
-            Center codes are assigned when creating admin accounts via the Admin
-            Accounts page.
+          <p style={{ fontSize: 11, color: dimText, marginTop: 14 }}>
+            Center codes are assigned when creating admin accounts via the Admin Accounts page.
           </p>
         </motion.div>
 
         {/* ═══════════════════════════════════════════════════════
             SECTION 3: Security Settings
             ═══════════════════════════════════════════════════════ */}
-        <motion.div
-          variants={item}
-          style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 18,
-            }}
-          >
-            <Shield size={16} color={MASTER_PALETTE.accent} />
+        <motion.div variants={item} style={{ ...masterGlass, padding: "24px 26px", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+            <Shield size={16} color="var(--tc-accent)" />
             <p
               style={{
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: 2,
                 textTransform: "uppercase",
-                color: dark ? "#a0d4ff" : "#1a5fa8",
+                color: dark ? "#fff" : "var(--tc-primary)",
                 fontFamily: "var(--font-jetbrains-mono)",
               }}
             >
@@ -418,13 +325,7 @@ export default function SuperSettingsPage() {
             </p>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {/* Re-auth toggle */}
             <div
               style={{
@@ -433,31 +334,16 @@ export default function SuperSettingsPage() {
                 justifyContent: "space-between",
                 padding: "14px 18px",
                 borderRadius: 14,
-                background: dark
-                  ? "rgba(255,255,255,0.02)"
-                  : "rgba(0,0,0,0.02)",
-                border: `1px solid ${dark ? "rgba(100,200,255,0.08)" : "rgba(80,160,255,0.12)"}`,
+                background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
               }}
             >
               <div>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: dark ? "#daeeff" : "#0a2060",
-                  }}
-                >
+                <p style={{ fontSize: 13, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
                   Require re-auth for destructive actions
                 </p>
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: dimText,
-                    marginTop: 2,
-                  }}
-                >
-                  Prompts for password before deactivating users or deleting
-                  data.
+                <p style={{ fontSize: 11, color: dimText, marginTop: 2 }}>
+                  Prompts for password before deactivating users or deleting data.
                 </p>
               </div>
               <div
@@ -465,9 +351,7 @@ export default function SuperSettingsPage() {
                   width: 44,
                   height: 24,
                   borderRadius: 12,
-                  background: dark
-                    ? "rgba(34,197,94,0.20)"
-                    : "rgba(34,197,94,0.15)",
+                  background: dark ? "rgba(34,197,94,0.20)" : "rgba(34,197,94,0.15)",
                   border: "1px solid rgba(34,197,94,0.30)",
                   position: "relative",
                   cursor: "not-allowed",
@@ -497,42 +381,20 @@ export default function SuperSettingsPage() {
                 justifyContent: "space-between",
                 padding: "14px 18px",
                 borderRadius: 14,
-                background: dark
-                  ? "rgba(255,255,255,0.02)"
-                  : "rgba(0,0,0,0.02)",
-                border: `1px solid ${dark ? "rgba(100,200,255,0.08)" : "rgba(80,160,255,0.12)"}`,
+                background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+                border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
               }}
             >
               <div>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: dark ? "#daeeff" : "#0a2060",
-                  }}
-                >
+                <p style={{ fontSize: 13, fontWeight: 600, color: dark ? "#fff" : "var(--tc-primary)" }}>
                   Session timeout
                 </p>
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: dimText,
-                    marginTop: 2,
-                  }}
-                >
-                  Auto-logout after inactivity period (managed by Supabase
-                  Auth).
+                <p style={{ fontSize: 11, color: dimText, marginTop: 2 }}>
+                  Auto-logout after inactivity period (managed by Supabase Auth).
                 </p>
               </div>
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: MASTER_PALETTE.accent,
-                  fontFamily: "var(--font-jetbrains-mono)",
-                }}
-              >
-                1 hour
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--tc-accent)", fontFamily: "var(--font-jetbrains-mono)" }}>
+                 1 hour
               </span>
             </div>
           </div>
@@ -546,22 +408,14 @@ export default function SuperSettingsPage() {
           style={{
             ...masterGlass,
             padding: "24px 26px",
-            borderColor: dark
-              ? "rgba(239,68,68,0.25)"
-              : "rgba(239,68,68,0.35)",
+            borderColor: dark ? "rgba(239,68,68,0.25)" : "rgba(239,68,68,0.35)",
+            background: "var(--spatial-glass-bg)",
             boxShadow: dark
               ? `inset 0 1px 0 rgba(239,68,68,0.08), 0 24px 64px rgba(0,5,30,0.65)`
               : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(239,68,68,0.08)`,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 18,
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
             <AlertTriangle size={16} color="#ef4444" />
             <p
               style={{
@@ -584,52 +438,28 @@ export default function SuperSettingsPage() {
               justifyContent: "space-between",
               padding: "16px 18px",
               borderRadius: 14,
-              background: dark
-                ? "rgba(239,68,68,0.05)"
-                : "rgba(239,68,68,0.03)",
+              background: dark ? "rgba(239,68,68,0.05)" : "rgba(239,68,68,0.03)",
               border: `1px solid ${dark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.20)"}`,
             }}
           >
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Database size={14} color="#ef4444" />
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "#ef4444",
-                  }}
-                >
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#ef4444" }}>
                   Export complete database backup
                 </p>
               </div>
-              <p
-                style={{
-                  fontSize: 11,
-                  color: dimText,
-                  marginTop: 4,
-                }}
-              >
-                Opens the Supabase Dashboard where you can export full database
-                backups.
+              <p style={{ fontSize: 11, color: dimText, marginTop: 4 }}>
+                Opens the Supabase Dashboard where you can export full database backups.
               </p>
             </div>
             <motion.button
-              whileHover={{
-                scale: 1.03,
-                boxShadow: "0 8px 24px rgba(239,68,68,0.30)",
-              }}
+              whileHover={{ scale: 1.03, boxShadow: "0 8px 24px rgba(239,68,68,0.30)" }}
               whileTap={{ scale: 0.97 }}
               onClick={() => {
-                const supabaseUrl =
-                  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-                const projectRef = supabaseUrl
-                  .replace("https://", "")
-                  .replace(".supabase.co", "");
-                window.open(
-                  `https://supabase.com/dashboard/project/${projectRef}/settings/database`,
-                  "_blank"
-                );
+                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+                const projectRef = supabaseUrl.replace("https://", "").replace(".supabase.co", "");
+                window.open(`https://supabase.com/dashboard/project/${projectRef}/settings/database`, "_blank");
               }}
               style={{
                 background: "transparent",
@@ -649,13 +479,6 @@ export default function SuperSettingsPage() {
           </div>
         </motion.div>
       </motion.div>
-
-      <style jsx global>{`
-        @keyframes gridPulse {
-          0%, 100% { opacity: 0.06; }
-          50% { opacity: 0.12; }
-        }
-      `}</style>
     </div>
   );
 }

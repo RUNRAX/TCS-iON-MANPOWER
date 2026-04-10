@@ -128,27 +128,16 @@ export default function SuperDashboardPage() {
   }, [aiData?.summary]);
 
   // ── Style tokens
-  const iceBorder = dark
-    ? "rgba(100,200,255,0.12)"
-    : "rgba(80,160,255,0.25)";
   const dimText = dark
-    ? "rgba(160,200,255,0.50)"
-    : "rgba(20,80,180,0.55)";
+    ? "rgba(255,255,255,0.50)"
+    : "rgba(0,0,0,0.55)";
 
   const masterGlass = {
-    background: dark
-      ? `rgba(4, 8, 32, ${(0.78 * glassOpacity / 100).toFixed(2)})`
-      : `rgba(220, 235, 255, ${(0.6 * glassOpacity / 100).toFixed(2)})`,
-    backdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    WebkitBackdropFilter: glassFrost
-      ? `blur(${glassBlur + 24}px) saturate(250%) brightness(${dark ? 1.08 : 1.02})`
-      : "none",
-    border: `1px solid ${iceBorder}`,
-    boxShadow: dark
-      ? `inset 0 1px 0 rgba(120,200,255,0.12), 0 0 0 1px rgba(30,100,255,0.06) inset, 0 24px 64px rgba(0,5,30,0.65), 0 4px 20px rgba(0,0,0,0.4)`
-      : `inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(20,80,200,0.10), 0 2px 8px rgba(0,0,0,0.06)`,
+    background: "var(--spatial-glass-bg)",
+    backdropFilter: "var(--spatial-glass-blur)",
+    WebkitBackdropFilter: "var(--spatial-glass-blur)",
+    border: "var(--spatial-glass-border)",
+    boxShadow: "var(--spatial-glass-shadow)",
     borderRadius: 24,
   };
 
@@ -450,7 +439,7 @@ export default function SuperDashboardPage() {
                             textTransform: "uppercase",
                             color: dimText,
                             fontFamily: "var(--font-jetbrains-mono)",
-                            borderBottom: `1px solid ${iceBorder}`,
+                            borderBottom: "var(--spatial-glass-border)",
                           }}
                         >
                           {h}
@@ -478,7 +467,7 @@ export default function SuperDashboardPage() {
                             fontWeight: 700,
                             color: MASTER_PALETTE.accent,
                             fontFamily: "var(--font-jetbrains-mono)",
-                            borderBottom: `1px solid ${dark ? "rgba(100,200,255,0.06)" : "rgba(80,160,255,0.10)"}`,
+                            borderBottom: "var(--spatial-glass-border)",
                           }}
                         >
                           {code}
@@ -487,7 +476,7 @@ export default function SuperDashboardPage() {
                           style={{
                             padding: "10px 12px",
                             color: dark ? "#e8f4ff" : "#0a2060",
-                            borderBottom: `1px solid ${dark ? "rgba(100,200,255,0.06)" : "rgba(80,160,255,0.10)"}`,
+                            borderBottom: "var(--spatial-glass-border)",
                           }}
                         >
                           {data.shifts}
@@ -495,7 +484,7 @@ export default function SuperDashboardPage() {
                         <td
                           style={{
                             padding: "10px 12px",
-                            borderBottom: `1px solid ${dark ? "rgba(100,200,255,0.06)" : "rgba(80,160,255,0.10)"}`,
+                            borderBottom: "var(--spatial-glass-border)",
                           }}
                         >
                           <span
