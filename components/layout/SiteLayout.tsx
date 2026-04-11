@@ -550,20 +550,33 @@ export default function SiteLayout({
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative z-[1]" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-[100] px-3 md:px-5 lg:px-6" style={{
-            position: "sticky", top: 0, zIndex: 100,
+          <div className="z-50 px-3 md:px-5 lg:px-6" style={{
+            position: "sticky", top: 0, zIndex: 50,
           }}>
-            <div className="absolute inset-0 top-[-20px] bg-background z-[-1]"></div>
-            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px] overflow-hidden">
+            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>
               {/* ── Background Layer — ALWAYS enhanced frosted glass ── */}
               <motion.div
                 initial={{ opacity: 0.85 }}
                 animate={{ opacity: scrolled ? 1 : 0.85 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                className="absolute inset-0 bg-background/40 backdrop-blur-2xl saturate-[1.8] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] pointer-events-none"
-                style={{ zIndex: 0, borderRadius: 20 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+                  overflow: "hidden",
+                  background: dark 
+                    ? `rgba(18, 14, 25, ${scrolled ? 0.45 : 0.25})` 
+                    : `rgba(255, 255, 255, ${scrolled ? 0.40 : 0.20})`,
+                  border: `1px solid ${dark 
+                    ? `rgba(255,255,255,${scrolled ? 0.12 : 0.08})` 
+                    : `rgba(255,255,255,${scrolled ? 0.85 : 0.65})`}`,
+                  borderRadius: 20,
+                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
+                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
+                  boxShadow: dark
+                    ? `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.18 : 0.10}), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 15 : 8}%, transparent), 0 8px 32px rgba(0,0,0,${scrolled ? 0.3 : 0.15})`
+                    : `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.95 : 0.80}), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 12 : 6}%, transparent), 0 4px 16px rgba(0,0,0,${scrolled ? 0.08 : 0.04})`
+                }}
               />
 
               {/* Mobile toggle */}
