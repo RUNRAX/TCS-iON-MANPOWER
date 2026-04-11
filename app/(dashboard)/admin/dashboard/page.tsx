@@ -102,7 +102,7 @@ export default function AdminDashboard() {
 
   const [completingId, setCompletingId] = useState<string | null>(null);
 
-  const stats = statsData?.stats || statsData || {};
+  const stats = (statsData as any)?.stats || statsData || {};
 
   /* ── 4 stat cards matching reference design ── */
   const cards = useMemo(() => [
