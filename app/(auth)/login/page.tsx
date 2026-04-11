@@ -122,14 +122,21 @@ export default function LoginPage() {
       }}
     >
       {/* ── Live Background ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-[#ff4b1f] to-[#ff9068] blur-[100px] opacity-40 animate-float-slow" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[45vw] h-[45vw] rounded-full bg-gradient-to-tr from-[#ff9068] to-[#ff4b1f] blur-[100px] opacity-30 animate-float-delayed" />
-        <div className="absolute top-[20%] right-[20%] w-[30vw] h-[30vw] rounded-full bg-gradient-to-bl from-[#ff4b1f] to-[#ff9068] blur-[100px] opacity-20 animate-float-slow" style={{ animationDelay: '1s' }} />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center z-0">
+        <motion.div
+           style={{
+             width: '400px', height: '400px', borderRadius: '50%',
+             background: 'radial-gradient(circle at 30% 30%, #ffdb8b, #ff8b00 40%, #c43a00 80%, #5e0000)',
+             boxShadow: 'inset -20px -20px 40px rgba(0,0,0,0.5), inset 20px 20px 40px rgba(255,255,255,0.6), 0 20px 50px rgba(0,0,0,0.4)',
+             position: 'absolute'
+           }}
+           animate={{ y: [0, -30, 0] }}
+           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
       {/* Theme toggle — fixed top right */}
-      <div style={{ position: "fixed", top: 16, right: 16, zIndex: 50 }}>
+      <div className="fixed top-6 right-6 z-[200]">
         <ThemePanel size="md" />
       </div>
 
@@ -145,7 +152,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 28, scale: 0.96 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 28, scale: mounted ? 1 : 0.96 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 bg-white/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
+          className="relative z-10 bg-white/10 dark:bg-black/10 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl"
           style={{
             padding: 44,
             overflow: "hidden",

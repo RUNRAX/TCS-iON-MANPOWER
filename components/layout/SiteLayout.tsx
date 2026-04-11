@@ -110,9 +110,9 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
       animate={hovered ? "hover" : "idle"}
       whileTap="tap"
       variants={{
-        idle: { scale: 1, x: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
-        hover: { scale: 1.012, x: 2, transition: { type: "spring", stiffness: 420, damping: 30 } },
-        tap: { scale: 0.955, x: 1, transition: { type: "spring", stiffness: 500, damping: 22 } },
+        idle: { scale: 1, x: 0, transition: { duration: 0.6, ease: "easeInOut" } },
+        hover: { scale: 1.012, x: 2, transition: { type: "spring", stiffness: 100, damping: 20 } },
+        tap: { scale: 0.955, x: 1, transition: { type: "spring", stiffness: 100, damping: 20 } },
       }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
@@ -555,12 +555,13 @@ export default function SiteLayout({
           <div className="z-[100] px-3 md:px-5 lg:px-6" style={{
             position: "sticky", top: 0, zIndex: 100,
           }}>
+            <div className="absolute inset-0 top-[-20px] bg-background z-[-1]"></div>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px] overflow-hidden">
               {/* ── Background Layer — ALWAYS enhanced frosted glass ── */}
               <motion.div
                 initial={{ opacity: 0.85 }}
                 animate={{ opacity: scrolled ? 1 : 0.85 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
                 className="absolute inset-0 bg-background/40 backdrop-blur-2xl saturate-[1.8] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] pointer-events-none"
                 style={{ zIndex: 0, borderRadius: 20 }}
               />
