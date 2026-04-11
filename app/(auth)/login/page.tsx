@@ -125,13 +125,14 @@ export default function LoginPage() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center z-0">
         <motion.div
            style={{
-             width: '400px', height: '400px', borderRadius: '50%',
+             width: '800px', height: '800px', borderRadius: '50%',
              background: 'radial-gradient(circle at 30% 30%, #ffdb8b, #ff8b00 40%, #c43a00 80%, #5e0000)',
              boxShadow: 'inset -20px -20px 40px rgba(0,0,0,0.5), inset 20px 20px 40px rgba(255,255,255,0.6), 0 20px 50px rgba(0,0,0,0.4)',
-             position: 'absolute'
+             position: 'absolute',
+             zIndex: -1
            }}
-           animate={{ y: [0, -30, 0] }}
-           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+           animate={{ y: [0, -50, 20, 0], x: [0, 30, -30, 0], scale: [1, 1.05, 0.95, 1], rotate: [0, 45, -15, 0] }}
+           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 

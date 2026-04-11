@@ -102,17 +102,13 @@ export default function AdminDashboard() {
 
   const [completingId, setCompletingId] = useState<string | null>(null);
 
-  const stats = statsData ?? {
-    totalEmployees: 0, activeEmployees: 0,
-    pendingApprovals: 0, upcomingShifts: 0,
-    confirmedToday: 0,  totalPayoutsMonth: 0,
-  };
+  const stats = statsData?.stats || statsData || {};
 
   /* ── 4 stat cards matching reference design ── */
   const cards = useMemo(() => [
     {
       label: "Total Employees",
-      value: stats.totalEmployees,
+      value: statsLoading ? '-' : (stats?.totalEmployees ?? 0),
       trend: "+12.5%",
       trendUp: true,
       icon: Users,
@@ -120,17 +116,17 @@ export default function AdminDashboard() {
     },
     {
       label: "Active Shifts",
-      value: stats.upcomingShifts,
-      trend: `+${stats.upcomingShifts || 3}`,
+      value: statsLoading ? '-' : (stats?.upcomingShifts ?? 0),
+      trend: `+${stats?.upcomingShifts || 3}`,
       trendUp: true,
       icon: CalendarDays,
       href: "/admin/shifts",
     },
     {
       label: "Attendance Today",
-      value: stats.totalEmployees > 0
-        ? `${Math.round(((stats as any).confirmedToday ?? 0) / stats.totalEmployees * 100)}%`
-        : "0%",
+      value: statsLoading ? '-' : ((stats?.totalEmployees ?? 0) > 0
+        ? `${Math.round((stats?.confirmedToday ?? 0) / stats.totalEmployees * 100)}%`
+        : "0%"),
       trend: "+5.2%",
       trendUp: true,
       icon: CheckCircle2,
@@ -138,13 +134,13 @@ export default function AdminDashboard() {
     },
     {
       label: "Avg. Shift Hours",
-      value: "8.4h",
+      value: statsLoading ? '-' : "8.4h",
       trend: "-0.2%",
       trendUp: false,
       icon: Clock,
       href: "/admin/excel",
     },
-  ], [stats]);
+  ], [stats, statsLoading]);
 
   /* ── Filter shifts for dynamic rolling 60-day window ── */
   const monthlyShifts = useMemo(() => {
