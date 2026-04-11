@@ -369,17 +369,7 @@ export default function SiteLayout({
       >
         {/* ── Sidebar Abstract Geometric Pattern ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden", borderRadius: "inherit" }}>
-          {/* Abstract diagonal mesh — subtle geometric lines */}
-          <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, opacity: dark ? 0.06 : 0.04 }}>
-            <defs>
-              <pattern id="abstract-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 40" stroke="var(--tc-primary)" strokeWidth="0.5" fill="none" />
-                <path d="M 20 0 L 0 20" stroke="var(--tc-secondary)" strokeWidth="0.3" fill="none" />
-                <circle cx="20" cy="20" r="1" fill="var(--tc-accent)" opacity="0.4" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#abstract-grid)" />
-          </svg>
+          {/* Abstract diagonal mesh — removed */}
           {/* Corner accent — top-left radial */}
           <div style={{
             position: "absolute", top: 0, left: 0, width: "60%", height: "40%",
