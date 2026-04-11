@@ -642,7 +642,7 @@ export default function SiteLayout({
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}
-          <div style={{ minHeight: "100%" }} suppressHydrationWarning>
+          <div className="px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto" style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
               <div
                 key={pathname}
