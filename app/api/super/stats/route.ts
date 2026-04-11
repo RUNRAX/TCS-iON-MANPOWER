@@ -10,22 +10,19 @@ import { withSuperAdmin, ok, serverError } from "@/lib/utils/api";
 export const GET = withSuperAdmin(async () => {
   const supabase = createAdminClient();
 
+  // Fetch all data with individual error handling — never return a hard 500
   const [usersRes, shiftsRes, paymentsRes, assignmentsRes] = await Promise.all([
-    supabase.from("users").select("id, role, is_active, created_at"),
-    supabase.from("exam_shifts").select("id, status, exam_date, center_code"),
-    supabase.from("payments").select("id, amount, status, cleared_at"),
-    supabase.from("shift_assignments").select("id, status, duty_role"),
+    supabase.from("users").select("id, role, is_active, created_at").then(r => r).catch(() => ({ data: null, error: { message: "users query failed" } })),
+    supabase.from("exam_shifts").select("id, status, exam_date, center_code").then(r => r).catch(() => ({ data: null, error: { message: "shifts query failed" } })),
+    supabase.from("payments").select("id, amount, status, cleared_at").then(r => r).catch(() => ({ data: null, error: { message: "payments query failed" } })),
+    supabase.from("shift_assignments").select("id, status, duty_role").then(r => r).catch(() => ({ data: null, error: { message: "assignments query failed" } })),
   ]);
 
-  if (usersRes.error || shiftsRes.error || paymentsRes.error || assignmentsRes.error) {
-    console.error("[Super/Stats] Query errors:", {
-      users: usersRes.error?.message,
-      shifts: shiftsRes.error?.message,
-      payments: paymentsRes.error?.message,
-      assignments: assignmentsRes.error?.message,
-    });
-    return serverError();
-  }
+  // Log errors but don't fail — use empty arrays as fallback
+  if (usersRes.error) console.warn("[Super/Stats] Users:", usersRes.error.message);
+  if (shiftsRes.error) console.warn("[Super/Stats] Shifts:", shiftsRes.error.message);
+  if (paymentsRes.error) console.warn("[Super/Stats] Payments:", paymentsRes.error.message);
+  if (assignmentsRes.error) console.warn("[Super/Stats] Assignments:", assignmentsRes.error.message);
 
   const users       = usersRes.data ?? [];
   const shifts      = shiftsRes.data ?? [];
@@ -45,13 +42,6 @@ export const GET = withSuperAdmin(async () => {
     centerMap[cc].shifts++;
   });
 
-  // Count employees per center from users table
-  users.forEach((u: any) => {
-    if (u.role === "employee" && u.is_active) {
-      // employees don't have center_code directly, but we track what we can
-    }
-  });
-
   return ok({
     totalAdmins:       users.filter((u: any) => u.role === "admin").length,
     totalEmployees:    users.filter((u: any) => u.role === "employee").length,
@@ -65,7 +55,7 @@ export const GET = withSuperAdmin(async () => {
     totalPaymentsThisMonth: payments
       .filter(
         (p: any) =>
-          p.status === "cleared" && new Date(p.cleared_at) >= thisMonth
+          p.status === "cleared" && p.cleared_at && new Date(p.cleared_at) >= thisMonth
       )
       .reduce((s: number, p: any) => s + (p.amount ?? 0), 0) / 100,
     pendingPayments:   payments.filter((p: any) => p.status === "pending").length,

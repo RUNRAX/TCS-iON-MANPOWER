@@ -126,18 +126,51 @@ export default function LoginPage() {
         <motion.div
            style={{
              width: '800px', height: '800px', borderRadius: '50%',
-             background: 'radial-gradient(circle at 30% 30%, #ffdb8b, #ff8b00 40%, #c43a00 80%, #5e0000)',
-             boxShadow: 'inset -20px -20px 40px rgba(0,0,0,0.5), inset 20px 20px 40px rgba(255,255,255,0.6), 0 20px 50px rgba(0,0,0,0.4)',
+             background: 'radial-gradient(circle at 35% 35%, #fff3cd 0%, #ffb347 15%, #ff7b00 40%, #cc3300 70%, #4a0000 100%)',
+             boxShadow: 'inset -30px -30px 60px rgba(0,0,0,0.6), inset 30px 30px 60px rgba(255,255,255,0.7), 0 0 100px 20px rgba(255,123,0,0.5)',
              position: 'absolute',
-             zIndex: -1
+             zIndex: -1,
+             overflow: 'hidden',
            }}
            animate={{ y: [0, -50, 20, 0], x: [0, 30, -30, 0], scale: [1, 1.05, 0.95, 1], rotate: [0, 45, -15, 0] }}
            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        />
+        >
+          {/* Conic gradient overlay for flares */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '50%',
+              background: 'conic-gradient(from 0deg, transparent 0deg, rgba(255,255,200,0.15) 30deg, transparent 60deg, transparent 120deg, rgba(255,200,100,0.12) 150deg, transparent 180deg, transparent 240deg, rgba(255,255,220,0.10) 270deg, transparent 300deg, transparent 360deg)',
+              mixBlendMode: 'overlay',
+              animation: 'spin 20s linear infinite',
+            }}
+          />
+          {/* Inner moving flare */}
+          <motion.div
+            animate={{
+              x: ['-15%', '20%', '-10%', '-15%'],
+              y: ['-15%', '-5%', '15%', '-15%'],
+              scale: [1, 1.15, 0.9, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              position: 'absolute',
+              top: '15%',
+              left: '15%',
+              width: '45%',
+              height: '45%',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(255,230,150,0.25) 40%, transparent 70%)',
+              filter: 'blur(20px)',
+              pointerEvents: 'none',
+            }}
+          />
+        </motion.div>
       </div>
 
       {/* Theme toggle — fixed top right */}
-      <div className="fixed top-6 right-6 z-[200]">
+      <div className="fixed top-6 right-12 md:right-16 z-[200]">
         <ThemePanel size="md" />
       </div>
 

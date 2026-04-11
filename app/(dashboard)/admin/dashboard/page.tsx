@@ -197,11 +197,11 @@ export default function AdminDashboard() {
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
 
       {/* ── Stat cards — 4 columns matching reference ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-6 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-6 relative z-10">
         {cards.map((c, i) => {
           const accent = cardAccents[i % cardAccents.length];
           return (
-            <motion.div key={c.label} variants={cardItem}>
+            <motion.div key={c.label} variants={cardItem} className="max-w-xs">
               <Link href={c.href} style={{ display: "block" }}>
                 <motion.div
                   className="rounded-[22px] p-5 cursor-pointer relative overflow-hidden group admin-panel"

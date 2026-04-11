@@ -97,14 +97,28 @@ export default function SuperDashboardPage() {
     refetchInterval: 60_000,
   });
 
-  // ── AI summary
+  // ── AI summary (POST with metrics body — route only exports POST)
   const { data: aiData } = useQuery({
-    queryKey: ["admin", "ai-summary"],
+    queryKey: ["admin", "ai-summary", stats ? "loaded" : "pending"],
     queryFn: () =>
-      fetch("/api/admin/ai-summary")
+      fetch("/api/admin/ai-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          totalEmployees: stats?.totalEmployees ?? 0,
+          activeShifts: stats?.publishedShifts ?? 0,
+          confirmedShifts: stats?.confirmedSlots ?? 0,
+          pendingShifts: stats?.pendingPayments ?? 0,
+          totalPaymentsThisMonth: stats?.totalPaymentsThisMonth ?? 0,
+          pendingPayments: stats?.pendingPayments ?? 0,
+          newRegistrationsThisWeek: 0,
+          date: new Date().toISOString().split("T")[0],
+        }),
+      })
         .then((r) => r.json())
         .then((d) => d.data)
         .catch(() => null),
+    enabled: !!stats,
     staleTime: 120_000,
     retry: false,
   });
