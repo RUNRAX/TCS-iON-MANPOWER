@@ -14,7 +14,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
-import OrbitalRingsBackground from "@/components/layout/OrbitalRingsBackground";
+
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -352,7 +352,7 @@ export default function SiteLayout({
       suppressHydrationWarning
     >
       {/* ── Background (Client-only) ── */}
-      {mounted && <OrbitalRingsBackground />}
+      {mounted && <LiquidBackground />}
 
       {/* ── Sidebar ── */}
       <aside
