@@ -799,6 +799,13 @@ html.tc-light .skeleton {
   box-shadow: 0 0 24px color-mix(in srgb, var(--tc-primary) 40%, transparent);
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+.animate-float-slow { animation: float 8s ease-in-out infinite; }
+.animate-float-delayed { animation: float 10s ease-in-out infinite 2s; }
+
 .glow-secondary {
   box-shadow: 0 0 24px color-mix(in srgb, var(--tc-secondary) 35%, transparent);
 }

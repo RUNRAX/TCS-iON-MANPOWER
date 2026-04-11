@@ -118,12 +118,15 @@ export default function LoginPage() {
         padding:        24,
         position:       "relative",
         overflow:       "hidden",
-        background:     bg,
         transition:     "background 0.5s ease",
       }}
     >
-      {/* Full-screen scene */}
-      <SceneBackground cubeCount={7} showGrid />
+      {/* ── Live Background ── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-[#ff4b1f] to-[#ff9068] blur-[100px] opacity-40 animate-float-slow" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[45vw] h-[45vw] rounded-full bg-gradient-to-tr from-[#ff9068] to-[#ff4b1f] blur-[100px] opacity-30 animate-float-delayed" />
+        <div className="absolute top-[20%] right-[20%] w-[30vw] h-[30vw] rounded-full bg-gradient-to-bl from-[#ff4b1f] to-[#ff9068] blur-[100px] opacity-20 animate-float-slow" style={{ animationDelay: '1s' }} />
+      </div>
 
       {/* Theme toggle — fixed top right */}
       <div style={{ position: "fixed", top: 16, right: 16, zIndex: 50 }}>
@@ -142,16 +145,9 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 28, scale: 0.96 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 28, scale: mounted ? 1 : 0.96 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 bg-white/5 dark:bg-black/20 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
           style={{
             padding: 44,
-            /* Reinforce the 3D glass look on the inner content panel */
-            background:           cardBg,
-            backdropFilter:       BLUR_CARD,
-            WebkitBackdropFilter: BLUR_CARD,
-            borderRadius: "inherit",
-            boxShadow: makeEdge(dark),
-            border: `1px solid ${dark ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.85)"}`,
-            position: "relative",
             overflow: "hidden",
           }}
         >
@@ -280,14 +276,11 @@ export default function LoginPage() {
                 placeholder="admin@example.com"
                 onFocus={() => setFocusedId(true)}
                 onBlur={() => setFocusedId(false)}
+                className="bg-white/5 border border-white/10"
                 style={{
                   width:        "100%",
                   padding:      "14px 16px",
                   borderRadius: 14,
-                  background:   focusedId
-                    ? (dark ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.96)")
-                    : inputBg,
-                  border:       `1px solid ${focusedId ? "var(--tc-primary)" : inputBorder}`,
                   color:        textMain,
                   fontSize:     15,
                   outline:      "none",
@@ -322,14 +315,11 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   onFocus={() => setFocusedPw(true)}
                   onBlur={() => setFocusedPw(false)}
+                  className="bg-white/5 border border-white/10"
                   style={{
                     width:        "100%",
                     padding:      "14px 44px 14px 16px",
                     borderRadius: 14,
-                    background:   focusedPw
-                      ? (dark ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.96)")
-                      : inputBg,
-                    border:       `1px solid ${focusedPw ? "var(--tc-primary)" : inputBorder}`,
                     color:        textMain,
                     fontSize:     15,
                     outline:      "none",
