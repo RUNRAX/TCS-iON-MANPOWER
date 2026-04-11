@@ -76,8 +76,14 @@ export const POST = withAdmin(async (request) => {
     }
 
     return NextResponse.json({ status: "ok", data: parsed });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[ParseEmployee] AI error:", err);
+    if (err?.status === 429 || String(err).includes("429") || String(err).includes("quota") || String(err).includes("Quota") || String(err).includes("exceeded")) {
+      return NextResponse.json(
+        { status: "error", message: "AI service is busy (Quota Exceeded). Please try manual fill." },
+        { status: 429 }
+      );
+    }
     return NextResponse.json(
       { status: "error", message: `AI Error: ${err instanceof Error ? err.message : String(err)}` },
       { status: 500 }

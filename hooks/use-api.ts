@@ -53,6 +53,7 @@ export function useAdminEmployees(params?: { page?: number; limit?: number; sear
     queryKey: QK.adminEmployees(params),
     queryFn:  () => adminApi.getEmployees(params),
     staleTime: 20_000,
+    refetchInterval: 30_000,
     placeholderData: (prev) => prev, // keeps old data visible while refetching (no flicker)
   });
 }
@@ -66,6 +67,7 @@ export function useApproveEmployee() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["admin", "employees"] });
       void qc.invalidateQueries({ queryKey: QK.adminStats });
+      void qc.invalidateQueries({ queryKey: QK.adminActivity });
     },
   });
 }
@@ -76,6 +78,7 @@ export function useAdminShifts(params?: { status?: string; page?: number; limit?
     queryKey: QK.adminShifts(params),
     queryFn:  () => adminApi.getShifts(params),
     staleTime: 15_000,
+    refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
 }
@@ -88,6 +91,7 @@ export function useCreateEmployee() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["admin", "employees"] });
       void qc.invalidateQueries({ queryKey: QK.adminStats });
+      void qc.invalidateQueries({ queryKey: QK.adminActivity });
     },
   });
 }
@@ -97,7 +101,11 @@ export function useCreateShift() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: adminApi.createShift,
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "shifts"] }); },
+    onSuccess: () => { 
+      void qc.invalidateQueries({ queryKey: ["admin", "shifts"] }); 
+      void qc.invalidateQueries({ queryKey: QK.adminStats });
+      void qc.invalidateQueries({ queryKey: QK.adminActivity });
+    },
   });
 }
 
@@ -107,7 +115,12 @@ export function usePatchShift() {
   return useMutation({
     mutationFn: ({ shiftId, action, fields }: { shiftId: string; action: "edit" | "cancel" | "complete" | "publish"; fields?: Record<string, unknown> }) =>
       adminApi.patchShift(shiftId, action, fields),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "shifts"] }); },
+    onSuccess: () => { 
+      void qc.invalidateQueries({ queryKey: ["admin", "shifts"] }); 
+      void qc.invalidateQueries({ queryKey: ["admin", "assignments"] });
+      void qc.invalidateQueries({ queryKey: QK.adminStats });
+      void qc.invalidateQueries({ queryKey: QK.adminActivity });
+    },
   });
 }
 
@@ -117,6 +130,7 @@ export function useAdminAssignments(params?: { shiftId?: string; status?: string
     queryKey: QK.adminAssignments(params),
     queryFn:  () => adminApi.getAssignments(params),
     staleTime: 15_000,
+    refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
 }
@@ -127,6 +141,7 @@ export function useAdminPayments(params?: { status?: string; page?: number; limi
     queryKey: QK.adminPayments(params),
     queryFn:  () => adminApi.getPayments(params),
     staleTime: 20_000,
+    refetchInterval: 45_000,
     placeholderData: (prev) => prev,
   });
 }
@@ -136,7 +151,11 @@ export function useClearPayment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: adminApi.clearPayment,
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["admin", "payments"] }); },
+    onSuccess: () => { 
+      void qc.invalidateQueries({ queryKey: ["admin", "payments"] }); 
+      void qc.invalidateQueries({ queryKey: QK.adminStats });
+      void qc.invalidateQueries({ queryKey: QK.adminActivity });
+    },
   });
 }
 
@@ -204,7 +223,11 @@ export function useConfirmShift() {
     onError: (_, __, ctx) => {
       if (ctx?.prev) qc.setQueryData(QK.employeeShifts, ctx.prev);
     },
-    onSettled: () => { void qc.invalidateQueries({ queryKey: QK.employeeShifts }); },
+    onSettled: () => { 
+      void qc.invalidateQueries({ queryKey: QK.employeeShifts }); 
+      void qc.invalidateQueries({ queryKey: QK.employeeHistory });
+      void qc.invalidateQueries({ queryKey: QK.employeeProfile });
+    },
   });
 }
 
@@ -213,7 +236,11 @@ export function useCancelShift() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (shiftId: string) => employeeApi.cancelShift(shiftId),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: QK.employeeShifts }); },
+    onSuccess: () => { 
+      void qc.invalidateQueries({ queryKey: QK.employeeShifts }); 
+      void qc.invalidateQueries({ queryKey: QK.employeeHistory });
+      void qc.invalidateQueries({ queryKey: QK.employeeProfile });
+    },
   });
 }
 

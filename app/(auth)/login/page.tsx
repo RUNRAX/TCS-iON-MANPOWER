@@ -109,8 +109,8 @@ export default function LoginPage() {
 
   return (
     <>
-    {/* Theme toggle — at true root level, outside overflow:hidden container */}
-    <div className="fixed top-6 right-16 z-[9999]">
+    {/* Theme toggle — responsive positioning to prevent mobile clipping */}
+    <div className="fixed top-4 right-4 md:top-6 md:right-12 z-[9999]">
       <ThemePanel size="md" />
     </div>
     <div

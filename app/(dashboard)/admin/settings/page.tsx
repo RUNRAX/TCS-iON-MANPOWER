@@ -19,8 +19,9 @@ import {
   User, Shield, Bell, Clock, StickyNote, Calendar,
   ImageIcon, ChevronRight, Check, Upload, Trash2,
   Smartphone, Eye, EyeOff, Lock, Mail,
-  Sun, Moon, Paintbrush, X, ChevronLeft,
+  Sun, Moon, Paintbrush, X, ChevronLeft, Building
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 const FONT_DISPLAY = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
 const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif";
@@ -138,6 +139,15 @@ export default function AdminSettings() {
     setSelectedDate(today);
   }, []);
 
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["admin_settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/settings");
+      const json = await (res.ok ? res.json() : {});
+      return json?.data?.settings || json?.settings || {};
+    }
+  });
+
   const currentNote = notes.find(n => n.date === selectedDate);
 
   const updateNote = (text: string) => {
@@ -242,50 +252,63 @@ export default function AdminSettings() {
         <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={User} title="Profile Details" subtitle="Manage your personal information" dark={dark} />
-            <div className="space-y-3">
-              <div className="flex items-center gap-4 mb-4">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold"
-                  style={{
-                    background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 0 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
-                  }}
-                >
-                  AU
-                </div>
-                <div>
-                  <p className="text-sm font-bold" style={{ color: textMain }}>Admin User</p>
-                  <p className="text-[11px]" style={{ color: textMuted }}>Administrator · TCS iON</p>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="mt-1 text-[11px] font-semibold px-3 py-1 rounded-lg"
-                    style={{
-                      background: "color-mix(in srgb, var(--tc-primary) 10%, transparent)",
-                      color: "var(--tc-primary)",
-                      border: "1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Change Avatar
-                  </motion.button>
+            {isLoading ? (
+              <div className="space-y-4 animate-pulse">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gray-500/20" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-32 bg-gray-500/20 rounded" />
+                    <div className="h-3 w-24 bg-gray-500/20 rounded" />
+                  </div>
                 </div>
               </div>
-              {[
-                { label: "Full Name", value: "Admin User", icon: User },
-                { label: "Email", value: "admin@tcsion.com", icon: Mail },
-                { label: "Phone", value: "+91 98765 43210", icon: Smartphone },
-              ].map(field => (
-                <div key={field.label} className="flex items-center gap-3 py-2" style={{ borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}` }}>
-                  <field.icon className="w-4 h-4 flex-shrink-0" style={{ color: textMuted }} />
-                  <div className="flex-1">
-                    <p className="text-[11px]" style={{ color: textMuted }}>{field.label}</p>
-                    <p className="text-[13px] font-medium" style={{ color: textMain }}>{field.value}</p>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 mb-4">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold"
+                    style={{
+                      background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 0 0 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
+                    }}
+                  >
+                    {profile?.full_name?.charAt(0) || "A"}
                   </div>
-                  <ChevronRight className="w-4 h-4" style={{ color: textMuted }} />
+                  <div>
+                    <p className="text-sm font-bold" style={{ color: textMain }}>{profile?.full_name || "Admin User"}</p>
+                    <p className="text-[11px]" style={{ color: textMuted }}>Administrator · TCS iON</p>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="mt-1 text-[11px] font-semibold px-3 py-1 rounded-lg"
+                      style={{
+                        background: "color-mix(in srgb, var(--tc-primary) 10%, transparent)",
+                        color: "var(--tc-primary)",
+                        border: "1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Change Avatar
+                    </motion.button>
+                  </div>
                 </div>
-              ))}
-            </div>
+                {[
+                  { label: "Full Name", value: profile?.full_name || "Admin User", icon: User },
+                  { label: "Email", value: profile?.email || "admin@tcsion.com", icon: Mail },
+                  { label: "Phone", value: profile?.phone || "Not Set", icon: Smartphone },
+                  { label: "Center Code", value: profile?.centerCode || "Not Set", icon: Building },
+                ].map(field => (
+                  <div key={field.label} className="flex items-center gap-3 py-2" style={{ borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}` }}>
+                    <field.icon className="w-4 h-4 flex-shrink-0" style={{ color: textMuted }} />
+                    <div className="flex-1">
+                      <p className="text-[11px]" style={{ color: textMuted }}>{field.label}</p>
+                      <p className="text-[13px] font-medium" style={{ color: textMain }}>{field.value}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4" style={{ color: textMuted }} />
+                  </div>
+                ))}
+              </div>
+            )}
           </SettingsCard>
         </div>
 

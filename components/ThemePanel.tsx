@@ -92,7 +92,7 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
               transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.75 }}
               style={{
                 position: "absolute",
-                top: "calc(100% + 14px)", left: "50%", x: "-50%",
+                top: "calc(100% + 14px)", right: 0, transformOrigin: "top right",
                 zIndex: 9999,
                 width: 220,
                 borderRadius: 18,
@@ -104,6 +104,8 @@ export default function ThemePanel({ size = "md" }: ThemePanelProps) {
                 boxShadow: "var(--spatial-glass-shadow)",
                 willChange: "transform, opacity",
                 transform: "translateZ(0)",
+                maxHeight: "80vh",
+                overflowY: "auto",
               }}
             >
               {/* Preset swatches */}

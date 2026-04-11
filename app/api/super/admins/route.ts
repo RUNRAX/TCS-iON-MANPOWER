@@ -58,7 +58,6 @@ export const GET = withSuperAdmin(async (request) => {
       id, email, phone, role, is_active, center_code, last_login_at, created_at,
       employee_profiles(full_name)
     `)
-    .in("role", ["admin", "super_admin"])
     .order("created_at", { ascending: false });
 
   if (error) {

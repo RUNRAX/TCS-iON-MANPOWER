@@ -35,7 +35,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     let usersQuery = supabase
       .from("users")
       .select("id")
-      .or("role.is.null,and(role.neq.admin,role.neq.super_admin)")
+      .or("role.is.null,role.neq.super_admin")
       .or(`email.ilike.%${search}%,phone.ilike.%${search}%`);
     
     let profilesQuery = supabase
@@ -44,7 +44,8 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       .or(`full_name.ilike.%${search}%,employee_code.ilike.%${search}%`);
 
     if (userRole !== "super_admin") {
-      usersQuery = usersQuery.eq("created_by_admin", userId);
+      // Admins see employees they created OR co-admins
+      usersQuery = usersQuery.or(`created_by_admin.eq.${userId},role.eq.admin`);
       profilesQuery = profilesQuery.eq("approved_by", userId);
     }
 
@@ -63,18 +64,19 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
   let query = supabase
     .from("users")
     .select(
-      `id, email, phone, is_active, created_at,
+      `id, email, phone, is_active, role, created_at,
        employee_profiles(
          id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
        )`,
       { count: "exact" }
     )
-    .or("role.is.null,and(role.neq.admin,role.neq.super_admin)")
+    .or("role.is.null,role.neq.super_admin")
     .order("created_at", { ascending: false });
 
   if (userRole !== "super_admin") {
-    query = query.eq("created_by_admin", userId);
+    // Admins see employees they created OR co-admins
+    query = query.or(`created_by_admin.eq.${userId},role.eq.admin`);
   }
 
   if (matchedUserIds !== null) {
@@ -97,10 +99,10 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       email:            u.email as string,
       phone:            u.phone as string | null,
       is_active:        u.is_active as boolean,
-      full_name:        (p?.full_name as string) ?? null,
+      full_name:        (p?.full_name as string) ?? (u.role === "admin" ? "PORTAL ADMIN" : null),
       city:             (p?.city as string) ?? null,
       state:            (p?.state as string) ?? null,
-      status:           profileStatus,
+      status:           u.role === "admin" ? "approved" : profileStatus,
       employee_code:    (p?.employee_code as string) ?? null,
       rejection_reason: (p?.rejection_reason as string) ?? null,
       photo_url:        (p?.photo_url as string) ?? null,

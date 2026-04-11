@@ -28,40 +28,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect("/login");
 
-  const { dbUser, profile } = await getUserData(session.user.id);
+  const { dbUser } = await getUserData(session.user.id);
 
   if (dbUser?.is_active === false) redirect("/login?reason=inactive");
 
-  // ── CRITICAL: Super admins must NEVER land in the (dashboard) layout ──
-  // They have their own dedicated (super) layout with superAdminNav.
-  // If a super_admin somehow hits /admin/*, redirect them to their own panel.
   if (dbUser?.role === "super_admin") redirect("/super/dashboard");
-
-  // Normalize role to admin | employee only (super_admin is handled above)
-  const role = (dbUser?.role === "admin" ? "admin" : "employee") as "admin" | "employee";
-
-  // Role is synced into app_metadata during login (server-side only).
-  // No client-side sync needed — app_metadata cannot be modified by the client.
-
-  // Prefetch all dashboard routes so navigations are instant after first load
-  const prefetchRoutes =
-    role === "admin"
-      ? ["/admin/dashboard","/admin/employees","/admin/shifts","/admin/payments","/admin/excel","/admin/broadcast"]
-      : ["/employee/dashboard","/employee/shifts","/employee/history","/employee/profile","/employee/payments"];
 
   return (
     <>
-      {prefetchRoutes.map(href => (
-        <Link key={href} href={href} prefetch={true} style={{ display: "none" }} aria-hidden />
-      ))}
-      <SiteLayout
-        role={role}
-        userId={session.user.id}
-        userEmail={session.user.email ?? ""}
-        userFullName={profile?.full_name ?? undefined}
-      >
-        {children}
-      </SiteLayout>
+      {children}
     </>
   );
 }

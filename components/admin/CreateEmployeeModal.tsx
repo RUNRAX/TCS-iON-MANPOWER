@@ -80,7 +80,11 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: aiText }),
       });
-      const json = await res.json();
+      let json = { status: "error", message: "Parsing failed", data: null };
+      try {
+        json = await res.json();
+      } catch (err) { }
+
       if (json.status === "ok" && json.data) {
         const d = json.data;
         setForm(prev => ({
@@ -101,6 +105,9 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
           ...(d.notes && { notes: d.notes }),
         }));
         toast.success("AI auto-filled fields ✨");
+        setStep(1);
+      } else if (res.status === 429 || res.status === 503 || (json.message || "").toLowerCase().includes("quota")) {
+        toast.error("AI system is currently busy (Quota Exceeded). Falling back to manual entry.");
         setStep(1);
       } else {
         toast.error(json.message || "Parsing failed");

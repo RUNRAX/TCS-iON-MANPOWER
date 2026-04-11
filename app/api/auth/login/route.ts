@@ -25,11 +25,16 @@ export async function POST(request: NextRequest) {
 
   try {
     // ── 3. Resolve email from identifier (email or phone)
-    const isEmail = identifier.includes("@");
-    let resolvedEmail: string | null = isEmail ? identifier : null;
+    const cleanId = identifier.trim();
+    const isEmail = cleanId.includes("@");
+    let resolvedEmail: string | null = isEmail ? cleanId : null;
 
     if (!isEmail) {
-      const phone = identifier.replace(/\D/g, "").slice(-10);
+      const phone = cleanId.replace(/\D/g, "").slice(-10);
+      
+      if (phone.length !== 10) {
+        return unauthorized("Invalid phone number or credentials");
+      }
       const { data: user, error } = await adminClient
         .from("users")
         .select("email, is_active")

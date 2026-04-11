@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminShifts, useCreateShift, usePatchShift } from "@/hooks/use-api";
-import { CalendarDays, Plus, Clock, Users, MapPin, X, XCircle, CheckCircle, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { CalendarDays, Plus, Clock, Users, MapPin, X, XCircle, CheckCircle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, Wand2, Loader2, FileText, ArrowRight } from "lucide-react";
 import GlassCalendar from "@/components/ui/GlassCalendar";
 import { toast } from "sonner";
 
@@ -73,6 +73,9 @@ export default function AdminShifts() {
 
   // ── Create modal state ────────────────────────────────────────────────────
   const [showCreate, setShowCreate] = useState(false);
+  const [step, setStep] = useState(0); // 0=AI, 1=Manual
+  const [aiText, setAiText] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_MULTI_FORM, examDate: selectedDate });
 
   // ── Status filter ─────────────────────────────────────────────────────────
@@ -104,8 +107,43 @@ export default function AdminShifts() {
 
   const openCreate = useCallback(() => {
     setForm(prev => ({ ...EMPTY_MULTI_FORM, examDate: selectedDate, shifts: [{ ...EMPTY_SHIFT, shiftNumber: shiftsForDate.length + 1 }] }));
+    setStep(0);
+    setAiText("");
     setShowCreate(true);
   }, [selectedDate, shiftsForDate.length]);
+
+  const handleAIFill = useCallback(async () => {
+    if (!aiText.trim()) return;
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/admin/parse-shift", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: aiText, date: selectedDate }),
+      });
+      
+      let json = { status: "error", message: "Parsing failed", data: null };
+      try {
+        json = await res.json();
+      } catch (err) {
+        // Handle case where server responds with non-JSON (e.g. 503 HTML from Vercel)
+      }
+
+      if (json.status === "ok" && json.data) {
+        toast.success("AI auto-filled fields ✨");
+        setForm(prev => ({ ...prev, ...json.data }));
+        setStep(1);
+      } else if (res.status === 429 || res.status === 503 || (json.message || "").toLowerCase().includes("quota")) {
+        toast.error("AI system is currently busy (Quota Exceeded). Falling back to manual entry.");
+        setStep(1);
+      } else {
+        toast.error(json.message || "Parsing failed");
+      }
+    } catch {
+      toast.error("Network error — try again");
+    }
+    setAiLoading(false);
+  }, [aiText, selectedDate]);
 
   const handleCreate = async () => {
     if (!form.title || !form.venue) { toast.error("Title and venue required"); return; }
@@ -558,7 +596,9 @@ export default function AdminShifts() {
                 <div style={{ padding: "22px 26px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${g.innerBorder}` }}>
                   <div>
                     <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 3 }}>New Shift</h3>
-                    <p style={{ fontSize: 12, color: "var(--tc-primary)", fontWeight: 600, letterSpacing: 0.2 }}>{prettyDate(selectedDate)}</p>
+                    <p style={{ fontSize: 12, color: "var(--tc-primary)", fontWeight: 600, letterSpacing: 0.2 }}>
+                      {step === 0 ? "AI Configuration" : "Manual Configuration"}
+                    </p>
                   </div>
                   <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
                     onClick={() => setShowCreate(false)}
@@ -567,8 +607,89 @@ export default function AdminShifts() {
                   </motion.button>
                 </div>
 
+                {/* Step indicator */}
+                <div style={{ padding: "8px 24px", display: "flex", gap: 6, flexShrink: 0 }}>
+                  {["AI Fill", "Manual Configuration"].map((s, i) => (
+                    <div key={s} style={{
+                      flex: 1, height: 4, borderRadius: 99,
+                      background: i <= step
+                        ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))"
+                        : dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                      transition: "all 0.18s ease",
+                    }} />
+                  ))}
+                </div>
+
                 {/* Form */}
                 <div style={{ padding: "20px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
+                  <AnimatePresence mode="wait">
+                    {step === 0 && (
+                      <motion.div key="ai" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
+                        <div className="admin-panel" style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 16 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                              <Sparkles size={17} />
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, fontSize: 14, color: textMain }}>AI Auto-Fill ✨</p>
+                              <p style={{ fontSize: 11, color: textMuted }}>Paste the shift details below</p>
+                            </div>
+                          </div>
+                          <textarea
+                            value={aiText}
+                            onChange={e => setAiText(e.target.value)}
+                            placeholder="Paste the shift details here, e.g.: Date: 15 April 2026, Venue: TCS Gitam, Start: 09:00 AM, End: 05:00 PM, Pay: 800"
+                            rows={8}
+                            style={{
+                              width: "100%", padding: "12px 14px", borderRadius: 14,
+                              background: g.inputBg, border: `1px solid ${g.inputBorder}`,
+                              color: textMain, fontSize: 13, outline: "none", resize: "none",
+                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif",
+                              lineHeight: 1.5, boxSizing: "border-box",
+                              transition: "border-color 0.22s, box-shadow 0.22s",
+                            }}
+                            onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 15%, transparent)"; }}
+                            onBlur={e => { e.target.style.borderColor = g.inputBorder; e.target.style.boxShadow = "none"; }}
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                            onClick={handleAIFill}
+                            disabled={aiLoading || !aiText.trim()}
+                            style={{
+                              width: "100%", marginTop: 12, padding: "12px 0", borderRadius: 14,
+                              background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                              border: "none", color: "#fff", fontSize: 14, fontWeight: 700,
+                              cursor: aiLoading || !aiText.trim() ? "not-allowed" : "pointer",
+                              opacity: aiLoading || !aiText.trim() ? 0.6 : 1,
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                              boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
+                              transition: "opacity 0.2s",
+                            }}
+                          >
+                            {aiLoading ? <><Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> Parsing with AI…</> : <><Wand2 size={15} /> AI Auto-Fill</>}
+                          </motion.button>
+                        </div>
+
+                        <div style={{ textAlign: "center", color: textMuted, fontSize: 12, marginBottom: 12 }}>— or —</div>
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                          onClick={() => setStep(1)}
+                          style={{
+                            width: "100%", padding: "12px 0", borderRadius: 14,
+                            background: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            border: `1px solid ${borderCol}`, color: textMain, fontSize: 13, fontWeight: 600,
+                            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                            transition: "all 0.2s",
+                          }}
+                        >
+                          <FileText size={14} /> Fill Manually <ArrowRight size={14} />
+                        </motion.button>
+                      </motion.div>
+                    )}
+
+                    {step === 1 && (
+                      <motion.div key="manual" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }} style={{display: 'flex', flexDirection: 'column', gap: 16}}>
 
                   {/* Exam Date — shown & editable, defaults to selectedDate */}
                   <div>
@@ -658,27 +779,49 @@ export default function AdminShifts() {
                     </button>
                   </div>
 
-                  {/* Submit */}
-                  <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={handleCreate}
-                    disabled={creating || !form.title || !form.venue}
-                    style={{
-                      width: "100%", padding: "14px 0", borderRadius: 16,
-                      background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                      border: "none", color: "#fff", cursor: creating || !form.title || !form.venue ? "not-allowed" : "pointer",
-                      fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
-                      opacity: creating || !form.title || !form.venue ? 0.55 : 1,
-                      boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                      transition: "opacity 0.2s, box-shadow 0.25s",
-                    }}>
-                    {creating
-                      ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} />Creating…</>
-                      : <><Plus size={16} />Create Shift</>}
-                  </motion.button>
-                </div>
+                  {/* Submit from form was removed here, it is in the footer below */}
+                  </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div> {/* End of form scrollable area */}
+
+                {/* Footer Navigation */}
+                {step === 1 && (
+                  <div style={{ padding: "14px 26px 18px", borderTop: `1px solid ${g.innerBorder}`, display: "flex", gap: 10, flexShrink: 0 }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                      onClick={() => setStep(0)}
+                      style={{
+                        flex: 1, padding: "12px 0", borderRadius: 12,
+                        background: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                        border: `1px solid ${borderCol}`, color: textMain, fontSize: 13, fontWeight: 600,
+                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      }}
+                    >
+                      <ArrowLeft size={14} /> Back
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleCreate}
+                      disabled={creating || !form.title || !form.venue}
+                      style={{
+                        flex: 2, padding: "14px 0", borderRadius: 16,
+                        background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                        border: "none", color: "#fff", cursor: creating || !form.title || !form.venue ? "not-allowed" : "pointer",
+                        fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
+                        opacity: creating || !form.title || !form.venue ? 0.55 : 1,
+                        boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                        transition: "opacity 0.2s, box-shadow 0.25s",
+                      }}>
+                      {creating
+                        ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} />Creating…</>
+                        : <><CheckCircle size={16} />Create Shift</>}
+                    </motion.button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </>

@@ -11,15 +11,18 @@ export const GET = withAdmin(async (_request: NextRequest, { userId }) => {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("users")
-      .select("center_code, email, phone")
+      .select("center_code, email, phone, employee_profiles(full_name)")
       .eq("id", userId)
       .single();
+
+    const profileData = Array.isArray(data?.employee_profiles) ? data.employee_profiles[0] : data?.employee_profiles;
 
     return ok({
       settings: {
         centerCode: data?.center_code ?? null,
         email: data?.email ?? null,
         phone: data?.phone ?? null,
+        full_name: profileData?.full_name ?? null,
       },
     });
   } catch (err) {
