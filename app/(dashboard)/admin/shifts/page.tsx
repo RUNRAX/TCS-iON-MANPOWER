@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminShifts, useCreateShift, usePatchShift } from "@/hooks/use-api";
-import { CalendarDays, Plus, Clock, Users, MapPin, X, XCircle, CheckCircle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, Wand2, Loader2, FileText, ArrowRight } from "lucide-react";
+import { CalendarDays, Plus, Clock, Users, MapPin, X, XCircle, CheckCircle, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles, Wand2, Loader2, FileText, ArrowRight, ArrowLeft } from "lucide-react";
 import GlassCalendar from "@/components/ui/GlassCalendar";
 import { toast } from "sonner";
 
@@ -122,7 +122,7 @@ export default function AdminShifts() {
         body: JSON.stringify({ message: aiText, date: selectedDate }),
       });
       
-      let json = { status: "error", message: "Parsing failed", data: null };
+      let json: { status: string; message: string; data: any } = { status: "error", message: "Parsing failed", data: null };
       try {
         json = await res.json();
       } catch (err) {

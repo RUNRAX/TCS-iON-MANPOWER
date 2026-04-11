@@ -80,7 +80,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: aiText }),
       });
-      let json = { status: "error", message: "Parsing failed", data: null };
+      let json: { status: string; message: string; data: any } = { status: "error", message: "Parsing failed", data: null };
       try {
         json = await res.json();
       } catch (err) { }
