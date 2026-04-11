@@ -110,7 +110,7 @@ export default function LoginPage() {
   return (
     <>
     {/* Theme toggle — at true root level, outside overflow:hidden container */}
-    <div className="fixed top-6 right-6 z-[9999]">
+    <div className="fixed top-6 right-16 z-[9999]">
       <ThemePanel size="md" />
     </div>
     <div
