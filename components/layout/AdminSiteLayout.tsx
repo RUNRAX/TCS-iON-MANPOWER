@@ -229,6 +229,47 @@ const NavItem = memo(function NavItem({ item, active, textMuted }: NavItemProps)
 });
 
 
+/* ── Liquid Background Component (Internal) ──────────────────────────────── */
+const LiquidBackground = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, overflow: "hidden" }}>
+      {/* Top-Left Droplet */}
+      <div className="glowing-orb" style={{
+        top: "-15%", left: "-5%",
+        width: isMobile ? "40vmax" : "55vmax",
+        height: isMobile ? "40vmax" : "55vmax",
+        boxShadow: `inset -20px -30px ${isMobile ? 60 : 120}px var(--orb-edge-1), inset -2px -4px 12px var(--orb-edge-2), 0 40px ${isMobile ? 60 : 120}px rgba(0,0,0,0.7)`,
+        animation: isMobile ? "floatOrb1 50s ease-in-out infinite" : "floatOrb1 32s ease-in-out infinite",
+      }} />
+      {/* Bottom-Right Droplet */}
+      <div className="glowing-orb" style={{
+        bottom: "-15%", right: "-5%",
+        width: isMobile ? "45vmax" : "60vmax",
+        height: isMobile ? "45vmax" : "60vmax",
+        boxShadow: `inset 20px 30px ${isMobile ? 60 : 120}px var(--orb-edge-2), inset 2px 4px 12px var(--orb-edge-3), 0 -40px ${isMobile ? 60 : 120}px rgba(0,0,0,0.7)`,
+        animation: isMobile ? "floatOrb2 60s ease-in-out infinite" : "floatOrb2 40s ease-in-out infinite",
+      }} />
+      {/* Mid-Left Overlapping Droplet */}
+      <div className="glowing-orb" style={{
+        top: "20%", left: "-15%",
+        width: isMobile ? "35vmax" : "45vmax",
+        height: isMobile ? "35vmax" : "45vmax",
+        boxShadow: `inset -15px 25px ${isMobile ? 50 : 100}px var(--orb-edge-3), inset -2px 3px 10px var(--orb-edge-1), 0 20px ${isMobile ? 50 : 100}px rgba(0,0,0,0.6)`,
+        animation: isMobile ? "floatOrb3 55s ease-in-out infinite" : "floatOrb3 35s ease-in-out infinite",
+      }} />
+    </div>
+  );
+};
+
 /* ── Main SiteLayout ─────────────────────────────────────────────────────── */
 interface SiteLayoutProps {
   children: React.ReactNode;
@@ -313,7 +354,7 @@ export default function AdminSiteLayout({
       suppressHydrationWarning
     >
       {/* ── Background (Client-only) ── */}
-      {/* Admin layout uses the standard global background entirely. */}
+      {mounted && <LiquidBackground />}
 
       {/* ── Sidebar ── */}
       <aside
