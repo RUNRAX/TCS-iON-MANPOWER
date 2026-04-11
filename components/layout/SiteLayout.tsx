@@ -553,7 +553,7 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50 px-1 md:px-3 lg:px-5" style={{
+          <div className="z-50 px-3 md:px-6 lg:px-8" style={{
             position: "sticky", top: 0, zIndex: 50,
           }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>
@@ -642,7 +642,7 @@ export default function SiteLayout({
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}
-          <div className="px-4 md:px-8 lg:px-10 max-w-[1600px] mx-auto" style={{ minHeight: "100%" }} suppressHydrationWarning>
+          <div className="px-3 md:px-6 lg:px-8 max-w-[1600px] mx-auto" style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
               <div
                 key={pathname}
