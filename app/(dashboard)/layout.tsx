@@ -32,7 +32,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (dbUser?.is_active === false) redirect("/login?reason=inactive");
 
-  const role = (dbUser?.role ?? "employee") as "admin" | "employee";
+  // ── CRITICAL: Super admins must NEVER land in the (dashboard) layout ──
+  // They have their own dedicated (super) layout with superAdminNav.
+  // If a super_admin somehow hits /admin/*, redirect them to their own panel.
+  if (dbUser?.role === "super_admin") redirect("/super/dashboard");
+
+  // Normalize role to admin | employee only (super_admin is handled above)
+  const role = (dbUser?.role === "admin" ? "admin" : "employee") as "admin" | "employee";
 
   // Role is synced into app_metadata during login (server-side only).
   // No client-side sync needed — app_metadata cannot be modified by the client.
@@ -49,13 +55,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Link key={href} href={href} prefetch={true} style={{ display: "none" }} aria-hidden />
       ))}
       <SiteLayout
-      role={role}
-      userId={session.user.id}
-      userEmail={session.user.email ?? ""}
-      userFullName={profile?.full_name ?? undefined}
-    >
-      {children}
-    </SiteLayout>
+        role={role}
+        userId={session.user.id}
+        userEmail={session.user.email ?? ""}
+        userFullName={profile?.full_name ?? undefined}
+      >
+        {children}
+      </SiteLayout>
     </>
   );
 }

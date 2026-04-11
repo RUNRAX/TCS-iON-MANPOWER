@@ -14,7 +14,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
-import AbstractTorusBackground from "@/components/layout/AbstractTorusBackground";
+import OrbitalRingsBackground from "@/components/layout/OrbitalRingsBackground";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -307,8 +307,8 @@ export default function SiteLayout({
      Read dynamic opacity directly from the ThemeContext integers 
   */
   const alphaVal = glassFrost ? (glassOpacity / 100).toFixed(2) : (dark ? "0.98" : "1");
-  // Set transparent so the <body> background image is visible
-  const bgMain = dark ? "transparent" : "#f0f0fa";
+  // Always transparent so the <body> background + orbs are visible in both modes
+  const bgMain = "transparent";
   const sidebarBg = dark ? `rgba(30,30,35,0.4)` : `rgba(252,251,255,${alphaVal})`;
   // Header: transparent background — blur alone provides the frosted effect
   const headerBg = "transparent";
@@ -337,11 +337,9 @@ export default function SiteLayout({
   const actualBlur = glassFrost ? glassBlur : 0;
   // Sidebar: NO blur — background stays sharp
   const BLUR_SIDEBAR = "none";
-  // Header blur: 0 at scroll-top, frosted glass when scrolled (only element with backdrop blur)
-  const headerBlurPx = scrolled ? Math.max(actualBlur, 28) : 0;
-  const BLUR_HEADER = headerBlurPx > 0
-    ? `blur(${headerBlurPx}px)`
-    : "none";
+  // Header blur: ALWAYS enhanced frosted glass — stronger when scrolled
+  const headerBlurPx = scrolled ? Math.max(actualBlur, 32) : Math.max(actualBlur, 18);
+  const BLUR_HEADER = `blur(${headerBlurPx}px)`;
 
   return (
     <div
@@ -354,7 +352,7 @@ export default function SiteLayout({
       suppressHydrationWarning
     >
       {/* ── Background (Client-only) ── */}
-      {mounted && (isSuperAdmin ? <AbstractTorusBackground /> : <LiquidBackground />)}
+      {mounted && <OrbitalRingsBackground />}
 
       {/* ── Sidebar ── */}
       <aside
@@ -562,34 +560,32 @@ export default function SiteLayout({
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative" suppressHydrationWarning>
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
           <div className="z-50 px-3 md:px-5 lg:px-6" style={{
             position: "sticky", top: 0, zIndex: 50,
-            /* Mask that fades content scrolling behind the curved header edges */
-            maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
           }}>
-            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "hidden" }}>
-              {/* ── Background Layer (Smooth GPU Opacity Crossfade) ── */}
+            <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>
+              {/* ── Background Layer — ALWAYS enhanced frosted glass ── */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: scrolled ? 1 : 0 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0.85 }}
+                animate={{ opacity: scrolled ? 1 : 0.85 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none",
+                  overflow: "hidden",
                   background: dark 
-                    ? `rgba(18, 14, 25, 0.03)` 
-                    : `rgba(255, 255, 255, 0.03)`,
+                    ? `rgba(18, 14, 25, ${scrolled ? 0.45 : 0.25})` 
+                    : `rgba(255, 255, 255, ${scrolled ? 0.40 : 0.20})`,
                   border: `1px solid ${dark 
-                    ? `rgba(255,255,255,0.08)` 
-                    : `rgba(0,0,0,0.05)`}`,
+                    ? `rgba(255,255,255,${scrolled ? 0.12 : 0.08})` 
+                    : `rgba(255,255,255,${scrolled ? 0.85 : 0.65})`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${Math.max(actualBlur, 12)}px) saturate(160%)`,
-                  WebkitBackdropFilter: `blur(${Math.max(actualBlur, 12)}px) saturate(160%)`,
+                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
+                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
                   boxShadow: dark
-                    ? "inset 0 1.5px 2px rgba(255,255,255,0.18), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 15%, transparent)"
-                    : "inset 0 1.5px 2px rgba(255,255,255,0.90), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) 12%, transparent)"
+                    ? `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.18 : 0.10}), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 15 : 8}%, transparent), 0 8px 32px rgba(0,0,0,${scrolled ? 0.3 : 0.15})`
+                    : `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.95 : 0.80}), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 12 : 6}%, transparent), 0 4px 16px rgba(0,0,0,${scrolled ? 0.08 : 0.04})`
                 }}
               />
 

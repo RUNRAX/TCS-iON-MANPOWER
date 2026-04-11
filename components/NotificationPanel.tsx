@@ -413,7 +413,7 @@ export default function NotificationPanel({ role, userId }: Props) {
             </div>
 
             {/* Footer */}
-            {role === "admin" && (
+            {(role === "admin" || role === "super_admin") && (
               <div style={{ padding: "10px 18px", borderTop: `1px solid ${border}`, flexShrink: 0 }}>
                 <button
                   onClick={() => { setOpen(false); router.push("/admin/employees"); }}

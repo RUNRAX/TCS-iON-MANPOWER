@@ -48,6 +48,7 @@ export const viewport: Viewport = {
 const themeScript = `(function(){
   var HEX = /^#[0-9a-fA-F]{6}$/;
   var THEMES = {
+    orange:   ["#e0550b","#b63b07","#cc350f"],
     violet:   ["#6366f1","#8b5cf6","#06b6d4"],
     emerald:  ["#10b981","#059669","#34d399"],
     rose:     ["#f43f5e","#e11d48","#fb7185"],
@@ -64,9 +65,9 @@ const themeScript = `(function(){
     arctic:   ["#67e8f9","#818cf8","#a78bfa"],
     infrared: ["#ef4444","#7c3aed","#06b6d4"]
   };
-  var key = "violet";
+  var key = "orange";
   var dark = true;
-  var colors = THEMES.violet;
+  var colors = THEMES.orange;
   try {
     var rk = localStorage.getItem("tc_theme_key");
     var rd = localStorage.getItem("tc_dark");

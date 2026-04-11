@@ -123,6 +123,8 @@ html {
   color: rgba(255, 255, 255, 0.95);
   /* Prevent FOUC */
   text-rendering: optimizeLegibility;
+  /* GPU-accelerated compositing */
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -525,7 +527,8 @@ main {
     background 0.42s var(--spring-decel),
     border-color 0.42s var(--spring-decel),
     box-shadow 0.42s var(--spring-decel),
-    color 0.30s var(--spring-decel);
+    color 0.30s var(--spring-decel),
+    backdrop-filter 0.45s var(--spring-smooth);
 }
 
 /* ── Glossy flash on theme switch ────────────────────────────────────────── */
@@ -1013,6 +1016,7 @@ html.tc-light .skeleton {
   border-radius: var(--spatial-glass-radius);
   box-shadow: var(--spatial-glass-shadow);
   /* Do NOT use backface-visibility here as it forces 3D rendering context and breaks backdrop-filter over siblings */
+  transition: background 0.4s var(--spring-smooth), border-color 0.4s var(--spring-smooth), box-shadow 0.4s var(--spring-smooth);
 }
 
 .admin-panel::after {
