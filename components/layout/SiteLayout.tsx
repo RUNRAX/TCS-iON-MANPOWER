@@ -357,7 +357,7 @@ export default function SiteLayout({
 
       {/* ── Sidebar ── */}
       <aside
-        className={`admin-panel fixed inset-y-4 left-4 z-40 w-[220px] rounded-2xl flex flex-col transition-transform duration-300
+        className={`admin-panel fixed inset-y-4 left-4 z-40 w-[235px] rounded-2xl flex flex-col transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-[110%] md:translate-x-0"}
           md:relative md:inset-auto md:h-full md:translate-x-0 md:flex-shrink-0`}
         style={{
@@ -553,7 +553,7 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50 px-3 md:px-6 lg:px-8" style={{
+          <div className="z-50 px-5 md:px-8 lg:px-10" style={{
             position: "sticky", top: 0, zIndex: 50,
           }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>
