@@ -204,7 +204,7 @@ export default function AdminDashboard() {
             <motion.div key={c.label} variants={cardItem} className="max-w-xs">
               <Link href={c.href} style={{ display: "block" }}>
                 <motion.div
-                  className="rounded-[22px] p-5 cursor-pointer relative overflow-hidden group admin-panel"
+                  className="rounded-[22px] p-5 cursor-pointer relative overflow-hidden group bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]"
                   whileHover={{
                     y: -6,
                     scale: 1.03,

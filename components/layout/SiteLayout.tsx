@@ -551,9 +551,9 @@ export default function SiteLayout({
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth", maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black 100%)' }} suppressHydrationWarning>
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50 px-3 md:px-5 lg:px-6" style={{
+          <div className="z-50" style={{
             position: "sticky", top: 0, zIndex: 50,
           }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>

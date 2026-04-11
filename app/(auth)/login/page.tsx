@@ -108,6 +108,11 @@ export default function LoginPage() {
   const BLUR_CARD  = "blur(56px) saturate(220%) brightness(1.07)";
 
   return (
+    <>
+    {/* Theme toggle — at true root level, outside overflow:hidden container */}
+    <div className="fixed top-6 right-6 z-[9999]">
+      <ThemePanel size="md" />
+    </div>
     <div
       style={{
         minHeight:      "100vh",
@@ -169,10 +174,7 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Theme toggle — fixed top right */}
-      <div className="fixed top-6 right-12 md:right-16 z-[200]">
-        <ThemePanel size="md" />
-      </div>
+
 
       {/* ── Login Card ── */}
       <GlassCard
@@ -528,5 +530,6 @@ export default function LoginPage() {
         TCS iON Manpower Portal · v26.4
       </motion.p>
     </div>
+    </>
   );
 }
