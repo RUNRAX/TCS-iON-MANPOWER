@@ -553,7 +553,7 @@ export default function SiteLayout({
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
-          <div className="z-50" style={{
+          <div className="z-50 px-4 md:px-8 lg:px-10" style={{
             position: "sticky", top: 0, zIndex: 50,
           }}>
             <header className="h-[60px] flex items-center justify-between px-5 md:px-6 relative rounded-[20px]" style={{ overflow: "visible" }}>
