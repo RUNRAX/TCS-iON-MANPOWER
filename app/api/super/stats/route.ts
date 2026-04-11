@@ -12,10 +12,10 @@ export const GET = withSuperAdmin(async () => {
 
   // Fetch all data with individual error handling — never return a hard 500
   const [usersRes, shiftsRes, paymentsRes, assignmentsRes] = await Promise.all([
-    supabase.from("users").select("id, role, is_active, created_at").then(r => r).catch(() => ({ data: null, error: { message: "users query failed" } })),
-    supabase.from("exam_shifts").select("id, status, exam_date, center_code").then(r => r).catch(() => ({ data: null, error: { message: "shifts query failed" } })),
-    supabase.from("payments").select("id, amount, status, cleared_at").then(r => r).catch(() => ({ data: null, error: { message: "payments query failed" } })),
-    supabase.from("shift_assignments").select("id, status, duty_role").then(r => r).catch(() => ({ data: null, error: { message: "assignments query failed" } })),
+    Promise.resolve(supabase.from("users").select("id, role, is_active, created_at")).catch(() => ({ data: null, error: { message: "users query failed" } })),
+    Promise.resolve(supabase.from("exam_shifts").select("id, status, exam_date, center_code")).catch(() => ({ data: null, error: { message: "shifts query failed" } })),
+    Promise.resolve(supabase.from("payments").select("id, amount, status, cleared_at")).catch(() => ({ data: null, error: { message: "payments query failed" } })),
+    Promise.resolve(supabase.from("shift_assignments").select("id, status, duty_role")).catch(() => ({ data: null, error: { message: "assignments query failed" } })),
   ]);
 
   // Log errors but don't fail — use empty arrays as fallback
