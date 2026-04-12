@@ -181,18 +181,19 @@ export default function LoginPage() {
         depth={12}
         levitate={false}
         noTilt
+        fillOpacity={0.02}
         className="w-full rounded-3xl"
         style={{ maxWidth: 440, zIndex: 10 }}
       >
         <motion.div
-          initial={{ opacity: 0, y: 28, scale: 0.96 }}
-          animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 28, scale: mounted ? 1 : 0.96 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 bg-white/[0.02] dark:bg-black/[0.02] backdrop-blur-[5px] border border-white/20 rounded-3xl shadow-2xl"
-          style={{
-            padding: 44,
-            overflow: "hidden",
-          }}
+           initial={{ opacity: 0, y: 28, scale: 0.96 }}
+           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 28, scale: mounted ? 1 : 0.96 }}
+           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+           className="relative z-10 border border-white/20 rounded-3xl shadow-2xl"
+           style={{
+             padding: 44,
+             overflow: "hidden",
+           }}
         >
           {/* Card inner top sheen */}
           <div
