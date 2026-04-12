@@ -26,7 +26,7 @@ const getUserData = cache(async (userId: string) => {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect("/login");
+  if (!session) return redirect("/login");
 
   const { dbUser } = await getUserData(session.user.id);
 

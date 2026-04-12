@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema, ZodError } from "zod";
-import { createAdminClient, getUser } from "@/lib/supabase/server";
+import { createAdminClient, getUser, createClient } from "@/lib/supabase/server";
 
 // ── Response helpers
 
@@ -167,6 +167,10 @@ export function withAuth(
     { params }: { params?: Record<string, string> } = {}
   ): Promise<NextResponse> => {
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return unauthorized("Missing authentication token.");
+
       // Prefer injected headers from middleware (faster)
       const userId    = request.headers.get("x-user-id");
       const userRole  = request.headers.get("x-user-role") as "super_admin" | "admin" | "employee" | null;
@@ -228,6 +232,10 @@ export function withSuperAdmin(handler: RouteHandler) {
     { params }: { params?: Record<string, string> } = {}
   ): Promise<NextResponse> => {
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return unauthorized("Missing authentication token.");
+
       // Prefer injected headers from middleware (faster)
       const userId    = request.headers.get("x-user-id");
       const userRole  = request.headers.get("x-user-role");

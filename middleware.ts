@@ -84,12 +84,8 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   // ── 4. Not authenticated → redirect to login
-  if (!session) {
-    const url = new URL("/login", request.url);
-    if (!pathname.startsWith("/login")) {
-      url.searchParams.set("redirect", pathname);
-    }
-    return NextResponse.redirect(url);
+  if (!session && request.nextUrl.pathname !== '/login') {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // ── 5. Inject user info headers for API routes (avoids repeated DB lookups)
@@ -147,6 +143,6 @@ function withSecurityHeaders(res: NextResponse): NextResponse {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|login|register|api/webhooks).*)"
   ],
 };
