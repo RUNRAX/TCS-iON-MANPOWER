@@ -286,7 +286,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
             {/* Step 0: AI Auto-Fill */}
             {step === 0 && (
               <motion.div key="ai" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-                <div className="admin-panel" style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 16 }}>
+                <div style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 16, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
                       <Sparkles size={17} />
@@ -417,7 +417,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
             {/* Step 3: Preview */}
             {step === 3 && (
               <motion.div key="preview" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}>
-                <div className="admin-panel" style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 14 }}>
+                <div style={{ position: "relative", borderRadius: 18, padding: 20, marginBottom: 14, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: textMuted, textTransform: "uppercase", marginBottom: 14 }}>Employee Preview</p>
 
                   {/* Avatar + Name */}
@@ -472,7 +472,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
                   <p style={{ fontSize: 13, color: textMuted, marginBottom: 24 }}>{form.fullName} has been added to the portal.</p>
                 </div>
 
-                <div className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                <div style={{ position: "relative", borderRadius: 16, padding: 20, marginBottom: 16, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   {[
                     { label: "Employee ID", value: result.employeeCode ?? "—", copyable: true },
                     { label: "Email", value: form.email, copyable: true },
