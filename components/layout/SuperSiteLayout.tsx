@@ -395,23 +395,46 @@ export default function SuperSiteLayout({
         {/* Logo / Master Admin badge */}
         <div className="px-4 py-4 relative z-10" style={{ borderBottom: `1px solid ${borderCol}` }}>
           {isSuperAdmin ? (
-            /* ── MASTER CONTROL badge — cold-ice style for super_admin ── */
-            <div style={{
-              padding: "10px 12px", borderRadius: 14, marginBottom: 0,
-              background: dark
-                ? `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 35%, rgba(0,0,0,0.9)), color-mix(in srgb, var(--tc-secondary) 20%, rgba(0,0,0,0.95)))`
-                : `linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 15%, transparent), color-mix(in srgb, var(--tc-secondary) 8%, transparent))`,
-              border: `1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)`,
-              boxShadow: `0 0 20px color-mix(in srgb, var(--tc-primary) 15%, transparent)`,
+            /* ── MASTER CONTROL badge — Glassmorphism reference style ── */
+            <div className="relative px-4 py-3 rounded-full flex items-center shadow-lg" style={{
+              background: dark 
+                ? "linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))"
+                : "linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.01))",
+              backdropFilter: "blur(12px)",
+              border: `1px solid ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
+              boxShadow: dark ? "inset 0 1px 0 rgba(255,255,255,0.1)" : "inset 0 1px 0 rgba(255,255,255,0.6)",
             }}>
               <p style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: 3,
-                textTransform: "uppercase", color: "var(--tc-accent)",
-                fontFamily: "var(--font-jetbrains-mono)",
-              }}>◈ MASTER CONTROL</p>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--tc-primary)", marginTop: 2 }}>
-                super_admin
+                fontSize: 13, 
+                fontWeight: 300, 
+                letterSpacing: "0.08em",
+                color: dark ? "#cbd5e1" : "#475569",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+                flex: 1,
+                textAlign: "center",
+                paddingRight: "8px"
+              }}>
+                Master Control
               </p>
+              
+              {/* Floating Spheres (Glassmorphism Reference) */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] w-6 h-10 pointer-events-none z-10 flex flex-col justify-center gap-[2px]">
+                 {/* Top medium sphere */}
+                 <div className="absolute -top-[6px] right-[4px] w-[18px] h-[18px] rounded-full" style={{
+                   background: dark ? "radial-gradient(circle at 30% 30%, #e2e8f0, #64748b)" : "radial-gradient(circle at 30% 30%, #ffffff, #94a3b8)",
+                   boxShadow: "0 2px 5px rgba(0,0,0,0.4)"
+                 }} />
+                 {/* Middle large sphere */}
+                 <div className="absolute top-[6px] -right-[6px] w-[22px] h-[22px] rounded-full z-10" style={{
+                   background: dark ? "radial-gradient(circle at 30% 30%, #f1f5f9, #475569)" : "radial-gradient(circle at 30% 30%, #ffffff, #64748b)",
+                   boxShadow: "0 4px 8px rgba(0,0,0,0.5)"
+                 }} />
+                 {/* Bottom small sphere */}
+                 <div className="absolute top-[22px] right-[10px] w-[14px] h-[14px] rounded-full" style={{
+                   background: dark ? "radial-gradient(circle at 30% 30%, #e2e8f0, #64748b)" : "radial-gradient(circle at 30% 30%, #ffffff, #94a3b8)",
+                   boxShadow: "0 2px 4px rgba(0,0,0,0.3)"
+                 }} />
+              </div>
             </div>
           ) : (
             /* ── Normal TCS iON logo for admin/employee ── */
@@ -525,21 +548,18 @@ export default function SuperSiteLayout({
           {/* Sidebar collapse chevron */}
           <div className="flex justify-center mt-2">
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-full flex items-center justify-center py-1 rounded-xl"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full flex items-center justify-center py-[2px] rounded-full h-[12px]"
               style={{
                 background: 'linear-gradient(270deg, #ff4b1f, #ff9068, #ff4b1f)',
                 backgroundSize: '200% 200%',
                 animation: 'gradientFlow 3s ease infinite',
                 boxShadow: '0 0 15px rgba(255, 75, 31, 0.6)',
                 border: 'none',
-                color: '#fff',
                 cursor: "pointer",
               }}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </motion.button>
+            />
           </div>
         </div>
       </aside>
