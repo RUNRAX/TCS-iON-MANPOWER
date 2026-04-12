@@ -521,7 +521,7 @@ export default function AdminShifts() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-              style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(20px) saturate(110%)", WebkitBackdropFilter: "blur(20px) saturate(110%)", background: dark ? "rgba(3,2,10,0.55)" : "rgba(15,8,30,0.20)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)" }}
               onClick={() => setShowCreate(false)}
             />
 
@@ -543,7 +543,7 @@ export default function AdminShifts() {
                   width: "100%", maxWidth: 540,
                   maxHeight: "88vh", overflowY: "auto",
                   borderRadius: 28,
-                  background: dark ? "rgba(18, 16, 28, 0.55)" : "rgba(255, 255, 255, 0.45)",
+                  background: "var(--spatial-glass-bg)",
                   backdropFilter: "var(--spatial-glass-blur)",
                   padding: "0 0 32px",
                   position: "relative",
