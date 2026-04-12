@@ -521,7 +521,7 @@ export default function AdminShifts() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-              style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", background: dark ? "rgba(3,2,10,0.60)" : "rgba(15,8,30,0.22)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", background: dark ? "rgba(3,2,10,0.60)" : "rgba(15,8,30,0.22)" }}
               onClick={() => setShowCreate(false)}
             />
 
