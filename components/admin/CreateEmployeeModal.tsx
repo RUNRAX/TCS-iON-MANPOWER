@@ -250,7 +250,7 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
                 pointerEvents: "auto",
                 width: "100%", maxWidth: 540, maxHeight: "88vh",
                 borderRadius: 28,
-                background: "rgba(20, 20, 25, 0.18)",
+                background: "var(--spatial-glass-bg)",
                 backdropFilter: "var(--spatial-glass-blur)",
                 display: "flex", flexDirection: "column", overflow: "hidden",
               }}
