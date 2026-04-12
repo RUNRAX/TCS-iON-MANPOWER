@@ -7,6 +7,7 @@ import { AuthLayout3D } from "@/components/layout/AuthLayout3D";
 export default function LoginPage() {
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
