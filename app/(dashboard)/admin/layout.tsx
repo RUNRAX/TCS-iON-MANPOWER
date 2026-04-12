@@ -20,7 +20,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { dbUser, profile } = await getUserData(session.user.id);
 
-  if (dbUser?.role !== "admin") redirect("/employee/dashboard");
+  // Hard role guard: only role === "admin" can render admin pages
+  if (!dbUser) redirect("/login");
+  if (dbUser.role === "super_admin") redirect("/super/dashboard");
+  if (dbUser.role !== "admin") redirect("/login");
 
   const prefetchRoutes = ["/admin/dashboard","/admin/employees","/admin/shifts","/admin/payments","/admin/excel","/admin/broadcast"];
 

@@ -30,9 +30,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { dbUser } = await getUserData(session.user.id);
 
-  if (dbUser?.is_active === false) redirect("/login?reason=inactive");
+  if (!dbUser) redirect("/login");
+  if (dbUser.is_active === false) redirect("/login?reason=inactive");
 
-  if (dbUser?.role === "super_admin") redirect("/super/dashboard");
+  // super_admin should never render inside the (dashboard) group
+  if (dbUser.role === "super_admin") redirect("/super/dashboard");
 
   return (
     <>

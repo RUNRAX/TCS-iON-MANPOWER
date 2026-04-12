@@ -81,17 +81,35 @@ export async function POST(request: NextRequest) {
       .eq("id", authData.user.id)
       .single();
 
-    if (!dbUser?.is_active) {
+    if (!dbUser) {
+      await ssrClient.auth.signOut();
+      return unauthorized("User record not found. Contact your admin.");
+    }
+
+    if (dbUser.is_active === false) {
       await ssrClient.auth.signOut();
       return unauthorized("Your account has been deactivated. Contact your admin.");
+    }
+
+    // ── 5a. Validate role is a known value — reject unknown roles
+    const VALID_ROLES = ["super_admin", "admin", "employee"] as const;
+    const dbRole = (typeof dbUser.role === "string" ? dbUser.role.trim() : "");
+    if (!VALID_ROLES.includes(dbRole as any)) {
+      console.error(`[Auth] Unknown role "${dbUser.role}" for user ${authData.user.id}`);
+      await ssrClient.auth.signOut();
+      return unauthorized("Invalid account configuration. Contact your admin.");
     }
 
     // ── 6. Sync role into app_metadata (server-only, not client-writable)
     // This ensures middleware reads the correct role from the JWT
     const adminForMeta = createAdminClient();
+    let metaSyncOk = true;
     await adminForMeta.auth.admin.updateUserById(authData.user.id, {
-      app_metadata: { role: dbUser.role },
-    }).catch((e) => console.warn("[Auth] app_metadata sync failed:", e));
+      app_metadata: { role: dbRole },
+    }).catch((e) => {
+      console.warn("[Auth] app_metadata sync failed:", e);
+      metaSyncOk = false;
+    });
 
     // Refresh the session to ensure the JWT in the cookie has the updated app_metadata
     await ssrClient.auth.refreshSession();
@@ -113,16 +131,24 @@ export async function POST(request: NextRequest) {
       profileStatus = profile?.status ?? null;
     }
 
-    const redirectTo =
-      dbUser.role === "super_admin"
-        ? "/super/dashboard"
-        : dbUser.role === "admin"
-        ? "/admin/dashboard"
-        : !profileStatus
-        ? "/employee/profile"
-        : profileStatus === "pending"
-        ? "/employee/profile?status=pending"
-        : "/employee/dashboard";
+    // ── Role-based redirect — strict equality, no fallthrough
+    let redirectTo: string;
+    if (dbRole === "super_admin") {
+      redirectTo = "/super/dashboard";
+    } else if (dbRole === "admin") {
+      redirectTo = "/admin/dashboard";
+    } else if (dbRole === "employee") {
+      if (!profileStatus) {
+        redirectTo = "/employee/profile";
+      } else if (profileStatus === "pending") {
+        redirectTo = "/employee/profile?status=pending";
+      } else {
+        redirectTo = "/employee/dashboard";
+      }
+    } else {
+      // Should never reach here due to VALID_ROLES check above
+      redirectTo = "/login";
+    }
 
     // ── 8. Return JSON — cookies were already set by ssrClient above
     return NextResponse.json({
@@ -131,7 +157,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: authData.user.id,
           email: authData.user.email,
-          role: dbUser.role,
+          role: dbRole,
           profileStatus,
         },
         redirectTo,

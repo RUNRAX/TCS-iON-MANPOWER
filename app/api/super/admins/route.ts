@@ -42,27 +42,37 @@ export const GET = withSuperAdmin(async (request) => {
     if (!/^[A-Z]{3}$/.test(code)) {
       return ok({ available: false, reason: "Invalid format" });
     }
-    const { data: existing } = await supabase
-      .from("users")
-      .select("id")
-      .eq("center_code", code)
-      .limit(1);
+    const { data: existing, error: checkErr } = await Promise.resolve(
+      supabase
+        .from("users")
+        .select("id")
+        .eq("center_code", code)
+        .limit(1)
+    ).catch((e) => ({ data: null as any, error: e }));
 
-    return ok({ available: !existing || existing.length === 0 });
+    if (checkErr) {
+      console.error("[Super/Admins] checkCenter error:", checkErr);
+      return ok({ available: false, reason: "Lookup failed" });
+    }
+
+    const found = existing ?? [];
+    return ok({ available: found.length === 0 });
   }
 
   // Default: list all admins and employees (exclude super_admin)
-  const { data, error } = await supabase
-    .from("users")
-    .select(`
-      id, email, phone, role, is_active, center_code, last_login_at, created_at,
-      employee_profiles(full_name)
-    `)
-    .in("role", ["admin", "employee"])
-    .order("created_at", { ascending: false });
+  const { data, error } = await Promise.resolve(
+    supabase
+      .from("users")
+      .select(`
+        id, email, phone, role, is_active, center_code, last_login_at, created_at,
+        employee_profiles(full_name)
+      `)
+      .in("role", ["admin", "employee"])
+      .order("created_at", { ascending: false })
+  ).catch((e) => ({ data: null as any, error: e }));
 
   if (error) {
-    console.error("[Super/Admins] GET error:", error.message);
+    console.error("[Super/Admins] GET error:", error?.message ?? error);
     return serverError();
   }
 
@@ -103,11 +113,13 @@ export const POST = withSuperAdmin(async (request: NextRequest, { userId }) => {
   const supabase = createAdminClient();
 
   // ── Check uniqueness (email, phone, center code)
-  const { data: existing } = await supabase
-    .from("users")
-    .select("id, email, phone, center_code")
-    .or(`email.eq.${email},phone.eq.${phone},center_code.eq.${centerCode}`)
-    .limit(1);
+  const { data: existing } = await Promise.resolve(
+    supabase
+      .from("users")
+      .select("id, email, phone, center_code")
+      .or(`email.eq.${email},phone.eq.${phone},center_code.eq.${centerCode}`)
+      .limit(1)
+  ).catch((e) => ({ data: null as any, error: e }));
 
   if (existing && existing.length > 0) {
     const dup = existing[0] as any;
