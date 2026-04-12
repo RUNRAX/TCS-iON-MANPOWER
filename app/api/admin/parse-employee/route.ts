@@ -1,11 +1,11 @@
 /**
  * /api/admin/parse-employee
  * POST — AI agent: parse structured text message into employee form data
- * Uses Google Gemini Flash to extract fields from freeform text.
+ * Uses Groq Llama 3.1 to extract fields from freeform text.
  */
 import { NextResponse } from "next/server";
 import { withAdmin } from "@/lib/utils/api";
-import { generateJSON } from "@/lib/ai/gemini";
+import { generateJSON } from "@/lib/ai/groq";
 
 interface ParsedEmployee {
   fullName?: string;
@@ -79,7 +79,7 @@ export const POST = withAdmin(async (request) => {
   } catch (err: any) {
     console.error("[ParseEmployee] AI error:", err);
     // Guard: AI service not configured (missing/placeholder API key)
-    if (String(err).includes("not configured") || String(err).includes("GOOGLE_GEMINI_API_KEY")) {
+    if (String(err).includes("not configured") || String(err).includes("GROQ_API_KEY")) {
       return NextResponse.json(
         { error: "AI service is not configured. Please contact your administrator." },
         { status: 503 }

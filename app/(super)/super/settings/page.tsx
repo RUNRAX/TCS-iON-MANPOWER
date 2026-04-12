@@ -53,7 +53,7 @@ const item = {
 const ENV_VARS = [
   { key: "RESEND_API_KEY", label: "Resend API Key", icon: Key },
   { key: "MAILJET_API_KEY", label: "Mailjet API Key", icon: Key },
-  { key: "GOOGLE_GEMINI_API_KEY", label: "Google Gemini API Key", icon: Key },
+  { key: "GROQ_API_KEY", label: "Groq AI API Key (Llama)", icon: Key },
   { key: "UPSTASH_REDIS_REST_URL", label: "Upstash Redis URL", icon: Server },
   { key: "ENCRYPTION_KEY", label: "Encryption Key", icon: Shield },
 ] as const;

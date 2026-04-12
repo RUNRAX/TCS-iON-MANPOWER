@@ -59,7 +59,71 @@ export const GET = withSuperAdmin(async (request) => {
     return ok({ available: found.length === 0 });
   }
 
-  // Default: list all admins and employees (exclude super_admin)
+  // ── Primary path: try auth.admin.listUsers() first ────────────────────────
+  // This catches admins that exist in auth.users but not in the users table
+  try {
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (!authError && authData?.users) {
+      // Filter users whose app_metadata.role === 'admin' OR user_metadata.role === 'admin'
+      const authAdmins = authData.users.filter(
+        (u) => u.app_metadata?.role === "admin" || u.user_metadata?.role === "admin"
+      );
+
+      if (authAdmins.length > 0) {
+        // Enrich with users table data (center_code, etc.)
+        const adminIds = authAdmins.map((a) => a.id);
+        const { data: usersTableData } = await supabase
+          .from("users")
+          .select("id, center_code, is_active, last_login_at")
+          .in("id", adminIds);
+
+        const usersMap = new Map(
+          (usersTableData ?? []).map((u: any) => [u.id, u])
+        );
+
+        // Also get employee_profiles for full_name
+        const { data: profilesData } = await supabase
+          .from("employee_profiles")
+          .select("user_id, full_name")
+          .in("user_id", adminIds);
+
+        const profilesMap = new Map(
+          (profilesData ?? []).map((p: any) => [p.user_id, p])
+        );
+
+        const admins = authAdmins.map((u) => {
+          const usersRow = usersMap.get(u.id) as any;
+          const profile = profilesMap.get(u.id) as any;
+          return {
+            id: u.id,
+            email: u.email ?? "—",
+            phone: u.phone ?? u.user_metadata?.phone ?? "—",
+            role: "admin",
+            isActive: usersRow?.is_active ?? true,
+            centerCode: usersRow?.center_code ?? u.user_metadata?.center_code ?? "—",
+            fullName: profile?.full_name ?? u.user_metadata?.full_name ?? u.email ?? "—",
+            lastLoginAt: usersRow?.last_login_at ?? u.last_sign_in_at ?? null,
+            createdAt: u.created_at,
+          };
+        });
+
+        // Sort by created_at descending
+        admins.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        return ok({ admins });
+      }
+    }
+  } catch (e) {
+    console.warn("[Super/Admins] Auth admin.listUsers fallback:", e);
+  }
+
+  // ── Fallback: query users table directly (original behavior) ──────────────
   const { data, error } = await Promise.resolve(
     supabase
       .from("users")

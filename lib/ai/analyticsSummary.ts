@@ -1,9 +1,9 @@
 /**
  * lib/ai/analyticsSummary.ts
- * Generates a natural-language summary of admin dashboard metrics via Gemini.
+ * Generates a natural-language summary of admin dashboard metrics via Groq Llama.
  */
 
-import { generateText } from "./gemini";
+import { generateText } from "./groq";
 
 export interface DashboardMetrics {
   totalEmployees: number;

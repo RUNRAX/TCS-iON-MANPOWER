@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { withAdmin } from "@/lib/utils/api";
-import { generateJSON } from "@/lib/ai/gemini";
+import { generateJSON } from "@/lib/ai/groq";
 
 interface ParsedShift {
   title?: string;
@@ -52,7 +52,7 @@ export const POST = withAdmin(async (request) => {
   } catch (err: any) {
     console.error("[ParseShift] AI error:", err);
     // Guard: AI service not configured (missing/placeholder API key)
-    if (String(err).includes("not configured") || String(err).includes("GOOGLE_GEMINI_API_KEY")) {
+    if (String(err).includes("not configured") || String(err).includes("GROQ_API_KEY")) {
       return NextResponse.json(
         { status: "error", message: "AI service is not configured. Please contact your administrator." },
         { status: 503 }

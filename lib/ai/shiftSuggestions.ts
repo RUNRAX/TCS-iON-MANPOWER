@@ -1,9 +1,9 @@
 /**
  * lib/ai/shiftSuggestions.ts
- * Generates personalized shift recommendations for an employee via Gemini.
+ * Generates personalized shift recommendations for an employee via Groq Llama.
  */
 
-import { generateJSON } from "./gemini";
+import { generateJSON } from "./groq";
 
 export interface EmployeeProfile {
   name: string;
