@@ -249,8 +249,8 @@ export function withSuperAdmin(handler: RouteHandler) {
       const user = await getUser();
       if (!user) return unauthorized();
 
-      const supabase = createAdminClient();
-      const { data: dbUser } = await supabase
+      const adminClient = createAdminClient();
+      const { data: dbUser } = await adminClient
         .from("users")
         .select("role, is_active")
         .eq("id", user.id)
