@@ -188,7 +188,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 28, scale: 0.96 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 28, scale: mounted ? 1 : 0.96 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 bg-white/10 dark:bg-black/10 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl"
+          className="relative z-10 bg-white/[0.02] dark:bg-black/[0.02] backdrop-blur-[5px] border border-white/20 rounded-3xl shadow-2xl"
           style={{
             padding: 44,
             overflow: "hidden",

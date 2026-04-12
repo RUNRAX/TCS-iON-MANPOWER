@@ -80,7 +80,7 @@ export const POST = withAdmin(async (request) => {
     console.error("[ParseEmployee] AI error:", err);
     if (err?.status === 429 || String(err).includes("429") || String(err).includes("quota") || String(err).includes("Quota") || String(err).includes("exceeded")) {
       return NextResponse.json(
-        { status: "error", message: "AI service is busy (Quota Exceeded). Please try manual fill." },
+        { error: "AI system is currently busy (Quota Exceeded). Falling back to manual entry." },
         { status: 429 }
       );
     }
