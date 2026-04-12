@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
+import { useSuperStats } from "@/hooks/use-api";
 import {
   Users,
   UserCheck,
@@ -86,16 +87,8 @@ export default function SuperDashboardPage() {
     return () => clearInterval(id);
   }, []);
 
-  // ── Stats data
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["super", "stats"],
-    queryFn: () =>
-      fetch("/api/super/stats")
-        .then((r) => r.json())
-        .then((d) => d.data),
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-  });
+  // ── Stats data — shared hook ensures cache consistency across /super/* pages
+  const { data: stats, isLoading } = useSuperStats();
 
   // ── AI summary (POST with metrics body — route only exports POST)
   const { data: aiData } = useQuery({

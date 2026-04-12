@@ -10,7 +10,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSuperAdminList, QK } from "@/hooks/use-api";
 import { toast } from "sonner";
 import {
   Plus,
@@ -73,11 +74,8 @@ export default function SuperAdminsPage() {
   };
 
   // ── Fetch admins
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["super", "admins"],
-    queryFn: () => fetch("/api/super/admins").then(r => r.json()).then(d => d.data),
-    staleTime: 30_000,
-  });
+  // ✅ Bug 3 fix: use shared hook so ALL super admin pages share the same cache
+  const { data, isLoading } = useSuperAdminList();
 
   const admins: any[] = data?.admins ?? [];
   const filtered = admins.filter((a: any) => {
@@ -101,7 +99,8 @@ export default function SuperAdminsPage() {
       return res.json();
     },
     onSuccess: (d) => {
-      queryClient.invalidateQueries({ queryKey: ["super", "admins"] });
+      queryClient.invalidateQueries({ queryKey: QK.superAdmins });
+      queryClient.invalidateQueries({ queryKey: QK.superStats });
       toast.success(d.data?.active ? "Admin activated" : "Admin deactivated");
       setConfirmDeactivate(null);
     },
@@ -363,7 +362,7 @@ export default function SuperAdminsPage() {
             masterGlass={masterGlass}
             dimText={dimText}
             glassOpacity={glassOpacity}
-            onClose={() => { setShowCreate(false); refetch(); }}
+            onClose={() => { setShowCreate(false); queryClient.invalidateQueries({ queryKey: QK.superAdmins }); queryClient.invalidateQueries({ queryKey: QK.superStats }); }}
           />
         )}
       </AnimatePresence>

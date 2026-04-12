@@ -78,6 +78,13 @@ export const POST = withAdmin(async (request) => {
     return NextResponse.json({ status: "ok", data: parsed });
   } catch (err: any) {
     console.error("[ParseEmployee] AI error:", err);
+    // Guard: AI service not configured (missing/placeholder API key)
+    if (String(err).includes("not configured") || String(err).includes("GOOGLE_GEMINI_API_KEY")) {
+      return NextResponse.json(
+        { error: "AI service is not configured. Please contact your administrator." },
+        { status: 503 }
+      );
+    }
     if (err?.status === 429 || String(err).includes("429") || String(err).includes("quota") || String(err).includes("Quota") || String(err).includes("exceeded")) {
       return NextResponse.json(
         { error: "AI system is currently busy (Quota Exceeded). Falling back to manual entry." },

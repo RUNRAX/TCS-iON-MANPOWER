@@ -33,6 +33,9 @@ export const QK = {
   employeeHistory:     ["employee", "shifts", "history"]         as const,
   employeePayments:    ["employee", "payments"]                  as const,
   employeeNotifs:      ["employee", "notifications"]             as const,
+  // ── Super admin keys — shared across all /super/* pages
+  superAdmins:         ["super", "admins"]                       as const,
+  superStats:          ["super", "stats"]                        as const,
 } as const;
 
 // ── Admin hooks ───────────────────────────────────────────────────────────────
@@ -289,6 +292,56 @@ export function useMarkNotificationRead() {
     },
     onError: (_, __, ctx) => {
       if (ctx?.prev) qc.setQueryData(QK.employeeNotifs, ctx.prev);
+    },
+  });
+}
+
+// ── Super admin hooks ─────────────────────────────────────────────────────────
+
+/** Shared admin list — used by ALL /super/* pages that show admin data */
+export function useSuperAdminList() {
+  return useQuery({
+    queryKey: QK.superAdmins,
+    queryFn: () =>
+      fetch("/api/super/admins")
+        .then((r) => r.json())
+        .then((d) => d.data),
+    staleTime: 20_000,
+    refetchInterval: 30_000,
+  });
+}
+
+/** Super dashboard stats — cross-center aggregates */
+export function useSuperStats() {
+  return useQuery({
+    queryKey: QK.superStats,
+    queryFn: () =>
+      fetch("/api/super/stats")
+        .then((r) => r.json())
+        .then((d) => d.data),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+}
+
+/** Create admin mutation — invalidates ALL super admin query caches on success */
+export function useCreateAdmin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { fullName: string; email: string; phone: string; centerCode: string }) => {
+      const res = await fetch("/api/super/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message ?? "Failed to create admin");
+      return json.data;
+    },
+    onSuccess: () => {
+      // ✅ Invalidate ALL super admin caches so every page updates
+      void qc.invalidateQueries({ queryKey: QK.superAdmins });
+      void qc.invalidateQueries({ queryKey: QK.superStats });
     },
   });
 }

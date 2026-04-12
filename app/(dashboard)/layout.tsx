@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import SiteLayout from "@/components/layout/SiteLayout";
@@ -35,6 +36,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // super_admin should never render inside the (dashboard) group
   if (dbUser.role === "super_admin") redirect("/super/dashboard");
+
+  // ── Defense-in-depth: pathname-based role assertion ──
+  // Even though middleware already blocks these, a second check prevents future
+  // middleware bugs from causing an access-control breach.
+  const headersList = await headers();
+  const pathname = headersList.get("x-invoke-path") ?? headersList.get("x-next-url") ?? "";
+  const userRole = dbUser.role as string;
+
+  if (pathname.startsWith("/super") && userRole !== "super_admin") {
+    redirect(userRole === "admin" ? "/admin/dashboard" : "/employee/dashboard");
+  }
+  if (pathname.startsWith("/admin") && userRole !== "admin" && userRole !== "super_admin") {
+    redirect("/employee/dashboard");
+  }
 
   return (
     <>

@@ -11,7 +11,11 @@ let _model: GenerativeModel | null = null;
 function getClient(): GoogleGenerativeAI {
   if (!_client) {
     const key = process.env.GOOGLE_GEMINI_API_KEY;
-    if (!key) throw new Error("GOOGLE_GEMINI_API_KEY is not set in environment variables.");
+    if (!key || key === "your-gemini-api-key") {
+      throw new Error(
+        "AI service is not configured. GOOGLE_GEMINI_API_KEY is missing or set to placeholder. Please contact your administrator."
+      );
+    }
     _client = new GoogleGenerativeAI(key);
   }
   return _client;
