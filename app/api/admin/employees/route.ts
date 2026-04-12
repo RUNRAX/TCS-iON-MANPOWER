@@ -49,7 +49,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       profilesQuery = profilesQuery.eq("approved_by", userId);
     }
 
-    const [userRes, profileRes] = await Promise.all([usersQuery, profilesQuery]);
+    const [userRes, profileRes] = await Promise.all([usersQuery, profilesQuery]).catch(() => [{ data: null }, { data: null }]);
 
     const fromUsers    = (userRes.data ?? []).map((u: { id: string }) => u.id);
     const fromProfiles = (profileRes.data ?? []).map((p: { user_id: string }) => p.user_id);
@@ -83,8 +83,11 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     query = query.in("id", matchedUserIds);
   }
 
-  const { data, error, count } = await query.range(from, from + limit - 1);
-  if (error) { console.error("[Admin/Employees GET]:", error); return serverError(`DB Error: ${error.message}`); }
+  const { data, error, count } = await Promise.resolve(query.range(from, from + limit - 1)).catch((err: any) => {
+    console.error("[Admin/Employees GET] Promise rejection:", err);
+    return { data: null, error: err, count: 0 };
+  });
+  if (error) { console.error("[Admin/Employees GET]:", error); return serverError("Failed to fetch employees"); }
 
   // ── Step 3: flatten + apply status filter ─────────────────────────────────
   const employees = (data ?? []).flatMap((u: Record<string, unknown>) => {

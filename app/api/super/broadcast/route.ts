@@ -49,19 +49,24 @@ export const POST = withSuperAdmin(
     else roleFilter = ["employee", "admin"];
 
     // ── Fetch recipients with joined user data
-    const { data: profiles, error: fetchErr } = await supabase
-      .from("employee_profiles")
-      .select(
+    const { data: profiles, error: fetchErr } = await Promise.resolve(
+      supabase
+        .from("employee_profiles")
+        .select(
+          `
+          user_id, full_name, email,
+          users!employee_profiles_user_id_fkey(role, is_active, center_code)
         `
-        user_id, full_name, email,
-        users!employee_profiles_user_id_fkey(role, is_active, center_code)
-      `
-      )
-      .eq("is_deleted", false);
+        )
+        .eq("is_deleted", false)
+    ).catch((err: any) => {
+      console.error("[Super/Broadcast] Promise rejection:", err);
+      return { data: null, error: err };
+    });
 
     if (fetchErr) {
-      console.error("[Super/Broadcast] Fetch error:", fetchErr.message);
-      return serverError();
+      console.error("[Super/Broadcast] Fetch error:", fetchErr?.message ?? fetchErr);
+      return serverError("Failed to fetch recipients");
     }
 
     // ── Filter by role, active status, and optional center code
@@ -120,20 +125,21 @@ export const POST = withSuperAdmin(
     }
 
     // ── Log broadcast to broadcast_logs table (best effort — table may not exist yet)
-    await supabase
-      .from("broadcast_logs")
-      .insert({
-        admin_id: userId,
-        type: "email_system_broadcast",
-        title: subject,
-        body: message,
-        target: targets,
-        sent,
-        failed,
-      })
-      .then(null, () => {
-        // Silently ignore if broadcast_logs table doesn't exist
-      });
+    await Promise.resolve(
+      supabase
+        .from("broadcast_logs")
+        .insert({
+          admin_id: userId,
+          type: "email_system_broadcast",
+          title: subject,
+          body: message,
+          target: targets,
+          sent,
+          failed,
+        })
+    ).catch(() => {
+      // Silently ignore if broadcast_logs table doesn't exist
+    });
 
     // ── Audit log
     await auditLog({

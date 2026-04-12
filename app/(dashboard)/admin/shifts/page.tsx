@@ -574,23 +574,21 @@ export default function AdminShifts() {
                 display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
                 pointerEvents: "none",
               }}>
-              <div style={{
-                pointerEvents: "all",
-                width: "100%", maxWidth: 500,
-                maxHeight: "92vh", overflowY: "auto",
-                borderRadius: 36,
-                background: g.bg,
-                backdropFilter: g.blur,
-                WebkitBackdropFilter: g.blur,
-                border: `1px solid ${g.border}`,
-                boxShadow: g.shadow,
-                padding: "0 0 32px",
-                position: "relative",
-              }}>
-                {/* Prismatic inner glow */}
-                <div style={{ position: "absolute", inset: 0, borderRadius: 36, pointerEvents: "none", background: dark ? "radial-gradient(ellipse at 30% 0%, rgba(99,102,241,0.10) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.08) 0%, transparent 55%)" : "radial-gradient(ellipse at 30% 0%, rgba(99,102,241,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.04) 0%, transparent 55%)" }} />
+              <div
+                className="glass-panel-strong admin-panel"
+                style={{
+                  pointerEvents: "all",
+                  width: "100%", maxWidth: 540,
+                  maxHeight: "88vh", overflowY: "auto",
+                  borderRadius: 28,
+                  background: "var(--spatial-glass-bg)",
+                  backdropFilter: "var(--spatial-glass-blur)",
+                  padding: "0 0 32px",
+                  position: "relative",
+                  display: "flex", flexDirection: "column", overflow: "hidden",
+                }}>
                 {/* Gradient top bar */}
-                <div style={{ height: 3, borderRadius: "36px 36px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
+                <div style={{ height: 3, borderRadius: "28px 28px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
 
                 {/* Header */}
                 <div style={{ padding: "22px 26px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${g.innerBorder}` }}>

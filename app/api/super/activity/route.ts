@@ -16,22 +16,27 @@ export const GET = withSuperAdmin(async (request) => {
 
   const supabase = createAdminClient();
 
-  const { data, error, count } = await supabase
-    .from("audit_logs")
-    .select(
-      `
-      id, action, entity_type, entity_id, before_value, after_value,
-      ip_address, user_agent, created_at,
-      user:users!audit_logs_user_id_fkey(email, role, center_code)
-    `,
-      { count: "exact" }
-    )
-    .order("created_at", { ascending: false })
-    .range(from, from + limit - 1);
+  const { data, error, count } = await Promise.resolve(
+    supabase
+      .from("audit_logs")
+      .select(
+        `
+        id, action, entity_type, entity_id, before_value, after_value,
+        ip_address, user_agent, created_at,
+        user:users!audit_logs_user_id_fkey(email, role, center_code)
+      `,
+        { count: "exact" }
+      )
+      .order("created_at", { ascending: false })
+      .range(from, from + limit - 1)
+  ).catch((err: any) => {
+    console.error("[Super/Activity] Promise rejection:", err);
+    return { data: null, error: err, count: 0 };
+  });
 
   if (error) {
-    console.error("[Super/Activity] Query error:", error.message);
-    return serverError();
+    console.error("[Super/Activity] Query error:", error?.message ?? error);
+    return serverError("Failed to fetch activity logs");
   }
 
   return ok({ logs: data ?? [], total: count ?? 0, page, limit });

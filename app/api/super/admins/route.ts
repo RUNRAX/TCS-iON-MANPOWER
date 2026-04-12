@@ -51,13 +51,14 @@ export const GET = withSuperAdmin(async (request) => {
     return ok({ available: !existing || existing.length === 0 });
   }
 
-  // Default: list all admins
+  // Default: list all admins and employees (exclude super_admin)
   const { data, error } = await supabase
     .from("users")
     .select(`
       id, email, phone, role, is_active, center_code, last_login_at, created_at,
       employee_profiles(full_name)
     `)
+    .in("role", ["admin", "employee"])
     .order("created_at", { ascending: false });
 
   if (error) {

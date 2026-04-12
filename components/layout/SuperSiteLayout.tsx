@@ -287,6 +287,7 @@ export default function SuperSiteLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
@@ -449,8 +450,15 @@ export default function SuperSiteLayout({
               border: `1px solid ${dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
-            <Search className="w-3.5 h-3.5" style={{ color: textMuted }} />
-            <span className="text-[12px]" style={{ color: textMuted, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif" }}>Search...</span>
+            <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: textMuted }} />
+            <input
+              type="search"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="text-[12px] bg-transparent border-none outline-none w-full"
+              style={{ color: textMain, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif" }}
+            />
           </div>
         </div>
 
@@ -469,7 +477,7 @@ export default function SuperSiteLayout({
 
         {/* Nav */}
         <nav className="flex-1 px-2.5 py-2 space-y-0.5 overflow-y-auto relative z-10" style={{ scrollbarWidth: "none" }}>
-          {navItems.map(item => {
+          {navItems.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase())).map(item => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}>
@@ -521,9 +529,12 @@ export default function SuperSiteLayout({
               whileTap={{ scale: 0.9 }}
               className="w-full flex items-center justify-center py-1 rounded-xl"
               style={{
-                background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                border: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}`,
-                color: textMuted,
+                background: 'linear-gradient(270deg, #ff4b1f, #ff9068, #ff4b1f)',
+                backgroundSize: '200% 200%',
+                animation: 'gradientFlow 3s ease infinite',
+                boxShadow: '0 0 15px rgba(255, 75, 31, 0.6)',
+                border: 'none',
+                color: '#fff',
                 cursor: "pointer",
               }}
             >
