@@ -84,8 +84,11 @@ export async function middleware(request: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   // ── 4. Not authenticated → redirect to login
-  if (!session && request.nextUrl.pathname !== '/login') {
-    return NextResponse.redirect(new URL('/login', request.url));
+  if (!session) {
+    if (request.nextUrl.pathname !== '/login') {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    return withSecurityHeaders(response);
   }
 
   // ── 5. Inject user info headers for API routes (avoids repeated DB lookups)
