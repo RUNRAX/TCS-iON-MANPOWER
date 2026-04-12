@@ -49,8 +49,8 @@ export default function ForgotPasswordPage() {
         <AnimatePresence mode="wait">
           {sent ? (
             <motion.div key="sent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-3/4 relative z-20 text-center">
-              <h2 className="text-[#fbbb29] text-sm mb-4">Link Sent!</h2>
-              <p className="text-white/60 text-xs italic mb-6">Check your inbox at <span className="text-white">{email}</span></p>
+              <h2 className="text-[#fbbb29] text-sm mb-4 uppercase tracking-widest">Request Received</h2>
+              <p className="text-white/60 text-xs mb-6">If an account exists, a password reset link has been sent to that email address. Please check your inbox.</p>
               
               <Link href="/login" className="mt-2 w-[120px] h-[34px] rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold tracking-wide flex items-center justify-center transition-all">
                 <ArrowLeft size={14} className="mr-2" /> Back
