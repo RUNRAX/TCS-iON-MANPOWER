@@ -50,18 +50,7 @@ export default function LoginPage() {
         
         <form onSubmit={handleLogin} className="flex flex-col items-center w-3/4 gap-4 relative z-20">
           
-          <AnimatePresence>
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="absolute -top-10 text-xs text-[#ff4d79] bg-[#ff4d79]/10 px-3 py-1 rounded-full border border-[#ff4d79]/30"
-              >
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+
 
           <input
             type="text"
@@ -93,6 +82,19 @@ export default function LoginPage() {
               )}
             </button>
           </div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="w-[280px] text-center text-xs text-[#ff4d79] mt-1"
+              >
+                Invalid Credentials
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="w-[280px] flex justify-end">
              <a href="/forgot-password" className="text-white/40 hover:text-white text-xs italic transition-colors">
