@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useCreateEmployee } from "@/hooks/use-api";
@@ -209,36 +210,51 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
     </div>
   );
 
-  if (!open) return null;
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => setMounted(true), []);
 
-  return (
-    <>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.18 }}
-        style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
-        onClick={step < 4 ? handleClose : undefined}>
-        
-        {/* Modal */}
-        <motion.div
-          onClick={e => e.stopPropagation()}
-          className="glass-panel-strong admin-panel"
-          initial={{ opacity: 0, scale: 0.94, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 16 }}
-          transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.8 }}
-          style={{
-            position: "relative",
-            zIndex: 9999, width: "100%", maxWidth: 540, maxHeight: "88vh",
-            borderRadius: 28,
-            background: "var(--spatial-glass-bg)",
-            backdropFilter: "var(--spatial-glass-blur)",
-            display: "flex", flexDirection: "column", overflow: "hidden",
-          }}
-        >
+  const content = (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="employee-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)" }}
+            onClick={step < 4 ? handleClose : undefined}
+          />
+          
+          {/* Modal Container */}
+          <motion.div
+            key="employee-modal-container"
+            style={{
+              position: "fixed", inset: 0, zIndex: 9999,
+              display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+              pointerEvents: "none"
+            }}
+          >
+            {/* Modal */}
+            <motion.div
+              onClick={e => e.stopPropagation()}
+              className="glass-panel-strong admin-panel"
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ type: "spring", stiffness: 500, damping: 35, mass: 0.8 }}
+              style={{
+                position: "relative",
+                pointerEvents: "auto",
+                width: "100%", maxWidth: 540, maxHeight: "88vh",
+                borderRadius: 28,
+                background: "var(--spatial-glass-bg)",
+                backdropFilter: "var(--spatial-glass-blur)",
+                display: "flex", flexDirection: "column", overflow: "hidden",
+              }}
+            >
 
         {/* Header */}
         <div style={{ padding: "24px 24px 18px", borderBottom: `1px solid ${border}`, flexShrink: 0, position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -569,6 +585,11 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
         )}
       </motion.div>
       </motion.div>
-    </>
+      </>
+      )}
+    </AnimatePresence>
   );
+
+  if (!mounted) return null;
+  return createPortal(content, document.body);
 }
