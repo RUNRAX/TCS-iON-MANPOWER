@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { motion } from "framer-motion";
 
 export default function SuperLoginPage() {
   const router   = useRouter();
@@ -46,92 +47,92 @@ export default function SuperLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050508] px-4">
-      {/* Different color scheme — visually distinct from regular login */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px]
-                        bg-red-900/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px]
-                        bg-orange-900/10 rounded-full blur-[100px]" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#050508] px-4 overflow-hidden relative">
+      {/* Background Animated Squares - RED THEME */}
+      <motion.div 
+        animate={{ y: [-30, 30, -30], rotate: [0, 45, 90] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[10%] left-[15%] w-72 h-72 bg-red-600/30 rounded-[40px] blur-[60px]" 
+      />
+      <motion.div 
+        animate={{ y: [30, -30, 30], rotate: [90, 45, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        className="absolute bottom-[10%] right-[15%] w-80 h-80 bg-red-800/20 rounded-[40px] blur-[80px]" 
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[40%] left-[55%] w-48 h-48 bg-orange-700/15 rounded-3xl blur-[50px]" 
+      />
 
-      <div className="relative w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14
-                          bg-red-900/50 border border-red-700/40 rounded-2xl
-                          text-red-400 font-black text-2xl mb-4">
-            ⬡
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-md"
+      >
+        {/* Glassmorphic Square Panel */}
+        <div className="aspect-square w-full max-w-[420px] mx-auto flex flex-col items-center justify-center bg-white/[0.03] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+          {/* Inner ambient glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
+
+          <div className="text-center mb-8 relative z-10">
+            <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">Master Control</h1>
+            <p className="text-xs font-medium text-red-500 tracking-wide uppercase">Super Admin</p>
           </div>
-          <h1 className="text-2xl font-bold text-white">Master Control</h1>
-          <p className="text-xs text-red-400/60 mt-1 font-mono tracking-widest uppercase">
-            Restricted Access — Super Admin Only
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-white/[0.03] border border-red-900/30 rounded-2xl p-8
-                        backdrop-blur-xl shadow-2xl shadow-red-900/10">
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30
-                            text-red-400 text-sm leading-relaxed">
-              🚫 {error}
-            </div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-3 w-full rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center relative z-10">
+              {error}
+            </motion.div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-white/40
-                                uppercase tracking-widest mb-2">
-                Master Admin Email
-              </label>
+          <form onSubmit={handleLogin} className="space-y-4 w-full px-2 relative z-10">
+            <motion.div whileHover={{ scale: 1.02 }} className="w-full">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="superadmin@tcsion.com"
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3
-                           text-white placeholder-white/15 focus:outline-none
-                           focus:border-red-700/60 transition-all"
+                placeholder="your mail here"
+                className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner"
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label className="block text-xs font-semibold text-white/40
-                                uppercase tracking-widest mb-2">
-                Master Password
-              </label>
+            <motion.div whileHover={{ scale: 1.02 }} className="w-full">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••••••"
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3
-                           text-white placeholder-white/15 focus:outline-none
-                           focus:border-red-700/60 transition-all"
+                placeholder="your password here"
+                className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner"
               />
+            </motion.div>
+
+            <div className="flex justify-end pt-1">
+              <span className="text-[11px] text-red-400/80 hover:text-red-300 transition-colors cursor-pointer">
+                restricted access
+              </span>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-red-900/60 hover:bg-red-800/70 border border-red-700/40
-                         disabled:opacity-50 text-red-200 font-bold py-3.5 rounded-xl
-                         transition-all active:scale-[0.98]"
-            >
-              {loading ? "Verifying..." : "Enter Master Control →"}
-            </button>
+            <div className="pt-6 flex justify-center w-full">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                disabled={loading}
+                className="w-1/2 bg-[#f3efe6] hover:bg-white text-red-700 border border-white/20 disabled:opacity-50 font-bold py-3 rounded-xl transition-all shadow-lg backdrop-blur-md"
+              >
+                {loading ? "Verifying..." : "Login"}
+              </motion.button>
+            </div>
           </form>
-
-          {/* Intentionally bare — no links, no helpers */}
-          <p className="text-center text-xs text-white/10 mt-6 font-mono">
-            TCSION · MASTER CONTROL · RESTRICTED
-          </p>
         </div>
-      </div>
+        <p className="text-center text-xs text-white/10 mt-8 font-mono">
+          TCSION · MASTER CONTROL · RESTRICTED
+        </p>
+      </motion.div>
     </div>
   );
 }
