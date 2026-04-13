@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { Providers } from "@/components/Providers";
 
 export default async function DashboardLayout({
   children,
@@ -64,6 +65,12 @@ export default async function DashboardLayout({
     redirect("/admin/dashboard");
   }
 
-  // ✅ Pass verified user data down to all child pages
-  return <>{children}</>;
+  // ✅ Pass userId + userRole down so Providers → ThemeProvider can:
+  //   1. Namespace sessionStorage per user (isolates theme between accounts)
+  //   2. Apply role-based default (orange for admin/employee routes)
+  return (
+    <Providers userId={user.id} userRole={role}>
+      {children}
+    </Providers>
+  );
 }

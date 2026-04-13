@@ -37,12 +37,15 @@ export const viewport: Viewport = {
  * Purpose: prevent flash-of-wrong-theme on hard refresh / first load.
  *
  * Logic:
- *  1. Read tc_theme_key, tc_dark, tc_custom from localStorage.
- *  2. If nothing is stored (first ever visit), use "violet" dark defaults.
+ *  1. Check if current path is a public route → always use orange dark.
+ *  2. Otherwise scan sessionStorage for tc_*_theme keys (user-namespaced).
  *  3. Apply CSS vars + tc-dark/tc-light classes to <html> immediately.
  *
+ * sessionStorage is used (not localStorage) so themes are tab-scoped
+ * and closing the tab resets to defaults.
+ *
  * This runs BEFORE React hydrates, so the user never sees a wrong theme.
- * React's ThemeContext will read localStorage again on mount and sync
+ * React's ThemeContext will read sessionStorage again on mount and sync
  * its state to match — no mismatch, no flash.
  */
 const themeScript = `(function(){
@@ -65,22 +68,51 @@ const themeScript = `(function(){
     arctic:   ["#67e8f9","#818cf8","#a78bfa"],
     infrared: ["#ef4444","#7c3aed","#06b6d4"]
   };
+
+  var PUBLIC = ["/","/login","/register","/forgot-password","/reset-password","/super/login"];
+  var path = location.pathname;
+  var isPublic = PUBLIC.indexOf(path) !== -1;
+
   var key = "orange";
   var dark = true;
   var colors = THEMES.orange;
-  try {
-    var rk = localStorage.getItem("tc_theme_key");
-    var rd = localStorage.getItem("tc_dark");
-    var rc = localStorage.getItem("tc_custom");
-    if (rk) { var k = JSON.parse(rk); if (THEMES[k]) { key = k; colors = THEMES[k]; } }
-    if (rd !== null) { dark = JSON.parse(rd) === true; }
-    if (key === "custom" && rc) {
-      var c = JSON.parse(rc);
-      var cp = c.primary, cs = c.secondary, ca = c.accent;
-      if (HEX.test(cp) && HEX.test(cs) && HEX.test(ca)) { colors = [cp, cs, ca]; }
-      else { key = "violet"; colors = THEMES.violet; }
-    }
-  } catch(e) {}
+
+  if (!isPublic) {
+    try {
+      // Scan sessionStorage for the first tc_*_theme key we can find
+      // (the user-namespaced key set by ThemeProvider)
+      var isSuperRoute = path.indexOf("/super") === 0;
+      for (var i = 0; i < sessionStorage.length; i++) {
+        var sk = sessionStorage.key(i);
+        if (!sk) continue;
+        // Match tc_{userId}_theme or tc_{userId}_superadmin_theme
+        var isSuperKey = sk.indexOf("_superadmin_theme") !== -1;
+        var isThemeKey = sk.slice(-6) === "_theme" && sk.indexOf("tc_") === 0;
+        if (!isThemeKey) continue;
+        // Only use superadmin keys on super routes, and non-superadmin keys elsewhere
+        if (isSuperRoute && !isSuperKey) continue;
+        if (!isSuperRoute && isSuperKey) continue;
+        var rk = sessionStorage.getItem(sk);
+        if (rk) {
+          var k2 = JSON.parse(rk);
+          if (THEMES[k2]) { key = k2; colors = THEMES[k2]; }
+        }
+        // Also try to read dark mode from the same prefix
+        var prefix = sk.replace(/_theme$/, "");
+        var rd = sessionStorage.getItem(prefix + "_dark");
+        if (rd !== null) { dark = JSON.parse(rd) === true; }
+        var rc = sessionStorage.getItem(prefix + "_custom");
+        if (key === "custom" && rc) {
+          var c = JSON.parse(rc);
+          var cp = c.primary, cs = c.secondary, ca = c.accent;
+          if (HEX.test(cp) && HEX.test(cs) && HEX.test(ca)) { colors = [cp, cs, ca]; }
+          else { key = "orange"; colors = THEMES.orange; }
+        }
+        break;
+      }
+    } catch(e) {}
+  }
+
   var r = document.documentElement;
   r.style.setProperty("--tc-primary",   colors[0]);
   r.style.setProperty("--tc-secondary", colors[1]);

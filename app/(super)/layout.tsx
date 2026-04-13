@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import SuperSiteLayout from "@/components/layout/SuperSiteLayout";
+import { Providers } from "@/components/Providers";
 import { cache } from "react";
 
 // Cache the role+profile lookup for the duration of this request
@@ -47,8 +48,11 @@ export default async function SuperAdminLayout({ children }: { children: React.R
     "/super/settings"
   ];
 
+  // ✅ Pass userId + userRole down so Providers → ThemeProvider can:
+  //   1. Namespace sessionStorage per user (tc_{userId}_superadmin)
+  //   2. Apply role-based default (orange for super admin on /super routes)
   return (
-    <>
+    <Providers userId={user.id} userRole={role}>
       {prefetchRoutes.map(href => (
         <Link key={href} href={href} prefetch={true} style={{ display: "none" }} aria-hidden />
       ))}
@@ -60,6 +64,6 @@ export default async function SuperAdminLayout({ children }: { children: React.R
       >
         {children}
       </SuperSiteLayout>
-    </>
+    </Providers>
   );
 }
