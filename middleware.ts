@@ -63,9 +63,8 @@ export async function middleware(request: NextRequest) {
     pathname === "/" ||
     PUBLIC_ROUTES.filter((r) => r !== "/").some((r) => pathname.startsWith(r));
 
-  if (isPublic) {
-    return withSecurityHeaders(NextResponse.next());
-  }
+  // We DO NOT return early here anymore. We need to check the session so we
+  // can redirect logged-in users AWAY from login pages.
 
   // ── 4. Build Supabase client to read session from cookie
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -97,6 +96,25 @@ export async function middleware(request: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  // ── 4a. Redirect authenticated users AWAY from login pages
+  const AUTH_PAGES = ["/", "/admin/login", "/employee/login", "/super/login"];
+  if (session && AUTH_PAGES.includes(pathname)) {
+    const role = (session.user.app_metadata?.role as string) ?? "employee";
+    if (role === "super_admin") {
+      return NextResponse.redirect(new URL("/super/dashboard", request.url));
+    } else if (role === "admin") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    } else {
+      return NextResponse.redirect(new URL("/employee/dashboard", request.url));
+    }
+  }
+
+  // ── 4b. If it's a public route (and not an AUTH_PAGE that we just handled), allow it
+  if (isPublic) {
+    return withSecurityHeaders(response);
+  }
+
 
   // ── 5. No session → redirect to appropriate login
   if (!session) {
