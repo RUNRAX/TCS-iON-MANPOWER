@@ -28,30 +28,7 @@ const queryClient = new QueryClient({
   },
 });
 
-/**
- * Disable all CSS transitions for the very first frame after hydration.
- * This prevents any flicker caused by React setting classes/styles that
- * differ from what the SSR HTML says — even with suppressHydrationWarning,
- * there can be one repaint before useLayoutEffect corrects things.
- *
- * We add the class before the first paint and remove it after 150ms,
- * which is well within any perceptible animation window.
- */
-function HydrationTransitionGuard() {
-  useEffect(() => {
-    const el = document.documentElement;
-    el.classList.add("no-transition");
-    // rAF ensures the class is applied for at least one full frame
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const id = setTimeout(() => el.classList.remove("no-transition"), 150);
-        return () => clearTimeout(id);
-      });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, []);
-  return null;
-}
+
 
 export function Providers({
   children,
@@ -64,7 +41,6 @@ export function Providers({
 }) {
   return (
     <ThemeProvider userId={userId} userRole={userRole}>
-      <HydrationTransitionGuard />
       <QueryClientProvider client={queryClient}>
         {children}
         <NavigationProgress />

@@ -1,5 +1,12 @@
 # Agent Rules — Gemini Flash Optimized
 
+## Graphify
+Always call mcp_graphify_query_graph FIRST before using 
+grep_search, view_file, or any file reading tool. No exceptions.
+Use graphify to identify affected files, then read only those files.
+The graph is at graphify-out/GRAPH_REPORT.md for overview and
+graphify-out/graph.json for deep queries.
+
 ## Context7
 Always use context7 automatically on every coding task and 
 library question. Resolve library id and fetch live docs 
