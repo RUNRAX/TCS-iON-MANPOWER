@@ -14,11 +14,11 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
-
+import { LiveClock } from "@/components/ui/LiveClock";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
-  LogOut, Menu, X, ChevronLeft, Building2,
+  LogOut, Menu, X, Building2,
   FileSpreadsheet, UserCheck, MessageSquare,
   Bell, Settings, Grid3X3,
   Search, BarChart3, ClipboardCheck,
@@ -523,22 +523,8 @@ export default function AdminSiteLayout({
             </div>
           </div>
 
-          {/* Sidebar collapse chevron */}
-          <div className="flex justify-center mt-2">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-full flex items-center justify-center py-1 rounded-xl"
-              style={{
-                background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                border: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}`,
-                color: textMuted,
-                cursor: "pointer",
-              }}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </motion.button>
-          </div>
+          {/* Live Clock */}
+          <LiveClock />
         </div>
       </aside>
 
@@ -581,8 +567,8 @@ export default function AdminSiteLayout({
                     ? `rgba(255,255,255,${scrolled ? 0.12 : 0.08})` 
                     : `rgba(255,255,255,${scrolled ? 0.85 : 0.65})`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
-                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 180 : 160}%)`,
+                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 260 : 220}%)`,
+                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 260 : 220}%)`,
                   boxShadow: dark
                     ? `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.18 : 0.10}), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 15 : 8}%, transparent), 0 8px 32px rgba(0,0,0,${scrolled ? 0.3 : 0.15})`
                     : `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.95 : 0.80}), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 12 : 6}%, transparent), 0 4px 16px rgba(0,0,0,${scrolled ? 0.08 : 0.04})`

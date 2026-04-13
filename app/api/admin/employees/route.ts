@@ -19,22 +19,39 @@ import { z } from "zod";
 
 /* ── Flexible schema — accepts both camelCase and snake_case field names ── */
 const createEmployeeSchema = z.object({
-  full_name:    z.string().min(2, "Name must be at least 2 characters"),
+  // Name — camelCase (modal) or snake_case
+  full_name:    z.string().min(2, "Name must be at least 2 characters").optional(),
+  fullName:     z.string().min(2, "Name must be at least 2 characters").optional(),
   email:        z.string().email("Invalid email"),
   password:     z.string().min(8).optional(),
+  // Phone — any of these
   phone:        z.string().min(10).max(15).optional(),
   phone_number: z.string().min(10).max(15).optional(),
+  phoneNumber:  z.string().min(10).max(15).optional(),
   state:        z.string().optional(),
   city:         z.string().optional(),
   pincode:      z.string().max(10).optional(),
+  // ID proof — any of these
   id_proof:     z.string().optional(),
   id_proof_type:z.string().optional(),
   id_type:      z.string().optional(),
+  idProofType:  z.string().optional(),
   role:         z.enum(["employee", "admin"]).default("employee"),
   center_code:  z.string().optional(),
   department:   z.string().optional(),
   designation:  z.string().optional(),
-});
+  // Optional fields from multi-step form (camelCase)
+  altPhone:     z.string().optional(),
+  addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
+  bankAccount:  z.string().optional(),
+  bankIfsc:     z.string().optional(),
+  bankName:     z.string().optional(),
+  notes:        z.string().optional(),
+}).refine(
+  (d) => !!(d.full_name || d.fullName),
+  { message: "Name is required", path: ["fullName"] }
+);
 
 /* ── Secure temp password generator ── */
 function generateTempPassword(): string {
@@ -176,9 +193,10 @@ export const POST = withAdmin(async (request, { userId }) => {
     const data = flexResult.data;
     const supabase = createAdminClient();
 
-    // ── Normalise aliased fields ──
-    const phone        = data.phone ?? data.phone_number ?? null;
-    const idProofType  = data.id_proof ?? data.id_proof_type ?? data.id_type ?? null;
+    // ── Normalise aliased fields (camelCase + snake_case) ──
+    const fullName     = data.fullName ?? data.full_name ?? "";
+    const phone        = data.phone ?? data.phone_number ?? data.phoneNumber ?? null;
+    const idProofType  = data.idProofType ?? data.id_proof ?? data.id_proof_type ?? data.id_type ?? null;
     const tempPassword = data.password ?? generateTempPassword();
 
     // ── Check uniqueness ──
@@ -231,7 +249,7 @@ export const POST = withAdmin(async (request, { userId }) => {
       email_confirm: true,
       app_metadata:  { role: data.role ?? "employee" },
       user_metadata: {
-        full_name:   data.full_name,
+        full_name:   fullName,
         phone,
         center_code: data.center_code ?? null,
       },
@@ -251,7 +269,7 @@ export const POST = withAdmin(async (request, { userId }) => {
     // ── Create employee profile ──
     const { error: profileError } = await supabase.from("employee_profiles").insert({
       user_id:       authUser.user.id,
-      full_name:     data.full_name,
+      full_name:     fullName,
       phone:         phone ?? "",
       email:         data.email,
       city:          data.city ?? "",
@@ -262,6 +280,10 @@ export const POST = withAdmin(async (request, { userId }) => {
       status:        "approved",
       approved_by:   userId,
       approved_at:   new Date().toISOString(),
+      address_line1: data.addressLine1 || "",
+      address_line2: data.addressLine2 || null,
+      alt_phone:     data.altPhone || null,
+      bank_name:     data.bankName || null,
     });
 
     if (profileError) {
@@ -273,7 +295,7 @@ export const POST = withAdmin(async (request, { userId }) => {
     // ── Send welcome email ──
     try {
       const emailContent = employeeWelcomeEmail({
-        fullName: data.full_name,
+        fullName,
         email: data.email,
         phone: phone ?? "",
         employeeCode,
@@ -294,7 +316,7 @@ export const POST = withAdmin(async (request, { userId }) => {
       action: "employee.create",
       entityType: "employee",
       entityId: authUser.user.id,
-      after: { fullName: data.full_name, email: data.email, phone, employeeCode, centerCode },
+      after: { fullName, email: data.email, phone, employeeCode, centerCode },
       request,
     });
 
@@ -302,13 +324,17 @@ export const POST = withAdmin(async (request, { userId }) => {
       success:  true,
       employee: {
         id:          authUser.user.id,
-        full_name:   data.full_name,
+        full_name:   fullName,
         email:       data.email,
         phone,
         role:        data.role ?? "employee",
         center_code: data.center_code ?? null,
       },
-      ...(data.password ? {} : { temp_password: tempPassword }),
+      // Return BOTH camelCase (for modal) and snake_case (for backward compat)
+      employeeCode,
+      tempPassword: data.password ? undefined : tempPassword,
+      temp_password: data.password ? undefined : tempPassword,
+      message: `${fullName} created as ${employeeCode}. Credentials sent via email.`,
     });
   }
 
