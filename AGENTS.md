@@ -33,3 +33,8 @@ or validate any UI or browser-based task.
 - Implement one feature at a time
 - Do not run automated tests — I will test manually
 - Do not call any MCP tools unless they are genuinely needed
+
+## Planning Mode & Token Saving
+- For any task involving more than one file or step, you MUST use Planning Mode.
+- Generate an `implementation_plan.md` and `task.md` file explicitly inside a `.agent_plans/` folder in the root directory BEFORE coding.
+- Check off items in the `.agent_plans/task.md` file as you complete them so that if the chat errors out, we have a persistent checkpoint to start a new chat from.

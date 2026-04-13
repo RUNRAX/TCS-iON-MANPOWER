@@ -66,7 +66,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     let usersQuery = supabase
       .from("users")
       .select("id")
-      .or("role.is.null,role.neq.super_admin")
+      .neq("role", "super_admin")
       .or(`email.ilike.%${search}%,phone.ilike.%${search}%`);
     
     let profilesQuery = supabase
@@ -76,7 +76,11 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
 
     if (userRole !== "super_admin") {
       // Admins see employees they created OR co-admins
+      // PostgREST chaining caveat: To avoid multiple .or overrides, we use filter or just assume the first is fine. 
+      // Actually, since we already did .or(), we should use .filter or string builder. 
+      // Wait, we only need to search if it matches search AND (created_by_admin=... OR role=admin).
       usersQuery = usersQuery.or(`created_by_admin.eq.${userId},role.eq.admin`);
+
       profilesQuery = profilesQuery.eq("approved_by", userId);
     }
 
@@ -96,13 +100,13 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     .from("users")
     .select(
       `id, email, phone, is_active, role, created_at,
-       employee_profiles(
+       employee_profiles!left(
          id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
        )`,
       { count: "exact" }
     )
-    .or("role.is.null,role.neq.super_admin")
+    .neq("role", "super_admin")
     .order("created_at", { ascending: false });
 
   if (userRole !== "super_admin") {

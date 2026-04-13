@@ -136,22 +136,30 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
 
       if (json.status === "ok" && json.data) {
         const d = json.data;
+        const clean = (val: string | undefined | null) => {
+          if (!val) return "";
+          const v = val.trim();
+          const lower = v.toLowerCase();
+          if (["not mentioned", "n/a", "nil", "none", "-", "not applicable"].includes(lower)) return "";
+          return v;
+        };
+
         setForm(prev => ({
           ...prev,
-          ...(d.fullName && { fullName: d.fullName }),
-          ...(d.email && { email: d.email }),
-          ...(d.phone && { phone: d.phone }),
-          ...(d.state && { state: d.state }),
-          ...(d.city && { city: d.city }),
-          ...(d.idProofType && { idProofType: d.idProofType }),
-          ...(d.altPhone && { altPhone: d.altPhone }),
-          ...(d.addressLine1 && { addressLine1: d.addressLine1 }),
-          ...(d.addressLine2 && { addressLine2: d.addressLine2 }),
-          ...(d.pincode && { pincode: d.pincode }),
-          ...(d.bankAccount && { bankAccount: d.bankAccount }),
-          ...(d.bankIfsc && { bankIfsc: d.bankIfsc }),
-          ...(d.bankName && { bankName: d.bankName }),
-          ...(d.notes && { notes: d.notes }),
+          ...(d.fullName && { fullName: clean(d.fullName) || d.fullName }),
+          ...(d.email && { email: clean(d.email) || d.email }),
+          ...(d.phone && { phone: clean(d.phone) || d.phone }),
+          ...(d.state && { state: clean(d.state) || d.state }),
+          ...(d.city && { city: clean(d.city) || d.city }),
+          ...(d.idProofType && { idProofType: clean(d.idProofType) }),
+          ...(d.altPhone !== undefined && { altPhone: clean(d.altPhone) }),
+          ...(d.addressLine1 !== undefined && { addressLine1: clean(d.addressLine1) }),
+          ...(d.addressLine2 !== undefined && { addressLine2: clean(d.addressLine2) }),
+          ...(d.pincode !== undefined && { pincode: clean(d.pincode) }),
+          ...(d.bankAccount !== undefined && { bankAccount: clean(d.bankAccount) }),
+          ...(d.bankIfsc !== undefined && { bankIfsc: clean(d.bankIfsc) }),
+          ...(d.bankName !== undefined && { bankName: clean(d.bankName) }),
+          ...(d.notes !== undefined && { notes: clean(d.notes) }),
         }));
         toast.success("AI auto-filled fields ✨");
         setStep(1);
@@ -171,15 +179,39 @@ export default function CreateEmployeeModal({ open, onClose }: Props) {
     /^[6-9]\d{9}$/.test(form.phone) && form.state && form.city && form.idProofType;
 
   const handleSubmit = useCallback(async () => {
-    createMutation.mutate(form, {
+    const clean = (val: string) => {
+      const v = val.trim();
+      const lower = v.toLowerCase();
+      if (["not mentioned", "n/a", "nil", "none", "-", "not applicable"].includes(lower)) return "";
+      return v;
+    };
+
+    const sanitizedForm = {
+      ...form,
+      fullName: clean(form.fullName) || form.fullName, // never empty essential
+      email: clean(form.email) || form.email,
+      phone: clean(form.phone) || form.phone,
+      altPhone: clean(form.altPhone),
+      addressLine1: clean(form.addressLine1),
+      addressLine2: clean(form.addressLine2),
+      pincode: clean(form.pincode),
+      bankAccount: clean(form.bankAccount),
+      bankIfsc: clean(form.bankIfsc),
+      bankName: clean(form.bankName),
+      notes: clean(form.notes),
+    };
+
+    createMutation.mutate(sanitizedForm, {
       onSuccess: (data) => {
         const d = data as { employeeCode?: string; tempPassword?: string; message?: string };
         setResult({ employeeCode: d.employeeCode, tempPassword: d.tempPassword });
         toast.success(d.message || "Employee created!");
         setStep(4);
       },
-      onError: (err) => {
-        toast.error(err.message || "Creation failed");
+      onError: (err: any) => {
+        console.error("Creation err", err);
+        const details = err.errors ? " (check fields)" : "";
+        toast.error(err.message + details || "Creation failed");
       },
     });
   }, [createMutation, form]);
