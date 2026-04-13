@@ -14,11 +14,12 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
+import { LiveClock } from "@/components/ui/LiveClock";
 
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
-  LogOut, Menu, X, ChevronLeft, Building2,
+  LogOut, Menu, X, Building2,
   FileSpreadsheet, UserCheck, MessageSquare,
   Bell, Settings, Grid3X3,
   Search, BarChart3, ClipboardCheck,
@@ -517,21 +518,9 @@ export default function SiteLayout({
             </div>
           </div>
 
-          {/* Sidebar collapse chevron */}
+          {/* Live Clock */}
           <div className="flex justify-center mt-2">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-full flex items-center justify-center py-1 rounded-xl"
-              style={{
-                background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                border: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}`,
-                color: textMuted,
-                cursor: "pointer",
-              }}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </motion.button>
+            <LiveClock />
           </div>
         </div>
       </aside>

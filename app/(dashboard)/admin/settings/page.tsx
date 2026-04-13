@@ -8,24 +8,23 @@
  *   • Two-Step Verification
  *   • Shift Reminders
  *   • Active Period
- *   • Notes section with Calendar
- *   • Custom Background import
+ *   • Notes & Reminders with Calendar
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import {
   User, Shield, Bell, Clock, StickyNote, Calendar,
-  ImageIcon, ChevronRight, Check, Upload, Trash2,
-  Smartphone, Eye, EyeOff, Lock, Mail,
-  Sun, Moon, Paintbrush, X, ChevronLeft, Building
+  ChevronRight, Check,
+  Smartphone, Lock, Mail,
+  Paintbrush, ChevronLeft, Building
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { NotesPanel } from "@/components/ui/NotesPanel";
 
 const FONT_DISPLAY = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif";
 const FONT_SYSTEM  = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Outfit', sans-serif";
-const BLUR = "blur(36px) saturate(200%) brightness(1.06)";
 
 /* ── Toggle Switch component ─────────────────────────────────────────────── */
 function Toggle({ checked, onChange, accent }: { checked: boolean; onChange: (v: boolean) => void; accent?: string }) {
@@ -114,8 +113,6 @@ export default function AdminSettings() {
     glassFrost, setGlassFrost, 
     glassBlur, setGlassBlur, 
     glassOpacity, setGlassOpacity,
-    bgIndex, setBgIndex,
-    autoBg, setAutoBg 
   } = useTheme();
 
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
@@ -127,69 +124,24 @@ export default function AdminSettings() {
   const [showTwoStepSetup, setShowTwoStepSetup] = useState(false);
   const [activeStart, setActiveStart] = useState("09:00");
   const [activeEnd, setActiveEnd] = useState("18:00");
-  const [customBgUrl, setCustomBgUrl] = useState<string | null>(null);
 
-  // Notes
-  const [notes, setNotes] = useState<Array<{ id: string; date: string; text: string }>>([]);
+  // Notes calendar date
   const [selectedDate, setSelectedDate] = useState("");
 
   React.useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
-    setNotes([{ id: "1", date: today, text: "" }]);
     setSelectedDate(today);
   }, []);
 
   const { data: profile, isLoading } = useQuery({
-    queryKey: ["admin_settings"],
+    queryKey: ["admin_profile"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/settings");
+      const res = await fetch("/api/admin/profile");
       const json = await (res.ok ? res.json() : {});
-      return json?.data?.settings || json?.settings || {};
-    }
+      return json?.data?.profile || json?.profile || {};
+    },
+    staleTime: 0,
   });
-
-  const currentNote = notes.find(n => n.date === selectedDate);
-
-  const updateNote = (text: string) => {
-    setNotes(prev => {
-      const exists = prev.find(n => n.date === selectedDate);
-      if (exists) {
-        return prev.map(n => n.date === selectedDate ? { ...n, text } : n);
-      }
-      return [...prev, { id: Date.now().toString(), date: selectedDate, text }];
-    });
-  };
-
-  const handleBgUpload = useCallback(() => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const url = URL.createObjectURL(file);
-        setCustomBgUrl(url);
-        // Store in localStorage for persistence
-        const reader = new FileReader();
-        reader.onload = () => {
-          localStorage.setItem("tc_custom_bg", reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  }, []);
-
-  const clearCustomBg = useCallback(() => {
-    setCustomBgUrl(null);
-    localStorage.removeItem("tc_custom_bg");
-  }, []);
-
-  // Load custom background on mount
-  React.useEffect(() => {
-    const saved = localStorage.getItem("tc_custom_bg");
-    if (saved) setCustomBgUrl(saved);
-  }, []);
 
   /* Animation variants */
   const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -293,10 +245,10 @@ export default function AdminSettings() {
                   </div>
                 </div>
                 {[
-                  { label: "Full Name", value: profile?.full_name || "Admin User", icon: User },
-                  { label: "Email", value: profile?.email || "admin@tcsion.com", icon: Mail },
-                  { label: "Phone", value: profile?.phone || "Not Set", icon: Smartphone },
-                  { label: "Center Code", value: profile?.centerCode || "Not Set", icon: Building },
+                  { label: "Full Name", value: profile?.full_name ?? "Admin User", icon: User },
+                  { label: "Email", value: profile?.email ?? "admin@tcsion.com", icon: Mail },
+                  { label: "Phone", value: profile?.phone ?? "Not Set", icon: Smartphone },
+                  { label: "Center Code", value: profile?.center_code ?? "Not Set", icon: Building },
                 ].map(field => (
                   <div key={field.label} className="flex items-center gap-3 py-2" style={{ borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}` }}>
                     <field.icon className="w-4 h-4 flex-shrink-0" style={{ color: textMuted }} />
@@ -449,97 +401,9 @@ export default function AdminSettings() {
           </SettingsCard>
         </div>
 
-        {/* ── Background Settings ── */}
-        <div>
-          <SettingsCard dark={dark}>
-            <SectionHeader icon={ImageIcon} title="Background Settings" subtitle="Customize the portal background" dark={dark} />
-            <SettingsRow label="Auto-Change Background" description="Randomly rotate background effects every minute" dark={dark}>
-              <Toggle checked={autoBg} onChange={setAutoBg} />
-            </SettingsRow>
 
-            {!autoBg && !customBgUrl && (
-              <div className="mt-4 pb-4" style={{ borderBottom: `1px solid ${dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"}` }}>
-                <p className="text-[12px] font-medium mb-3" style={{ color: textMain }}>Dynamic Presets</p>
-                <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
-                  {[0, 1, 2, 3].map((i) => (
-                    <motion.button
-                      key={i}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setBgIndex(i)}
-                      className="w-24 h-16 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-[11px]"
-                      style={{
-                        background: bgIndex === i ? "var(--tc-primary)" : (dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)"),
-                        color: bgIndex === i ? "#fff" : textMuted,
-                        border: `2px solid ${bgIndex === i ? "var(--tc-primary)" : "transparent"}`,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Preset {i + 1}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            <div className="mt-4">
-              <p className="text-[12px] font-medium mb-3" style={{ color: textMain }}>Custom Background</p>
-              {customBgUrl ? (
-                <div className="relative rounded-xl overflow-hidden" style={{ height: 120 }}>
-                  <img
-                    src={customBgUrl}
-                    alt="Custom background"
-                    className="w-full h-full object-cover"
-                    style={{ borderRadius: "inherit" }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center gap-2" style={{ background: "rgba(0,0,0,0.4)" }}>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleBgUpload}
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold"
-                      style={{ background: "rgba(255,255,255,0.2)", color: "#fff", border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer", backdropFilter: "blur(8px)" }}
-                    >
-                      <Upload className="w-3 h-3 inline mr-1" /> Change
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={clearCustomBg}
-                      className="px-3 py-1.5 rounded-lg text-[11px] font-semibold"
-                      style={{ background: "rgba(239,68,68,0.2)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)", cursor: "pointer", backdropFilter: "blur(8px)" }}
-                    >
-                      <Trash2 className="w-3 h-3 inline mr-1" /> Remove
-                    </motion.button>
-                  </div>
-                </div>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={handleBgUpload}
-                  className="w-full py-8 rounded-xl flex flex-col items-center gap-2"
-                  style={{
-                    background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                    border: `2px dashed ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-                    color: textMuted,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Upload className="w-6 h-6" style={{ color: "var(--tc-primary)" }} />
-                  <span className="text-[12px] font-medium">
-                    Click to upload a custom background
-                  </span>
-                  <span className="text-[10px]">
-                    PNG, JPG, WEBP · Max 10MB
-                  </span>
-                </motion.button>
-              )}
-            </div>
-          </SettingsCard>
-        </div>
-
-        {/* ── Notes with Calendar ── */}
+        {/* ── Notes & Reminders with Calendar ── */}
         <div>
           <SettingsCard dark={dark}>
             <SectionHeader icon={StickyNote} title="Notes & Reminders" subtitle="Keep track of important dates and information" dark={dark} />
@@ -634,77 +498,16 @@ export default function AdminSettings() {
                     );
                   })}
                 </div>
-
-                {/* Notes with dates */}
-                <div className="mt-3 space-y-1.5">
-                  {notes.filter(n => n.text.trim()).length > 0 ? (
-                    notes.filter(n => n.text.trim()).slice(0, 5).map(n => (
-                      <div
-                        key={n.id}
-                        onClick={() => setSelectedDate(n.date)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer"
-                        style={{
-                          background: selectedDate === n.date
-                            ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)"
-                            : "transparent",
-                          border: `1px solid ${selectedDate === n.date ? "color-mix(in srgb, var(--tc-primary) 20%, transparent)" : "transparent"}`,
-                        }}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--tc-primary)" }} />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px]" style={{ color: textMuted }}>{n.date}</p>
-                          <p className="text-[11px] truncate" style={{ color: textMain }}>{n.text}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-[11px] py-2" style={{ color: textMuted }}>No notes yet. Select a date and start typing.</p>
-                  )}
-                </div>
               </div>
 
-              {/* Note editor */}
+              {/* Note editor — persistent via API */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-[12px] font-semibold" style={{ color: textMain }}>
                     Notes for {selectedDate ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Today"}
                   </p>
                 </div>
-                <textarea
-                  value={currentNote?.text ?? ""}
-                  onChange={e => updateNote(e.target.value)}
-                  placeholder="Write your notes or reminders here..."
-                  rows={8}
-                  className="w-full px-4 py-3 rounded-xl text-[13px] resize-none"
-                  style={{
-                    background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                    border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"}`,
-                    color: textMain,
-                    outline: "none",
-                    fontFamily: FONT_SYSTEM,
-                    lineHeight: 1.6,
-                  }}
-                />
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-[10px]" style={{ color: textMuted }}>
-                    {(currentNote?.text ?? "").length} characters
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="text-[11px] font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
-                    style={{
-                      background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                      color: "#fff",
-                      cursor: "pointer",
-                      border: "none",
-                      boxShadow: "0 4px 12px color-mix(in srgb, var(--tc-primary) 30%, transparent)",
-                    }}
-                  >
-                    <Check className="w-3 h-3" />
-                    Save Note
-                  </motion.button>
-                </div>
+                <NotesPanel selectedDate={selectedDate} />
               </div>
             </div>
           </SettingsCard>

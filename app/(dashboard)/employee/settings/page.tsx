@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import {
   Settings, Mail, Phone, Bell, StickyNote, Shield,
-  Layers, Check, Clock, CalendarDays,
+  Layers, Check, Clock, CalendarDays, Calendar,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
+import { NotesPanel } from "@/components/ui/NotesPanel";
 
 /* ── Toggle switch ────────────────────────────────────────────────────────── */
 function Toggle({ on, onToggle, color = "var(--tc-primary)" }: {
@@ -78,8 +80,12 @@ export default function EmployeeSettings() {
   const [phone,         setPhone]         = useState("");
   const [shiftReminder, setShiftReminder] = useState(true);
   const [reminderTime,  setReminderTime]  = useState("1h");
-  const [notes,         setNotes]         = useState("");
   const [twoStep,       setTwoStep]       = useState(false);
+  const [selectedDate,  setSelectedDate]  = useState("");
+
+  useEffect(() => {
+    setSelectedDate(new Date().toISOString().split("T")[0]);
+  }, []);
 
   // Load from profile API (read-only display)
   useEffect(() => {
@@ -191,24 +197,108 @@ export default function EmployeeSettings() {
           )}
         </div>
 
-        {/* ── Notes ── */}
+        {/* ── Notes & Reminders ── */}
         <div className="admin-panel p-5 md:p-6" style={{ position: "relative", borderRadius: 20 }}>
-          <SectionHeader icon={StickyNote} title="Personal Notes" subtitle="Keep track of important information" dark={dark} />
+          <SectionHeader icon={StickyNote} title="Notes & Reminders" subtitle="Keep track of important information" dark={dark} />
 
-          <textarea
-            value={notes} onChange={e => setNotes(e.target.value)}
-            placeholder="Write your notes here... e.g. shift preferences, reminders, etc."
-            rows={5}
-            style={{
-              ...inputStyle,
-              resize: "vertical", fontFamily: "inherit", lineHeight: 1.6,
-            }}
-            onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 15%, transparent)"; }}
-            onBlur={e => { e.target.style.borderColor = inpBorder; e.target.style.boxShadow = "none"; }}
-          />
-          <p style={{ fontSize: 11, color: textMuted, marginTop: 6 }}>
-            {notes.length > 0 ? `${notes.length} characters` : "Your notes are saved locally"}
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Calendar */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <Calendar size={14} style={{ color: "var(--tc-primary)" }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: textMain }}>Select Date</span>
+              </div>
+              {(() => {
+                const viewD = selectedDate ? new Date(selectedDate + "T00:00:00") : new Date();
+                const yr = viewD.getFullYear();
+                const mo = viewD.getMonth();
+                const dim = new Date(yr, mo + 1, 0).getDate();
+                const fd = new Date(yr, mo, 1).getDay();
+                const moName = viewD.toLocaleString("default", { month: "long" });
+                const cells: (number | null)[] = [];
+                for (let i = 0; i < fd; i++) cells.push(null);
+                for (let d = 1; d <= dim; d++) cells.push(d);
+                const todayStr = new Date().toISOString().split("T")[0];
+                const prevM = () => { const d = new Date(yr, mo - 1, 1); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`); };
+                const nextM = () => { const d = new Date(yr, mo + 1, 1); setSelectedDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`); };
+                return (
+                  <div className="admin-panel" style={{ position: "relative", borderRadius: 16, padding: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                      <button onClick={prevM} className="admin-panel" style={{ position: "relative", width: 26, height: 26, borderRadius: 8, border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}>
+                        <ChevronLeft size={14} />
+                      </button>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: textMain }}>{moName} {yr}</span>
+                      <button onClick={nextM} className="admin-panel" style={{ position: "relative", width: 26, height: 26, borderRadius: 8, border: "none", cursor: "pointer", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}>
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
+                      {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+                        <div key={d} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: textMuted, padding: "2px 0" }}>{d}</div>
+                      ))}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
+                      {cells.map((day, idx) => {
+                        if (!day) return <div key={`b-${idx}`} />;
+                        const dateStr = `${yr}-${String(mo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                        const isSel = dateStr === selectedDate;
+                        const isToday = dateStr === todayStr;
+                        return (
+                          <motion.button key={dateStr} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}
+                            onClick={() => setSelectedDate(dateStr)}
+                            style={{
+                              width: "100%", aspectRatio: "1", borderRadius: 8, border: isToday && !isSel ? "1px solid var(--tc-primary)" : "none",
+                              cursor: "pointer", fontSize: 12, fontWeight: isSel ? 700 : 400,
+                              background: isSel ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" : isToday ? "color-mix(in srgb, var(--tc-primary) 10%, transparent)" : "transparent",
+                              color: isSel ? "#fff" : isToday ? "var(--tc-primary)" : textMain,
+                              boxShadow: isSel ? "0 4px 12px color-mix(in srgb, var(--tc-primary) 30%, transparent)" : "none",
+                              display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s",
+                            }}>
+                            {day}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+              {/* Quick dates */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {["Today", "Tomorrow", "+1 Week"].map(label => {
+                  const d = new Date();
+                  if (label === "Tomorrow") d.setDate(d.getDate() + 1);
+                  if (label === "+1 Week") d.setDate(d.getDate() + 7);
+                  const dateStr = d.toISOString().split("T")[0];
+                  const isActive = selectedDate === dateStr;
+                  return (
+                    <motion.button
+                      key={label}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setSelectedDate(dateStr)}
+                      style={{
+                        padding: "4px 12px", borderRadius: 8, fontSize: 10, fontWeight: 600,
+                        background: isActive ? "var(--tc-primary)" : (dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)"),
+                        color: isActive ? "#fff" : textMuted,
+                        border: `1px solid ${isActive ? "transparent" : border}`,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {label}
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Notes panel */}
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 700, color: textMain, marginBottom: 10 }}>
+                Notes for {selectedDate ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Today"}
+              </p>
+              <NotesPanel selectedDate={selectedDate} />
+            </div>
+          </div>
         </div>
 
         {/* ── Security — Two-Step Verification ── */}

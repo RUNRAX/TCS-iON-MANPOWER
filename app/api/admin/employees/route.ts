@@ -9,11 +9,42 @@ import { createAdminClient } from "@/lib/supabase/server";
 import {
   withAdmin, parseBody, ok, created, conflict,
   serverError, badRequest, unauthorized, auditLog,
+  validationError,
 } from "@/lib/utils/api";
 import { AddEmployeeSchema } from "@/lib/validations/schemas";
 import { sendEmail } from "@/lib/email/send";
 import { employeeWelcomeEmail } from "@/lib/email/templates";
 import { encrypt } from "@/lib/utils/encryption";
+import { z } from "zod";
+
+/* ── Flexible schema — accepts both camelCase and snake_case field names ── */
+const createEmployeeSchema = z.object({
+  full_name:    z.string().min(2, "Name must be at least 2 characters"),
+  email:        z.string().email("Invalid email"),
+  password:     z.string().min(8).optional(),
+  phone:        z.string().min(10).max(15).optional(),
+  phone_number: z.string().min(10).max(15).optional(),
+  state:        z.string().optional(),
+  city:         z.string().optional(),
+  pincode:      z.string().max(10).optional(),
+  id_proof:     z.string().optional(),
+  id_proof_type:z.string().optional(),
+  id_type:      z.string().optional(),
+  role:         z.enum(["employee", "admin"]).default("employee"),
+  center_code:  z.string().optional(),
+  department:   z.string().optional(),
+  designation:  z.string().optional(),
+});
+
+/* ── Secure temp password generator ── */
+function generateTempPassword(): string {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+  return (
+    Array.from({ length: 12 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join("") + "Aa1!"
+  );
+}
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3018";
 
@@ -126,13 +157,176 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
 
 // ── POST /api/admin/employees — Add new employee ─────────────────────────────
 export const POST = withAdmin(async (request, { userId }) => {
-  const parsed = await parseBody(request, AddEmployeeSchema);
-  if ("error" in parsed) return parsed.error;
+  // Try the new flexible schema first (snake_case from multi-step form)
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return badRequest("Request body is required");
+  }
+
+  const flexResult = createEmployeeSchema.safeParse(body);
+
+  // If the flexible schema works, use the new path
+  if (flexResult.success) {
+    const data = flexResult.data;
+    const supabase = createAdminClient();
+
+    // ── Normalise aliased fields ──
+    const phone        = data.phone ?? data.phone_number ?? null;
+    const idProofType  = data.id_proof ?? data.id_proof_type ?? data.id_type ?? null;
+    const tempPassword = data.password ?? generateTempPassword();
+
+    // ── Check uniqueness ──
+    if (phone) {
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id, email, phone")
+        .or(`email.eq.${data.email},phone.eq.${phone}`)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        const dup = existing[0] as { email: string; phone: string };
+        if (dup.email === data.email) return conflict("An employee with this email already exists.");
+        if (dup.phone === phone) return conflict("An employee with this phone number already exists.");
+      }
+    } else {
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id, email")
+        .eq("email", data.email)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        return conflict("An employee with this email already exists.");
+      }
+    }
+
+    // ── Get admin's center_code ──
+    const { data: adminUser } = await supabase
+      .from("users")
+      .select("center_code")
+      .eq("id", userId)
+      .single();
+
+    const centerCode = data.center_code ?? (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
+
+    // ── Generate employee code: XMP-{CENTER}59{SEQ} ──
+    let employeeCode: string;
+    try {
+      const { data: seqData, error: seqError } = await supabase.rpc("next_employee_code", { p_center: centerCode });
+      if (seqError) throw seqError;
+      employeeCode = seqData as string;
+    } catch {
+      employeeCode = `XMP-${centerCode}59${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
+    }
+
+    // ── Create auth user ──
+    const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
+      email:         data.email,
+      password:      tempPassword,
+      email_confirm: true,
+      app_metadata:  { role: data.role ?? "employee" },
+      user_metadata: {
+        full_name:   data.full_name,
+        phone,
+        center_code: data.center_code ?? null,
+      },
+    });
+
+    if (createError || !authUser.user) {
+      console.error("[Admin/Employees POST]:", createError);
+      return serverError("Failed to create employee account.");
+    }
+
+    // ── Update users table ──
+    await supabase.from("users").update({
+      phone: phone ?? undefined,
+      created_by_admin: userId,
+    }).eq("id", authUser.user.id);
+
+    // ── Create employee profile ──
+    const { error: profileError } = await supabase.from("employee_profiles").insert({
+      user_id:       authUser.user.id,
+      full_name:     data.full_name,
+      phone:         phone ?? "",
+      email:         data.email,
+      city:          data.city ?? "",
+      state:         data.state ?? "",
+      pincode:       data.pincode ?? "",
+      id_proof_type: idProofType,
+      employee_code: employeeCode,
+      status:        "approved",
+      approved_by:   userId,
+      approved_at:   new Date().toISOString(),
+    });
+
+    if (profileError) {
+      console.error("[Employees] Profile insert failed:", profileError);
+      await supabase.auth.admin.deleteUser(authUser.user.id).catch(() => {});
+      return serverError("Failed to create employee profile.");
+    }
+
+    // ── Send welcome email ──
+    try {
+      const emailContent = employeeWelcomeEmail({
+        fullName: data.full_name,
+        email: data.email,
+        phone: phone ?? "",
+        employeeCode,
+        tempPassword,
+      });
+      await sendEmail({
+        to: data.email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+    } catch {
+      // Welcome email failure is not critical
+    }
+
+    // ── Audit log ──
+    await auditLog({
+      userId,
+      action: "employee.create",
+      entityType: "employee",
+      entityId: authUser.user.id,
+      after: { fullName: data.full_name, email: data.email, phone, employeeCode, centerCode },
+      request,
+    });
+
+    return created({
+      success:  true,
+      employee: {
+        id:          authUser.user.id,
+        full_name:   data.full_name,
+        email:       data.email,
+        phone,
+        role:        data.role ?? "employee",
+        center_code: data.center_code ?? null,
+      },
+      ...(data.password ? {} : { temp_password: tempPassword }),
+    });
+  }
+
+  // ── Fallback: try original camelCase schema (AddEmployeeSchema) ──
+  const parsed = AddEmployeeSchema.safeParse(body);
+  if (!parsed.success) {
+    const errors = parsed.error.issues.reduce(
+      (acc: Record<string, string[]>, issue) => {
+        const field = issue.path.join(".") || "root";
+        if (!acc[field]) acc[field] = [];
+        acc[field].push(issue.message);
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
+    return validationError(errors);
+  }
 
   const {
     fullName, email, phone, state, city, idProofType,
     altPhone, addressLine1, addressLine2, pincode,
-    bankAccount, bankIfsc, bankName, notes,
+    bankAccount, bankIfsc, bankName, notes: empNotes,
   } = parsed.data;
   const supabase = createAdminClient();
 
@@ -158,19 +352,16 @@ export const POST = withAdmin(async (request, { userId }) => {
 
   const centerCode = (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
 
-  // ── Generate employee code: XMP-{CENTER}59{SEQ} ──
+  // ── Generate employee code ──
   let employeeCode: string;
   try {
     const { data: seqData, error: seqError } = await supabase.rpc("next_employee_code", { p_center: centerCode });
     if (seqError) throw seqError;
     employeeCode = seqData as string;
-  } catch (e) {
-    console.error("[Employees] Failed to generate employee code:", e);
-    // Fallback: generate a random code
+  } catch {
     employeeCode = `XMP-${centerCode}59${String(Math.floor(Math.random() * 999) + 1).padStart(3, "0")}`;
   }
 
-  // ── Generate temporary password ──
   const tempPassword = generatePassword();
 
   // ── Create auth user ──
@@ -187,25 +378,22 @@ export const POST = withAdmin(async (request, { userId }) => {
     return serverError("Failed to create employee account.");
   }
 
-  // ── Update users table ──
   await supabase.from("users").update({ phone, created_by_admin: userId }).eq("id", newUser.user.id);
 
-  // ── Encrypt and store bank details ──
   let bankAccountEncrypted: string | null = null;
   let bankIfscEncrypted: string | null = null;
 
   if (bankAccount) {
-    try { bankAccountEncrypted = await encrypt(bankAccount); } catch (e) {
-      console.warn("[Employees] Bank account encryption failed:", e);
+    try { bankAccountEncrypted = await encrypt(bankAccount); } catch {
+      // Encryption failure — continue without
     }
   }
   if (bankIfsc) {
-    try { bankIfscEncrypted = await encrypt(bankIfsc); } catch (e) {
-      console.warn("[Employees] IFSC encryption failed:", e);
+    try { bankIfscEncrypted = await encrypt(bankIfsc); } catch {
+      // Encryption failure — continue without
     }
   }
 
-  // ── Create employee profile ──
   const { error: profileError } = await supabase.from("employee_profiles").insert({
     user_id:       newUser.user.id,
     full_name:     fullName,
@@ -219,7 +407,7 @@ export const POST = withAdmin(async (request, { userId }) => {
     pincode:       pincode || "",
     id_proof_type: idProofType,
     employee_code: employeeCode,
-    status:        "approved",  // Admin-created employees are auto-approved
+    status:        "approved",
     approved_by:   userId,
     approved_at:   new Date().toISOString(),
     bank_account_encrypted: bankAccountEncrypted,
@@ -229,12 +417,10 @@ export const POST = withAdmin(async (request, { userId }) => {
 
   if (profileError) {
     console.error("[Employees] Profile insert failed:", profileError);
-    // Clean up auth user
     await supabase.auth.admin.deleteUser(newUser.user.id).catch(() => {});
     return serverError("Failed to create employee profile.");
   }
 
-  // ── Send welcome email ──
   try {
     const emailContent = employeeWelcomeEmail({
       fullName,
@@ -248,11 +434,10 @@ export const POST = withAdmin(async (request, { userId }) => {
       subject: emailContent.subject,
       html: emailContent.html,
     });
-  } catch (e) {
-    console.warn("[Employees] Welcome email failed:", e);
+  } catch {
+    // Welcome email failure is not critical
   }
 
-  // ── Audit log ──
   await auditLog({
     userId,
     action: "employee.create",
@@ -263,9 +448,17 @@ export const POST = withAdmin(async (request, { userId }) => {
   });
 
   return created({
-    employeeId: newUser.user.id,
+    success: true,
+    employee: {
+      id: newUser.user.id,
+      full_name: fullName,
+      email,
+      phone,
+      role: "employee",
+      center_code: centerCode,
+    },
+    temp_password: tempPassword,
     employeeCode,
-    tempPassword,
     message: `${fullName} created as ${employeeCode}. Credentials sent via email.`,
   });
 });
