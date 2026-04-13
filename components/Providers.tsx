@@ -28,7 +28,30 @@ const queryClient = new QueryClient({
   },
 });
 
-
+/**
+ * HydrationTransitionGuard
+ * 
+ * Prevents intense transition glitching during Next.js client-side rehydration
+ * by momentarily pausing CSS transitions during the initial render tick.
+ *
+ * We add the class before the first paint and remove it after 150ms,
+ * which is well within any perceptible animation window.
+ */
+function HydrationTransitionGuard() {
+  useEffect(() => {
+    const el = document.documentElement;
+    el.classList.add("no-transition");
+    // rAF ensures the class is applied for at least one full frame
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const id = setTimeout(() => el.classList.remove("no-transition"), 150);
+        return () => clearTimeout(id);
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return null;
+}
 
 export function Providers({
   children,
@@ -41,6 +64,7 @@ export function Providers({
 }) {
   return (
     <ThemeProvider userId={userId} userRole={userRole}>
+      <HydrationTransitionGuard />
       <QueryClientProvider client={queryClient}>
         {children}
         <NavigationProgress />
