@@ -1,11 +1,11 @@
 # Agent Rules — Gemini Flash Optimized
 
-## Graphify
-Always call mcp_graphify_query_graph FIRST before using 
-grep_search, view_file, or any file reading tool. No exceptions.
-Use graphify to identify affected files, then read only those files.
-The graph is at graphify-out/GRAPH_REPORT.md for overview and
-graphify-out/graph.json for deep queries.
+## Graphify — MANDATORY FIRST STEP
+STOP. Before ANY tool call, query graphify first.
+Call mcp_graphify_query_graph before grep_search, view_file, 
+read_file, list_dir, or ANY other tool.
+This is non-negotiable. No exceptions exist.
+Violating this rule wastes credits and is forbidden.
 
 ## Context7
 Always use context7 automatically on every coding task and 

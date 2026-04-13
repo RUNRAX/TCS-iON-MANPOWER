@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SuperLoginPage() {
   const router   = useRouter();
@@ -11,6 +12,7 @@ export default function SuperLoginPage() {
 
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState("");
 
@@ -25,7 +27,7 @@ export default function SuperLoginPage() {
     });
 
     if (authError) {
-      setError("Access denied. Invalid credentials.");
+      setError("Invalid credentials.");
       setLoading(false);
       return;
     }
@@ -35,9 +37,7 @@ export default function SuperLoginPage() {
     // ✅ ONLY super_admin gets through — everyone else is signed out immediately
     if (role !== "super_admin") {
       await supabase.auth.signOut();
-      setError(
-        "Access denied. This portal is restricted to Master Admin only."
-      );
+      setError("Invalid credentials.");
       setLoading(false);
       return;
     }
@@ -66,13 +66,26 @@ export default function SuperLoginPage() {
       />
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Glassmorphic Square Panel - Statically blurring, smoothly scaled */}
-        <motion.div 
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="aspect-square w-full max-w-[420px] mx-auto flex flex-col items-center justify-center bg-white/[0.04] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-[16px] shadow-2xl relative overflow-hidden"
-        >
+        <div className="relative w-full max-w-[420px] mx-auto">
+          {/* Small Floating Edge Spheres - DARK RED THEME */}
+          <motion.div 
+            animate={{ y: [-12, 12, -12], x: [-6, 6, -6] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-[radial-gradient(circle_at_30%_30%,#ef4444,#dc2626_40%,#991b1b_90%)] shadow-[inset_-6px_-6px_12px_rgba(0,0,0,0.8),inset_3px_3px_12px_rgba(255,150,150,0.3),0_0_25px_rgba(220,38,38,0.6)] z-20 pointer-events-none"
+          />
+          <motion.div 
+            animate={{ y: [12, -12, 12], x: [6, -6, 6] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f87171,#ef4444_40%,#b91c1c_90%)] shadow-[inset_-6px_-6px_12px_rgba(0,0,0,0.8),inset_3px_3px_12px_rgba(255,150,150,0.3),0_0_30px_rgba(239,68,68,0.6)] z-20 pointer-events-none"
+          />
+
+          {/* Glassmorphic Square Panel - Statically blurring, smoothly scaled */}
+          <motion.div 
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="aspect-square w-full flex flex-col items-center justify-center bg-white/[0.04] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-[16px] shadow-2xl relative overflow-hidden"
+          >
           {/* Inner ambient glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
 
@@ -106,15 +119,22 @@ export default function SuperLoginPage() {
                 />
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} className="w-full">
+              <motion.div whileHover={{ scale: 1.02 }} className="w-full relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="your password here"
-                  className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner"
+                  className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner pr-12"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </motion.div>
 
               <div className="flex justify-end pt-1 w-full">
@@ -137,6 +157,7 @@ export default function SuperLoginPage() {
             </form>
           </motion.div>
         </motion.div>
+        </div>
         <p className="text-center text-xs text-white/10 mt-8 font-mono">
           TCSION · MASTER CONTROL · RESTRICTED
         </p>
