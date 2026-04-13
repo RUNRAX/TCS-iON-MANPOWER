@@ -50,19 +50,19 @@ export default function SuperLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#050508] px-4 overflow-hidden relative">
       {/* Background Animated Squares - RED THEME */}
       <motion.div 
-        animate={{ y: [-30, 30, -30], rotate: [0, 45, 90] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[10%] left-[15%] w-72 h-72 bg-red-600/30 rounded-[40px] blur-[60px]" 
+        animate={{ y: [-150, 150, -150], x: [-100, 100, -100], rotate: [0, 90, 180] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[20%] left-[20%] w-64 h-64 bg-gradient-to-tr from-red-600/40 to-red-400/10 border border-red-500/20 rounded-[40px]" 
       />
       <motion.div 
-        animate={{ y: [30, -30, 30], rotate: [90, 45, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        className="absolute bottom-[10%] right-[15%] w-80 h-80 bg-red-800/20 rounded-[40px] blur-[80px]" 
+        animate={{ y: [150, -150, 150], x: [100, -100, 100], rotate: [0, -90, -180] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        className="absolute bottom-[20%] right-[20%] w-80 h-80 bg-gradient-to-br from-red-800/40 to-orange-700/10 border border-red-500/20 rounded-[40px] shadow-2xl" 
       />
       <motion.div 
-        animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+        animate={{ scale: [1, 1.3, 1], x: [-50, 50, -50], rotate: [0, 180, 360] }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[40%] left-[55%] w-48 h-48 bg-orange-700/15 rounded-3xl blur-[50px]" 
+        className="absolute top-[40%] left-[45%] w-48 h-48 bg-gradient-to-t from-orange-700/30 to-red-600/10 border border-orange-500/20 rounded-[30px]" 
       />
 
       <motion.div 
@@ -72,7 +72,7 @@ export default function SuperLoginPage() {
         className="relative z-10 w-full max-w-md"
       >
         {/* Glassmorphic Square Panel */}
-        <div className="aspect-square w-full max-w-[420px] mx-auto flex flex-col items-center justify-center bg-white/[0.03] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+        <div className="aspect-square w-full max-w-[420px] mx-auto flex flex-col items-center justify-center bg-white/[0.04] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-md shadow-2xl relative overflow-hidden">
           {/* Inner ambient glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
 
