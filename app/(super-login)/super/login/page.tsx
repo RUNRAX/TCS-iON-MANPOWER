@@ -48,21 +48,21 @@ export default function SuperLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050508] px-4 overflow-hidden relative">
-      {/* Background Animated 3D Spheres - RED THEME */}
+      {/* Background Animated 3D Spheres - DARK RED THEME */}
       <motion.div 
         animate={{ y: [-150, 150, -150], x: [-100, 100, -100] }}
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[20%] left-[20%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fca5a5,#ef4444_40%,#7f1d1d_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.6),inset_10px_10px_30px_rgba(255,255,255,0.4),0_0_140px_rgba(220,38,38,0.8)]" 
+        className="absolute top-[20%] left-[20%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_30%_30%,#dc2626,#991b1b_40%,#450a0a_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.8),inset_10px_10px_30px_rgba(255,100,100,0.2),0_0_140px_rgba(153,27,27,0.8)]" 
       />
       <motion.div 
         animate={{ y: [150, -150, 150], x: [100, -100, 100] }}
         transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-[20%] right-[20%] w-80 h-80 rounded-full bg-[radial-gradient(circle_at_30%_30%,#f87171,#dc2626_40%,#450a0a_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.6),inset_10px_10px_30px_rgba(255,255,255,0.4),0_0_180px_rgba(185,28,28,0.9)]" 
+        className="absolute bottom-[20%] right-[20%] w-80 h-80 rounded-full bg-[radial-gradient(circle_at_30%_30%,#b91c1c,#7f1d1d_40%,#2e0000_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.8),inset_10px_10px_30px_rgba(255,100,100,0.2),0_0_180px_rgba(127,29,29,0.9)]" 
       />
       <motion.div 
         animate={{ scale: [1, 1.3, 1], x: [-50, 50, -50], y: [-50, 50, -50] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[40%] left-[45%] w-48 h-48 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fb7185,#e11d48_40%,#881337_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.6),inset_10px_10px_30px_rgba(255,255,255,0.4),0_0_120px_rgba(225,29,72,0.8)]" 
+        className="absolute top-[40%] left-[45%] w-48 h-48 rounded-full bg-[radial-gradient(circle_at_30%_30%,#ef4444,#991b1b_40%,#450a0a_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.8),inset_10px_10px_30px_rgba(255,150,150,0.2),0_0_120px_rgba(153,27,27,0.8)]" 
       />
 
       <div className="relative z-10 w-full max-w-md">
