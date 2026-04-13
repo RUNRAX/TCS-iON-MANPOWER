@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function LoginPage() {
+export default function EmployeeLoginPage() {
   const router   = useRouter();
   const supabase = createClient();
 
@@ -35,21 +35,15 @@ export default function LoginPage() {
 
     const role = data.user?.app_metadata?.role as string | undefined;
 
-    // ✅ BLOCK super_admin — sign them out and show error
-    if (role === "super_admin") {
+    // ✅ Block anything that isn't explicitly an employee
+    if (role !== "employee") {
       await supabase.auth.signOut();
-      setError("Invalid credentials.");
+      setError("Unauthorized access. Employee account required.");
       setLoading(false);
       return;
     }
 
-    // ✅ Role-aware redirect
-    if (role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      // employee or any unrecognized role → safe default
-      router.push("/employee/dashboard");
-    }
+    router.push("/employee/dashboard");
   }
 
   return (
@@ -85,7 +79,7 @@ export default function LoginPage() {
             className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fcd34d,#f59e0b_40%,#b45309_90%)] shadow-[inset_-6px_-6px_12px_rgba(0,0,0,0.6),inset_3px_3px_12px_rgba(255,255,255,0.4),0_0_30px_rgba(245,158,11,0.6)] z-20 pointer-events-none"
           />
 
-          {/* Glassmorphic Square Panel - Statically blurring, smoothly scaled */}
+          {/* Glassmorphic Square Panel */}
           <motion.div 
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
@@ -104,7 +98,7 @@ export default function LoginPage() {
           >
             <div className="text-center mb-8 relative z-10 w-full">
               <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">Login</h1>
-              <p className="text-xs font-medium text-orange-400 tracking-wide">Staff Portal</p>
+              <p className="text-xs font-medium text-orange-400 tracking-wide">Employee Portal</p>
             </div>
 
             {error && (
@@ -120,7 +114,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="your mail here"
+                  placeholder="employee mail here"
                   className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium shadow-inner"
                 />
               </motion.div>
@@ -131,7 +125,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="your password here"
+                  placeholder="password"
                   className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium shadow-inner pr-12"
                 />
                 <button

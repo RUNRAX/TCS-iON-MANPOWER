@@ -34,7 +34,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
 
   // Hard server-side guard: ONLY super_admin role can access /super/* pages
   if (dbUser.role !== "super_admin") {
-    redirect(dbUser.role === "admin" ? "/admin/dashboard" : "/login");
+    redirect(dbUser.role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
   }
 
   const role = "super_admin";

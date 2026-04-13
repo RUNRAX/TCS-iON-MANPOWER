@@ -1,9 +1,9 @@
 # Agent Rules — Gemini Flash Optimized
 
 ## Graphify — MANDATORY FIRST STEP
-STOP. Before ANY tool call, query graphify first.
-Call mcp_graphify_query_graph before grep_search, view_file, 
-read_file, list_dir, or ANY other tool.
+Before ANY tool call, query graphify first.
+Call mcp_graphify_query_graph even if the task is small.
+Then use the other tools as needed.
 This is non-negotiable. No exceptions exist.
 Violating this rule wastes credits and is forbidden.
 

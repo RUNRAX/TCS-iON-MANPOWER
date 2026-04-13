@@ -153,13 +153,22 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} className="flex items-center gap-2">
           <ThemePanel size="md" />
 
-          <Link href="/login">
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white"
-              style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 15px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>
-              <LogIn className="w-4 h-4" /> Sign In
-            </motion.button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/employee/login">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border"
+                style={{ borderColor: "color-mix(in srgb, var(--tc-primary) 30%, transparent)", color: textMain, background: "rgba(255,255,255,0.05)" }}>
+                <Users className="w-4 h-4" /> Employee
+              </motion.button>
+            </Link>
+            <Link href="/admin/login">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 15px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>
+                <LogIn className="w-4 h-4" /> Admin
+              </motion.button>
+            </Link>
+          </div>
         </motion.div>
       </nav>
 
@@ -193,7 +202,15 @@ export default function Home() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
             className="flex items-center gap-4 flex-wrap">
-            <Link href="/login">
+            <Link href="/employee/login">
+              <motion.button whileHover={{ scale: 1.02, boxShadow: `0 14px 40px rgba(0,0,0,0.15)` }} whileTap={{ scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold border-2 shadow-sm"
+                style={{ borderColor: "color-mix(in srgb, var(--tc-primary) 30%, transparent)", color: textMain, background: cardBg, willChange: "transform, box-shadow" }}>
+                <Users className="w-4 h-4" /> Employee Login <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </Link>
+            <Link href="/admin/login">
               <motion.button whileHover={{ scale: 1.02, boxShadow: `0 14px 40px color-mix(in srgb, var(--tc-primary) 50%, transparent)` }} whileTap={{ scale: 0.94 }}
                 transition={{ type: "spring", stiffness: 400, damping: 22 }}
                 className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white shadow-xl"
@@ -303,7 +320,14 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: textMain }}>Ready to get started?</h2>
             <p className="text-sm mb-8" style={{ color: textMuted }}>Join TCS iON examination centres across India on this platform.</p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Link href="/login">
+              <Link href="/employee/login">
+                <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold border-2"
+                  style={{ borderColor: "color-mix(in srgb, var(--tc-primary) 30%, transparent)", color: textMain }}>
+                  <Users className="w-4 h-4" /> Employee Login <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </Link>
+              <Link href="/admin/login">
                 <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
                   className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white"
                   style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 25px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>

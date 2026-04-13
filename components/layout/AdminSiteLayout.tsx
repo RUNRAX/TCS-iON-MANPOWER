@@ -333,7 +333,7 @@ export default function AdminSiteLayout({
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    window.location.replace("/admin/login");
   };
 
   const actualBlur = glassFrost ? glassBlur : 0;

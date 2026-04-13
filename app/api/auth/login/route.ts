@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Should never reach here due to VALID_ROLES check above
-      redirectTo = "/login";
+      redirectTo = "/404";
     }
 
     // ── 8. Return JSON — cookies were already set by ssrClient above

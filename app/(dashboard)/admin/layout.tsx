@@ -16,14 +16,14 @@ const getUserData = cache(async (userId: string) => {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/admin/login");
 
   const { dbUser, profile } = await getUserData(session.user.id);
 
   // Hard role guard: only role === "admin" can render admin pages
-  if (!dbUser) redirect("/login");
+  if (!dbUser) redirect("/admin/login");
   if (dbUser.role === "super_admin") redirect("/super/dashboard");
-  if (dbUser.role !== "admin") redirect("/login");
+  if (dbUser.role !== "admin") redirect("/admin/login");
 
   const prefetchRoutes = ["/admin/dashboard","/admin/employees","/admin/shifts","/admin/payments","/admin/excel","/admin/broadcast"];
 

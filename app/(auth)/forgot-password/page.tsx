@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
               <h2 className="text-[#fbbb29] text-sm mb-4 uppercase tracking-widest">Request Received</h2>
               <p className="text-white/60 text-xs mb-6">If an account exists, a password reset link has been sent to that email address. Please check your inbox.</p>
               
-              <Link href="/login" className="mt-2 w-[120px] h-[34px] rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold tracking-wide flex items-center justify-center transition-all">
+              <Link href="/" className="mt-2 w-[120px] h-[34px] rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold tracking-wide flex items-center justify-center transition-all">
                 <ArrowLeft size={14} className="mr-2" /> Back
               </Link>
             </motion.div>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
               </div>
               
               <div className="mt-4">
-                 <Link href="/login" className="text-white/40 hover:text-white text-xs italic transition-colors flex items-center">
+                 <Link href="/" className="text-white/40 hover:text-white text-xs italic transition-colors flex items-center">
                    <ArrowLeft size={12} className="mr-1" /> Back to login
                  </Link>
               </div>

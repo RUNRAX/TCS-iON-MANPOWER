@@ -74,7 +74,7 @@ function ResetPasswordForm() {
               <h2 className="text-[#10b981] text-sm mb-4">Password Updated!</h2>
               <p className="text-white/60 text-xs italic mb-6">You can now log in with your new credentials</p>
               
-              <Link href="/login" className="mt-2 w-[120px] h-[34px] rounded-full bg-white text-black hover:bg-white/90 text-xs font-semibold tracking-wide flex items-center justify-center transition-all">
+              <Link href="/" className="mt-2 w-[120px] h-[34px] rounded-full bg-white text-black hover:bg-white/90 text-xs font-semibold tracking-wide flex items-center justify-center transition-all">
                 Go to Login
               </Link>
             </motion.div>
@@ -146,7 +146,7 @@ function ResetPasswordForm() {
               </div>
               
               <div className="mt-4">
-                 <Link href="/login" className="text-white/40 hover:text-white text-xs italic transition-colors flex items-center">
+                 <Link href="/" className="text-white/40 hover:text-white text-xs italic transition-colors flex items-center">
                    <ArrowLeft size={12} className="mr-1" /> Back to login
                  </Link>
               </div>

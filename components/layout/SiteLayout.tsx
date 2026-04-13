@@ -331,7 +331,10 @@ export default function SiteLayout({
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    if (role === "admin") window.location.replace("/admin/login");
+    else if (role === "employee") window.location.replace("/employee/login");
+    else if (role === "super_admin") window.location.replace("/super/login");
+    else window.location.replace("/");
   };
 
   const actualBlur = glassFrost ? glassBlur : 0;

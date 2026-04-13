@@ -20,17 +20,19 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
 
   // No valid user → boot to login, no exceptions
-  if (error || !user) {
-    redirect("/login");
-  }
-
-  const role = (user.app_metadata?.role as string) ?? "employee";
-
-  // Get the current path from headers to enforce role rules
   const headersList = await headers();
   const pathname = headersList.get("x-invoke-path") ?? 
                    headersList.get("x-pathname") ??
                    headersList.get("x-next-url") ?? "";
+
+  if (error || !user) {
+    if (pathname.startsWith("/admin")) redirect("/admin/login");
+    if (pathname.startsWith("/employee")) redirect("/employee/login");
+    redirect("/404");
+  }
+
+  const role = (user.app_metadata?.role as string) ?? "employee";
+
 
   // ✅ Independent role enforcement — does NOT trust middleware
   // super_admin must only use /super/*
@@ -44,7 +46,7 @@ export default async function DashboardLayout({
   // admin/employee must NOT access /super/*
   if (pathname.startsWith("/super") && role !== "super_admin") {
     redirect(
-      role === "admin" ? "/admin/dashboard" : "/login"
+      role === "admin" ? "/admin/dashboard" : "/employee/dashboard"
     );
   }
 

@@ -17,7 +17,8 @@ import { rateLimit } from "@/lib/ratelimit";
 // ── Routes that need NO authentication ──────────────────────────────
 const PUBLIC_ROUTES = [
   "/",
-  "/login",
+  "/admin/login",
+  "/employee/login",
   "/super/login",            // ✅ hidden super admin portal
   "/forgot-password",
   "/reset-password",
@@ -100,9 +101,17 @@ export async function middleware(request: NextRequest) {
   // ── 5. No session → redirect to appropriate login
   if (!session) {
     if (pathname.startsWith("/super")) {
-      return NextResponse.redirect(new URL("/super/login", request.url));
+      // Throw 404 error if an unauthenticated user tries to guess super admin routes
+      return NextResponse.rewrite(new URL("/404", request.url));
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    if (pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    if (pathname.startsWith("/employee")) {
+      return NextResponse.redirect(new URL("/employee/login", request.url));
+    }
+    // Block anything else like /dashboard directly
+    return NextResponse.rewrite(new URL("/404", request.url));
   }
 
   // ── 6. Read role from JWT app_metadata (server-only writable — safe)
@@ -123,15 +132,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/super/dashboard", request.url));
   }
 
-  // admin must NOT access /super/* — hard block
+  // If a super_admin hits EXACTLY /super, helpfully route to their dashboard
+  if (pathname === "/super" && isSuperAdmin) {
+    return NextResponse.redirect(new URL("/super/dashboard", request.url));
+  }
+
+  // admin/employee must NOT access /super/* — hard block
   if (pathname.startsWith("/super") && !isSuperAdmin) {
-    return NextResponse.redirect(
-      new URL(isAdmin ? "/admin/dashboard" : "/login", request.url)
-    );
+    if (pathname !== "/super/login") {
+      // Explicit wall: Throw a 404 error if an unauthorized user manually types any super route
+      return NextResponse.rewrite(new URL("/404", request.url));
+    }
+  }
+
+  // If an admin hits EXACTLY /admin, helpfully route to their dashboard
+  if (pathname === "/admin" && isAdmin) {
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
   // employee must NOT access /admin/* — hard block
   if (pathname.startsWith("/admin") && !isAdmin) {
+    return NextResponse.redirect(new URL("/employee/dashboard", request.url));
+  }
+
+  // If an employee hits EXACTLY /employee, helpfully route to their dashboard
+  if (pathname === "/employee" && !isAdmin) {
     return NextResponse.redirect(new URL("/employee/dashboard", request.url));
   }
 
@@ -162,6 +187,7 @@ function withSecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("X-XSS-Protection", "1; mode=block");
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   return res;
 }
 
