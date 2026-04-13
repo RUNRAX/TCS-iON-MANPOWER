@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function SuperLoginPage() {
   const router   = useRouter();
@@ -47,99 +48,130 @@ export default function SuperLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050508] px-4 overflow-hidden relative">
-      {/* Background Animated 3D Spheres - CENTER GLOW THEME */}
-      <motion.div 
-        animate={{ y: [-150, 150, -150], x: [-100, 100, -100] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[20%] left-[20%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_center,#ff6b6b_0%,#dc2626_30%,#991b1b_70%,#450a0a_100%)] shadow-[inset_0_0_60px_rgba(0,0,0,0.9),0_0_140px_rgba(153,27,27,0.8)]" 
-      />
-      <motion.div 
-        animate={{ y: [150, -150, 150], x: [100, -100, 100] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-[20%] right-[20%] w-80 h-80 rounded-full bg-[radial-gradient(circle_at_center,#ff4d4d_0%,#b91c1c_30%,#7f1d1d_70%,#2e0000_100%)] shadow-[inset_0_0_80px_rgba(0,0,0,0.9),0_0_180px_rgba(127,29,29,0.9)]" 
-      />
-      <motion.div 
-        animate={{ scale: [1, 1.3, 1], x: [-50, 50, -50], y: [-50, 50, -50] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[40%] left-[45%] w-48 h-48 rounded-full bg-[radial-gradient(circle_at_center,#ff8f8f_0%,#ef4444_30%,#991b1b_70%,#450a0a_100%)] shadow-[inset_0_0_50px_rgba(0,0,0,0.9),0_0_120px_rgba(153,27,27,0.8)]" 
-      />
-
-      <div className="relative z-10 w-full max-w-md">
-        {/* Glassmorphic Square Panel - Statically blurring, smoothly scaled */}
+    <div className="min-h-screen flex items-center justify-center bg-[#07070a] px-4 overflow-hidden relative">
+      {/* Absolute Ambient Background Container */}
+      <div className="absolute inset-0 z-0">
+        <Image 
+          src="/images/super-bg.png"
+          alt="Sci-Fi Structure Background"
+          fill
+          className="object-cover opacity-80 mix-blend-lighten"
+          priority
+        />
+        
+        {/* Animated Flowing Gap Lights - simulating neon light flowing down background structural grooves */}
         <motion.div 
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="aspect-square w-full max-w-[420px] mx-auto flex flex-col items-center justify-center bg-white/[0.04] border border-red-500/10 rounded-[40px] p-8 backdrop-blur-[16px] shadow-2xl relative overflow-hidden"
-        >
-          {/* Inner ambient glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
+          animate={{ x: [-800, 800], y: [-800, 800], opacity: [0, 1, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 1 }}
+          className="absolute top-[20%] left-0 w-[600px] h-[3px] bg-cyan-400 shadow-[0_0_20px_#22d3ee] rotate-45 pointer-events-none mix-blend-screen"
+        />
+        <motion.div 
+          animate={{ x: [800, -800], y: [800, -800], opacity: [0, 0.8, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 2.5 }}
+          className="absolute bottom-0 right-0 w-[400px] h-[4px] bg-red-500 shadow-[0_0_20px_#ef4444] -rotate-45 pointer-events-none mix-blend-screen"
+        />
+        <motion.div 
+          animate={{ x: [-600, 600], y: [600, -600], opacity: [0, 1, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear", delay: 0.5 }}
+          className="absolute bottom-[30%] left-[-20%] w-[350px] h-[2px] bg-blue-500 shadow-[0_0_15px_#3b82f6] -rotate-[35deg] pointer-events-none mix-blend-screen"
+        />
+      </div>
 
-          {/* Fading Content Container */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.1 }}
-            className="w-full relative z-10 flex flex-col items-center"
-          >
-            <div className="text-center mb-8 relative z-10 w-full">
-              <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">Master Control</h1>
-              <p className="text-xs font-medium text-red-500 tracking-wide uppercase">Super Admin</p>
+      <div className="relative z-10 w-full max-w-[440px] min-h-[580px] flex mx-auto">
+        
+        {/* Left Side Floating Decorator Diamonds */}
+        <div className="absolute left-[-28px] top-[18%] flex flex-col gap-2 z-20 pointer-events-none">
+          {[1,2,3,4].map((i) => (
+            <motion.div
+              key={i}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: i * 0.15 }}
+              className="w-12 h-[68px] bg-white/[0.015] backdrop-blur-[6px] border border-white/20 shadow-[-10px_0_30px_rgba(0,0,0,0.5)]"
+              style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)" }}
+            />
+          ))}
+        </div>
+
+        {/* Main Glassmorphic High-Tech Clip-Path Panel */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative w-full h-full bg-white/[0.04] backdrop-blur-xl border border-white/10 p-12 pr-14 flex flex-col justify-center overflow-visible"
+          style={{ clipPath: "polygon(14% 0, 100% 0, 100% 86%, 86% 100%, 0 100%, 0 14%)" }}
+        >
+          {/* Subtle Stardust/Noise texture overlay */}
+          <div className="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
+          
+          <div className="relative z-10 w-full mb-8 mt-2">
+            <h1 className="text-3xl font-extrabold text-white tracking-wide mb-2">Master Control</h1>
+            <p className="text-[9px] text-gray-400 font-mono leading-relaxed max-w-[90%] uppercase">
+              Mainframe access is highly restricted. <br/>
+              Attempts without proper security clearance are subject to strict penal action.
+            </p>
+          </div>
+
+          <div className="w-full h-px bg-white/10 mb-8 relative z-10" />
+
+          {error && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-3 w-full rounded-md bg-red-500/10 border border-red-500/30 text-red-500 text-xs text-center relative z-10 font-mono">
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-6 w-full relative z-10 flex flex-col">
+            <div className="w-full flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-white tracking-widest uppercase">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+                className="w-full bg-[#1b1b1e] rounded-xl px-4 py-3.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] border border-white/5"
+              />
             </div>
 
-            {error && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-3 w-full rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center relative z-10">
-                {error}
-              </motion.div>
-            )}
+            <div className="w-full flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-white tracking-widest uppercase">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Enter your password"
+                className="w-full bg-[#1b1b1e] rounded-xl px-4 py-3.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] border border-white/5"
+              />
+            </div>
 
-            <form onSubmit={handleLogin} className="space-y-4 w-full px-2 relative z-10">
-              <motion.div whileHover={{ scale: 1.02 }} className="w-full">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="your mail here"
-                  className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner"
-                />
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.02 }} className="w-full">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="your password here"
-                  className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all font-medium shadow-inner"
-                />
-              </motion.div>
-
-              <div className="flex justify-end pt-1 w-full">
-                <span className="text-[11px] text-red-400/80 hover:text-red-300 transition-colors cursor-pointer">
-                  restricted access
-                </span>
-              </div>
-
-              <div className="pt-6 flex justify-center w-full">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  disabled={loading}
-                  className="w-1/2 bg-[#f3efe6] hover:bg-white text-red-700 border border-white/20 disabled:opacity-50 font-bold py-3 rounded-xl transition-all shadow-lg backdrop-blur-md"
-                >
-                  {loading ? "Verifying..." : "Login"}
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
+            <div className="w-full pt-4 flex justify-center pb-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={loading}
+                className="w-full bg-white text-black font-bold py-3.5 rounded-full transition-all flex items-center justify-center hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.4)] disabled:opacity-50"
+              >
+                {loading ? "Accessing Matrix..." : "Login"}
+              </motion.button>
+            </div>
+          </form>
+          
         </motion.div>
-        <p className="text-center text-xs text-white/10 mt-8 font-mono">
-          TCSION · MASTER CONTROL · RESTRICTED
-        </p>
+
+        {/* Bottom external glass accents fitting perfectly beneath the bottom-right chamfer */}
+        <div className="absolute right-[5px] bottom-[-20px] flex gap-2 z-20 pointer-events-none">
+            {[1,2,3].map((i) => (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + (i * 0.1) }}
+                key={i} 
+                className="w-[50px] h-3 bg-white/[0.05] backdrop-blur-[6px] border border-white/20 skew-x-[45deg] shadow-lg" 
+              />
+            ))}
+        </div>
       </div>
     </div>
   );
