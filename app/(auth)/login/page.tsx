@@ -1,117 +1,151 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { AuthLayout3D } from "@/components/layout/AuthLayout3D";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const [id, setId] = useState("");
-  const [pw, setPw] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const router   = useRouter();
+  const supabase = createClient();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState("");
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setLoading(true);
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: id, password: pw }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message ?? "Invalid credentials");
-        return;
-      }
-      window.location.href = data.data.redirectTo;
-    } catch {
-      setError("Network error. Check your connection.");
-    } finally {
+    setError("");
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError("Invalid email or password. Please try again.");
       setLoading(false);
+      return;
     }
-  };
+
+    const role = data.user?.app_metadata?.role as string | undefined;
+
+    // ✅ BLOCK super_admin — sign them out and show error
+    if (role === "super_admin") {
+      await supabase.auth.signOut();
+      setError(
+        "This portal is for Admins and Employees only. Super Admin must use the Master Control portal."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Role-aware redirect
+    if (role === "admin") {
+      router.push("/admin/dashboard");
+    } else {
+      // employee or any unrecognized role → safe default
+      router.push("/employee/dashboard");
+    }
+  }
 
   return (
-    <AuthLayout3D>
-      {/* ── Center Glass Square Form ── */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative z-10 w-[420px] pb-10 pt-10 rounded-[40px] flex flex-col items-center justify-center border-[1.5px] border-white/20 backdrop-blur-xl bg-white/[0.04]"
-        style={{
-          boxShadow: "0 0 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05)"
-        }}
-      >
-        <h1 className="text-white text-xl font-light tracking-[0.15em] mb-8 mt-4">LOGIN</h1>
-        
-        <form onSubmit={handleLogin} className="flex flex-col items-center w-3/4 gap-4 relative z-20">
-          
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4">
+      {/* Background ambient glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px]
+                        bg-orange-600/10 rounded-full blur-[120px]" />
+      </div>
 
-
-          <input
-            type="text"
-            required
-            value={id}
-            onChange={e => setId(e.target.value)}
-            placeholder="Your mail here"
-            className="w-[280px] h-[42px] px-6 rounded-full bg-white/[0.03] border border-white/20 text-white text-sm outline-none placeholder:text-white/40 placeholder:italic transition-colors focus:border-white/40 focus:bg-white/[0.06]"
-          />
-
-          <div className="relative w-[280px]">
-            <input
-              type={showPw ? "text" : "password"}
-              required
-              value={pw}
-              onChange={e => setPw(e.target.value)}
-              placeholder="Your password here"
-              className="w-full h-[42px] pl-6 pr-12 rounded-full bg-white/[0.03] border border-white/20 text-white text-sm outline-none placeholder:text-white/40 placeholder:italic transition-colors focus:border-white/40 focus:bg-white/[0.06]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
-            >
-              {showPw ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              )}
-            </button>
+      <div className="relative w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14
+                          bg-orange-500 rounded-2xl text-white font-black text-xl mb-4">
+            T
           </div>
+          <h1 className="text-2xl font-bold text-white">Staff Portal Login</h1>
+          <p className="text-sm text-white/40 mt-1">Admin &amp; Employee Access</p>
+        </div>
 
-          <AnimatePresence>
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="w-[280px] text-center text-xs text-[#ff4d79] mt-1"
+        {/* Card */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-8
+                        backdrop-blur-xl shadow-2xl">
+
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30
+                            text-red-400 text-sm leading-relaxed">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-xs font-semibold text-white/50
+                                uppercase tracking-widest mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
+                           text-white placeholder-white/20 focus:outline-none
+                           focus:border-orange-500/60 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/50
+                                uppercase tracking-widest mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
+                           text-white placeholder-white/20 focus:outline-none
+                           focus:border-orange-500/60 transition-all"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-orange-400/70 hover:text-orange-400 transition-colors"
               >
-                Invalid Credentials
-              </motion.div>
-            )}
-          </AnimatePresence>
+                Forgot password?
+              </Link>
+            </div>
 
-          <div className="w-[280px] flex justify-end">
-             <a href="/forgot-password" className="text-white/40 hover:text-white text-xs italic transition-colors">
-               Forgot password?
-             </a>
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50
+                         text-white font-bold py-3.5 rounded-xl transition-all
+                         active:scale-[0.98] shadow-lg shadow-orange-500/20"
+            >
+              {loading ? "Signing in..." : "Sign In →"}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 w-[100px] h-[34px] rounded-full bg-white text-black text-xs font-semibold tracking-wide flex items-center justify-center hover:bg-white/90 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {loading ? "..." : "Login"}
-          </button>
-        </form>
+          {/* No register link — employees are created by admins */}
+          <p className="text-center text-xs text-white/20 mt-6">
+            Contact your administrator to get access.
+          </p>
+        </div>
 
-      </motion.div>
-    </AuthLayout3D>
+        <p className="text-center text-xs text-white/10 mt-4">
+          TCS iON Staff Portal © 2026
+        </p>
+      </div>
+    </div>
   );
 }

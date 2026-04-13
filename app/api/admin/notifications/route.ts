@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { ok, serverError, unauthorized } from "@/lib/utils/api";
+import { ok, serverError } from "@/lib/utils/api";
+import { verifyRole } from "@/lib/auth/verify-request";
 
 export async function GET(request: NextRequest) {
-  const userId = request.headers.get("x-user-id");
-  const role   = request.headers.get("x-user-role");
-  if (!userId || role !== "admin") return unauthorized("ADMIN ONLY");
+  // ✅ Layer 3: Independent verification — does NOT trust middleware headers
+  const { authorized, errorResponse, user } = await verifyRole("admin");
+  if (!authorized) return errorResponse!;
 
   const supabase = createAdminClient();
 

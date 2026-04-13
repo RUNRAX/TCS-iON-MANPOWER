@@ -153,14 +153,6 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} className="flex items-center gap-2">
           <ThemePanel size="md" />
 
-          <Link href="/register">
-            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              className="px-5 py-2 rounded-xl text-sm font-medium transition-all duration-300"
-              style={{ border: `1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)`, color: "var(--tc-secondary)", background: `color-mix(in srgb, var(--tc-primary) 6%, transparent)` }}>
-              Register
-            </motion.button>
-          </Link>
-
           <Link href="/login">
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white"
@@ -207,13 +199,6 @@ export default function Home() {
                 className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white shadow-xl"
                 style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 8px 30px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)`, willChange: "transform, box-shadow" }}>
                 <LogIn className="w-4 h-4" /> Admin Login <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </Link>
-            <Link href="/register">
-              <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all duration-300"
-                style={{ border: `1px solid color-mix(in srgb, var(--tc-primary) 16%, transparent)`, color: "var(--tc-secondary)", background: `color-mix(in srgb, var(--tc-primary) 3%, transparent)` }}>
-                Employee Register <ChevronRight className="w-4 h-4" />
               </motion.button>
             </Link>
           </motion.div>
@@ -323,13 +308,6 @@ export default function Home() {
                   className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white"
                   style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 25px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>
                   <LogIn className="w-4 h-4" /> Admin Login <ArrowRight className="w-4 h-4" />
-                </motion.button>
-              </Link>
-              <Link href="/register">
-                <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                  className="px-8 py-4 rounded-2xl font-bold transition-all"
-                  style={{ border: `1px solid color-mix(in srgb, var(--tc-primary) 27%, transparent)`, color: "var(--tc-secondary)", background: `color-mix(in srgb, var(--tc-primary) 6%, transparent)` }}>
-                  Employee Register
                 </motion.button>
               </Link>
             </div>

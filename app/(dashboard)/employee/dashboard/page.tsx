@@ -55,13 +55,7 @@ export default function EmployeeDashboard() {
     <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
       <AlertCircle className="w-12 h-12 mb-4" style={{ color: "#f59e0b" }} />
       <h2 className="text-xl font-bold mb-2" style={{ color: textMain }}>No Profile Found</h2>
-      <p className="text-sm mb-4" style={{ color: textMuted }}>You haven&apos;t registered your employee profile yet.</p>
-      <Link href="/register">
-        <button className="px-6 py-3 rounded-xl font-semibold text-white"
-          style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))` }}>
-          Complete Registration
-        </button>
-      </Link>
+      <p className="text-sm mb-4" style={{ color: textMuted }}>Your profile has not been set up yet. Please contact your administrator.</p>
     </div>
   );
 

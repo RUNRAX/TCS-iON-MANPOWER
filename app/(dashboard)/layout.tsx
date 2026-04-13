@@ -1,59 +1,69 @@
+// app/(dashboard)/layout.tsx
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import Link from "next/link";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
-import SiteLayout from "@/components/layout/SiteLayout";
-import { cache } from "react";
+import { createClient } from "@/lib/supabase/server";
 
-// Cache the role+profile lookup for the duration of this request
-const getUserData = cache(async (userId: string) => {
-  const admin = createAdminClient();
-  const [userRes, profileRes] = await Promise.all([
-    admin.from("users").select("role, is_active").eq("id", userId).single(),
-    admin.from("employee_profiles").select("full_name").eq("user_id", userId).maybeSingle(),
-  ]);
-  return { dbUser: userRes.data, profile: profileRes.data };
-});
-
-/**
- * app/(dashboard)/layout.tsx — Server Component
- *
- * MERGED from FUNCTIONAL/app/(dashboard)/layout.tsx
- *
- * Reads session from cookies (zero network call via getSession),
- * fetches role + name from DB using admin client (bypasses RLS),
- * then renders the DESIGN's SiteLayout client component.
- */
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return redirect("/login");
 
-  const { dbUser } = await getUserData(session.user.id);
+  // ✅ getUser() — makes a real network call to Supabase auth server
+  // This CANNOT be bypassed with a forged JWT — Supabase validates server-side
+  // This is Layer 2: runs even if middleware was somehow bypassed
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!dbUser) redirect("/login");
-  if (dbUser.is_active === false) redirect("/login?reason=inactive");
-
-  // super_admin should never render inside the (dashboard) group
-  if (dbUser.role === "super_admin") redirect("/super/dashboard");
-
-  // ── Defense-in-depth: pathname-based role assertion ──
-  // Even though middleware already blocks these, a second check prevents future
-  // middleware bugs from causing an access-control breach.
-  const headersList = await headers();
-  const pathname = headersList.get("x-invoke-path") ?? headersList.get("x-next-url") ?? "";
-  const userRole = dbUser.role as string;
-
-  if (pathname.startsWith("/super") && userRole !== "super_admin") {
-    redirect(userRole === "admin" ? "/admin/dashboard" : "/employee/dashboard");
+  // No valid user → boot to login, no exceptions
+  if (error || !user) {
+    redirect("/login");
   }
-  if (pathname.startsWith("/admin") && userRole !== "admin" && userRole !== "super_admin") {
+
+  const role = (user.app_metadata?.role as string) ?? "employee";
+
+  // Get the current path from headers to enforce role rules
+  const headersList = await headers();
+  const pathname = headersList.get("x-invoke-path") ?? 
+                   headersList.get("x-pathname") ??
+                   headersList.get("x-next-url") ?? "";
+
+  // ✅ Independent role enforcement — does NOT trust middleware
+  // super_admin must only use /super/*
+  if (
+    role === "super_admin" &&
+    (pathname.startsWith("/admin") || pathname.startsWith("/employee"))
+  ) {
+    redirect("/super/dashboard");
+  }
+
+  // admin/employee must NOT access /super/*
+  if (pathname.startsWith("/super") && role !== "super_admin") {
+    redirect(
+      role === "admin" ? "/admin/dashboard" : "/login"
+    );
+  }
+
+  // employee must NOT access /admin/*
+  if (
+    pathname.startsWith("/admin") &&
+    role !== "admin" &&
+    role !== "super_admin"
+  ) {
     redirect("/employee/dashboard");
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  // admin must NOT access /employee/* pages
+  if (
+    pathname.startsWith("/employee") &&
+    (role === "admin" || role === "super_admin")
+  ) {
+    redirect("/admin/dashboard");
+  }
+
+  // ✅ Pass verified user data down to all child pages
+  return <>{children}</>;
 }

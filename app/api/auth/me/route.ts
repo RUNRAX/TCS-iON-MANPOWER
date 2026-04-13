@@ -1,18 +1,16 @@
 /**
  * app/api/auth/me/route.ts
- * Returns the current authenticated user's identity from middleware-injected headers.
- * Used by the super admin layout to verify role before rendering.
+ * Returns the current authenticated user's identity.
+ * ✅ Uses getUser() for real Supabase server verification — NEVER trusts headers.
  */
 
 import { NextRequest } from "next/server";
 import { ok, unauthorized } from "@/lib/utils/api";
+import { verifyRole } from "@/lib/auth/verify-request";
 
 export async function GET(request: NextRequest) {
-  const userId    = request.headers.get("x-user-id");
-  const userRole  = request.headers.get("x-user-role");
-  const userEmail = request.headers.get("x-user-email");
+  const { authorized, errorResponse, user, role } = await verifyRole("employee");
+  if (!authorized) return errorResponse!;
 
-  if (!userId) return unauthorized();
-
-  return ok({ id: userId, role: userRole ?? "employee", email: userEmail });
+  return ok({ id: user!.id, role: role ?? "employee", email: user!.email ?? "" });
 }

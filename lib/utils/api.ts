@@ -157,6 +157,8 @@ type RouteHandler = (
 ) => Promise<NextResponse>;
 
 // ── withAuth — wraps a route handler with auth + role check
+// ✅ ALWAYS uses getUser() for real Supabase server verification (Layer 3)
+// NEVER trusts x-user-role headers alone — those can be forged
 
 export function withAuth(
   handler: RouteHandler,
@@ -168,43 +170,28 @@ export function withAuth(
   ): Promise<NextResponse> => {
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return unauthorized("Missing authentication token.");
 
-      // Prefer injected headers from middleware (faster)
-      const userId    = request.headers.get("x-user-id");
-      const userRole  = request.headers.get("x-user-role") as "super_admin" | "admin" | "employee" | null;
-      const userEmail = request.headers.get("x-user-email") ?? "";
+      // ✅ getUser() — real network call to Supabase, validates JWT server-side
+      // This is the ONLY source of truth for identity and role
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) return unauthorized("Missing or invalid authentication.");
 
-      if (!userId || !userRole) {
-        // Fallback: verify with Supabase directly
-        const user = await getUser();
-        if (!user) return unauthorized();
+      const userId    = user.id;
+      const userEmail = user.email ?? "";
+      const userRole  = (user.app_metadata?.role ?? "employee") as "super_admin" | "admin" | "employee";
 
-        const fallbackRole = (user.app_metadata?.role ?? "employee") as "super_admin" | "admin" | "employee";
-        if (requiredRole && fallbackRole !== requiredRole) {
-          return forbidden();
-        }
-
-        return handler(request, {
-          userId: user.id,
-          userRole: fallbackRole,
-          userEmail: user.email ?? "",
-        }, params);
-      }
-
-      // Role check
+      // Role check with hierarchy
       if (requiredRole) {
         const isSuperAdmin = userRole === "super_admin";
         if (requiredRole === "admin" && userRole !== "admin" && !isSuperAdmin) {
           return forbidden();
         }
-        if (requiredRole === "employee" && userRole !== "employee") {
+        if (requiredRole === "employee" && userRole !== "employee" && userRole !== "admin" && !isSuperAdmin) {
           return forbidden();
         }
       }
 
-      return handler(request, { userId, userRole: userRole as "admin" | "employee", userEmail }, params);
+      return handler(request, { userId, userRole, userEmail }, params);
     } catch (error) {
       console.error("[API] Unhandled error:", error);
       return serverError();
@@ -233,35 +220,21 @@ export function withSuperAdmin(handler: RouteHandler) {
   ): Promise<NextResponse> => {
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return unauthorized("Missing authentication token.");
 
-      // Prefer injected headers from middleware (faster)
-      const userId    = request.headers.get("x-user-id");
-      const userRole  = request.headers.get("x-user-role");
-      const userEmail = request.headers.get("x-user-email") ?? "";
+      // ✅ getUser() — real Supabase server verification
+      // NEVER trusts x-user-role header — that can be forged
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) return unauthorized("Missing or invalid authentication.");
 
-      if (userId && userRole === "super_admin") {
-        return handler(request, { userId, userRole: "admin", userEmail }, params);
+      const role = (user.app_metadata?.role as string) ?? "employee";
+
+      if (role !== "super_admin") {
+        return forbidden("Super admin access required");
       }
-
-      // Fallback: verify with Supabase directly
-      const user = await getUser();
-      if (!user) return unauthorized();
-
-      const adminClient = createAdminClient();
-      const { data: dbUser } = await adminClient
-        .from("users")
-        .select("role, is_active")
-        .eq("id", user.id)
-        .single();
-
-      if (!dbUser?.is_active) return unauthorized("Account deactivated");
-      if (dbUser.role !== "super_admin") return forbidden("Super admin access required");
 
       return handler(request, {
         userId: user.id,
-        userRole: "admin",
+        userRole: "super_admin",
         userEmail: user.email ?? "",
       }, params);
     } catch (err) {

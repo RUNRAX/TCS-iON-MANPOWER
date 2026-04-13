@@ -1,23 +1,24 @@
 /**
  * middleware.ts
- * 
- * KEY DESIGN DECISION:
- * We use getSession() NOT getUser() here.
- * getSession() reads the JWT from cookies — ZERO network calls, works offline.
- * getUser() makes an HTTP request to Supabase Auth every time — breaks with IPv6 issues.
- * 
- * Role enforcement happens in the dashboard layout (server component),
- * which runs AFTER middleware passes the request through.
+ *
+ * SECURITY LAYERS:
+ * Layer 1 (this file):  Cookie-based JWT check — fast, no network call
+ * Layer 2 (layout.tsx): getUser() — real Supabase server verification
+ * Layer 3 (API routes): verifyRole() — independent per-route verification
+ *
+ * NOTE: getSession() is used here intentionally for performance.
+ * Real verification happens in Layer 2 and Layer 3.
  */
 
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { rateLimit } from "@/lib/ratelimit";
 
-// Routes that don't need auth
+// ── Routes that need NO authentication ──────────────────────────────
 const PUBLIC_ROUTES = [
-  "/",                           // Landing page
+  "/",
   "/login",
-  "/register",
+  "/super/login",            // ✅ hidden super admin portal
   "/forgot-password",
   "/reset-password",
   "/change-password",
@@ -27,21 +28,25 @@ const PUBLIC_ROUTES = [
   "/api/auth/change-password",
   "/api/health",
   "/api/webhooks",
+  // ❌ /register is intentionally NOT here — it is BLOCKED
 ];
 
-import { rateLimit } from "@/lib/ratelimit";
-
 const RL_CONFIG: Record<string, number> = {
-  "/api/auth": 30,
-  "/api/super": 300,
-  "/api/admin": 300,
+  "/api/auth":     30,
+  "/api/super":   300,
+  "/api/admin":   300,
   "/api/employee": 120,
 };
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ── 1. Rate limiting (API routes only)
+  // ── 1. Block /register entirely — employees created by admin only
+  if (pathname.startsWith("/register")) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // ── 2. Rate limiting (API routes only)
   if (pathname.startsWith("/api/")) {
     for (const [prefix, limit] of Object.entries(RL_CONFIG)) {
       if (pathname.startsWith(prefix)) {
@@ -52,12 +57,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ── 2. Allow public routes with no auth check
-  if (pathname === "/" || PUBLIC_ROUTES.filter(r => r !== "/").some(r => pathname.startsWith(r))) {
+  // ── 3. Allow public routes — no auth needed
+  const isPublic =
+    pathname === "/" ||
+    PUBLIC_ROUTES.filter((r) => r !== "/").some((r) => pathname.startsWith(r));
+
+  if (isPublic) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  // ── 3. Auth check using getSession() — reads cookies, NO network call
+  // ── 4. Build Supabase client to read session from cookie
   let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
@@ -65,7 +74,9 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) { return request.cookies.get(name)?.value; },
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options });
           response = NextResponse.next({ request: { headers: request.headers } });
@@ -80,56 +91,66 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // getSession() = reads from cookie, verifies JWT locally. NO HTTP to Supabase.
-  const { data: { session } } = await supabase.auth.getSession();
+  // getSession() = reads JWT from cookie, verifies locally — ZERO network call
+  // Real verification happens in layout.tsx (Layer 2) and API routes (Layer 3)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // ── 4. Not authenticated → redirect to login
+  // ── 5. No session → redirect to appropriate login
   if (!session) {
-    if (request.nextUrl.pathname !== '/login') {
-      return NextResponse.redirect(new URL('/login', request.url));
+    if (pathname.startsWith("/super")) {
+      return NextResponse.redirect(new URL("/super/login", request.url));
     }
-    return withSecurityHeaders(response);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ── 5. Inject user info headers for API routes (avoids repeated DB lookups)
-  // Role is read from app_metadata in the JWT (set during login via admin.updateUserById)
-  // app_metadata is server-only writable — prevents client-side privilege escalation
+  // ── 6. Read role from JWT app_metadata (server-only writable — safe)
   const userId    = session.user.id;
   const userEmail = session.user.email ?? "";
   const userRole  = (session.user.app_metadata?.role as string) ?? "employee";
 
-  // ── 5a. Super admin role handling
-  // super_admin inherits all admin access — they can reach /admin/* and /super/*
   const isSuperAdmin = userRole === "super_admin";
   const isAdmin      = userRole === "admin" || isSuperAdmin;
 
-  // Block non-admins from /admin routes
+  // ── 7. STRICT ROLE-ROUTE ENFORCEMENT
+
+  // super_admin must use /super/* — redirect if they land on /admin or /employee
+  if (isSuperAdmin && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/super/dashboard", request.url));
+  }
+  if (isSuperAdmin && pathname.startsWith("/employee")) {
+    return NextResponse.redirect(new URL("/super/dashboard", request.url));
+  }
+
+  // admin must NOT access /super/* — hard block
+  if (pathname.startsWith("/super") && !isSuperAdmin) {
+    return NextResponse.redirect(
+      new URL(isAdmin ? "/admin/dashboard" : "/login", request.url)
+    );
+  }
+
+  // employee must NOT access /admin/* — hard block
   if (pathname.startsWith("/admin") && !isAdmin) {
     return NextResponse.redirect(new URL("/employee/dashboard", request.url));
   }
 
-  // Block non-super-admins from /super routes
-  if (pathname.startsWith("/super") && !isSuperAdmin) {
-    return NextResponse.redirect(new URL(isAdmin ? "/admin/dashboard" : "/employee/dashboard", request.url));
+  // admin must NOT access /employee/* pages — hard block
+  if (pathname.startsWith("/employee") && isAdmin) {
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
-  // Block non-employees from /employee routes (admins/super should use admin panel)
-  // Note: admins CAN access /api/employee/* endpoints but not the employee pages
-
+  // ── 8. Inject verified user headers for API routes
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id",    userId);
   requestHeaders.set("x-user-email", userEmail);
-  // Pass raw role — withSuperAdmin guard checks for "super_admin" specifically
   requestHeaders.set("x-user-role",  userRole);
 
   const finalResponse = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
+    request: { headers: requestHeaders },
   });
 
-  // Keep any cookies set above
-  response.cookies.getAll().forEach(cookie => {
+  response.cookies.getAll().forEach((cookie) => {
     finalResponse.cookies.set(cookie.name, cookie.value);
   });
 
@@ -137,15 +158,15 @@ export async function middleware(request: NextRequest) {
 }
 
 function withSecurityHeaders(res: NextResponse): NextResponse {
-  res.headers.set("X-Frame-Options",         "DENY");
-  res.headers.set("X-Content-Type-Options",  "nosniff");
-  res.headers.set("Referrer-Policy",         "strict-origin-when-cross-origin");
-  res.headers.set("X-XSS-Protection",        "1; mode=block");
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("X-XSS-Protection", "1; mode=block");
   return res;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|login|register|api/webhooks).*)"
+    "/((?!_next/static|_next/image|favicon.ico|api/webhooks).*)",
   ],
 };

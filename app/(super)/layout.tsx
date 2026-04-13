@@ -21,13 +21,15 @@ const getUserData = cache(async (userId: string) => {
  */
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return redirect("/login");
 
-  const { dbUser, profile } = await getUserData(session.user.id);
+  // ✅ getUser() — real Supabase server verification (Layer 2 for super admin)
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return redirect("/super/login");
 
-  if (!dbUser) redirect("/login");
-  if (dbUser.is_active === false) redirect("/login?reason=inactive");
+  const { dbUser, profile } = await getUserData(user.id);
+
+  if (!dbUser) redirect("/super/login");
+  if (dbUser.is_active === false) redirect("/super/login?reason=inactive");
 
   // Hard server-side guard: ONLY super_admin role can access /super/* pages
   if (dbUser.role !== "super_admin") {
@@ -52,8 +54,8 @@ export default async function SuperAdminLayout({ children }: { children: React.R
       ))}
       <SuperSiteLayout
         role={role}
-        userId={session.user.id}
-        userEmail={session.user.email ?? ""}
+        userId={user.id}
+        userEmail={user.email ?? ""}
         userFullName={profile?.full_name ?? undefined}
       >
         {children}
