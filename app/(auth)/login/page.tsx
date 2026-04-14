@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function EmployeeLoginPage() {
+export default function LoginPage() {
   const router   = useRouter();
   const supabase = createClient();
 
@@ -33,17 +33,15 @@ export default function EmployeeLoginPage() {
       return;
     }
 
-    const role = data.user?.app_metadata?.role as string | undefined;
+    const role = (data.user?.app_metadata?.role as string | undefined) ?? "employee";
 
-    // ✅ Block anything that isn't explicitly an employee
-    if (role !== "employee") {
-      await supabase.auth.signOut();
-      setError("Unauthorized access. Employee account required.");
-      setLoading(false);
-      return;
+    if (role === "super_admin") {
+      router.push("/super/dashboard");
+    } else if (role === "admin") {
+      router.push("/admin/dashboard");
+    } else {
+      router.push("/employee/dashboard");
     }
-
-    router.push("/employee/dashboard");
   }
 
   return (
@@ -98,7 +96,7 @@ export default function EmployeeLoginPage() {
           >
             <div className="text-center mb-8 relative z-10 w-full">
               <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">Login</h1>
-              <p className="text-xs font-medium text-orange-400 tracking-wide">Employee Portal</p>
+              <p className="text-xs font-medium text-orange-400 tracking-wide">Staff Portal</p>
             </div>
 
             {error && (
@@ -114,7 +112,7 @@ export default function EmployeeLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="employee mail here"
+                  placeholder="email address"
                   className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium shadow-inner"
                 />
               </motion.div>

@@ -17,9 +17,7 @@ import { rateLimit } from "@/lib/ratelimit";
 // ── Routes that need NO authentication ──────────────────────────────
 const PUBLIC_ROUTES = [
   "/",
-  "/admin/login",
-  "/employee/login",
-  "/super/login",            // ✅ hidden super admin portal
+  "/login",
   "/forgot-password",
   "/reset-password",
   "/change-password",
@@ -78,11 +76,15 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
+          delete options.maxAge;
+          delete options.expires;
           request.cookies.set({ name, value, ...options });
           response = NextResponse.next({ request: { headers: request.headers } });
           response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
+          delete options.maxAge;
+          delete options.expires;
           request.cookies.set({ name, value: "", ...options });
           response = NextResponse.next({ request: { headers: request.headers } });
           response.cookies.set({ name, value: "", ...options });
@@ -98,7 +100,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   // ── 4a. Redirect authenticated users AWAY from login pages
-  const AUTH_PAGES = ["/", "/admin/login", "/employee/login", "/super/login"];
+  const AUTH_PAGES = ["/login"];
   if (session && AUTH_PAGES.includes(pathname)) {
     const role = (session.user.app_metadata?.role as string) ?? "employee";
     if (role === "super_admin") {
@@ -122,14 +124,8 @@ export async function middleware(request: NextRequest) {
       // Throw 404 error if an unauthenticated user tries to guess super admin routes
       return NextResponse.rewrite(new URL("/404", request.url));
     }
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-    if (pathname.startsWith("/employee")) {
-      return NextResponse.redirect(new URL("/employee/login", request.url));
-    }
-    // Block anything else like /dashboard directly
-    return NextResponse.rewrite(new URL("/404", request.url));
+    // Any other protected route redirects to unified login
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // ── 6. Read role from JWT app_metadata (server-only writable — safe)
@@ -165,10 +161,8 @@ export async function middleware(request: NextRequest) {
 
   // admin/employee must NOT access /super/* — hard block
   if (pathname.startsWith("/super") && !isSuperAdmin) {
-    if (pathname !== "/super/login") {
-      // Explicit wall: Throw a 404 error if an unauthorized user manually types any super route
-      return NextResponse.rewrite(new URL("/404", request.url));
-    }
+    // Explicit wall: Throw a 404 error if an unauthorized user manually types any super route
+    return NextResponse.rewrite(new URL("/404", request.url));
   }
 
   // If an admin hits EXACTLY /admin, helpfully route to their dashboard

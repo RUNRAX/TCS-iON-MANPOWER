@@ -18,6 +18,8 @@ export function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
+            delete options.maxAge;
+            delete options.expires;
             cookieStore.set({ name, value, ...options });
           } catch {
             // Server Component — cannot set cookies (handled by middleware)
@@ -25,6 +27,8 @@ export function createClient() {
         },
         remove(name: string, options: CookieOptions) {
           try {
+            delete options.maxAge;
+            delete options.expires;
             cookieStore.set({ name, value: "", ...options });
           } catch {
             // Server Component — cannot remove cookies (handled by middleware)
