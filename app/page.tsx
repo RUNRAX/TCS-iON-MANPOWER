@@ -154,11 +154,18 @@ export default function Home() {
           <ThemePanel size="md" />
 
           <div className="flex gap-2">
-            <Link href="/login">
+            <Link href="/admin/login">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold"
+                style={{ background: `color-mix(in srgb, var(--tc-primary) 10%, transparent)`, border: `1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)`, color: "var(--tc-primary)" }}>
+                <Shield className="w-4 h-4" /> Admin
+              </motion.button>
+            </Link>
+            <Link href="/employee/login">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
                 className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white"
                 style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 15px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>
-                <LogIn className="w-4 h-4" /> Portal Login
+                <LogIn className="w-4 h-4" /> Employee
               </motion.button>
             </Link>
           </div>
@@ -195,12 +202,20 @@ export default function Home() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
             className="flex items-center gap-4 flex-wrap">
-            <Link href="/login">
+            <Link href="/employee/login">
               <motion.button whileHover={{ scale: 1.02, boxShadow: `0 14px 40px color-mix(in srgb, var(--tc-primary) 50%, transparent)` }} whileTap={{ scale: 0.94 }}
                 transition={{ type: "spring", stiffness: 400, damping: 22 }}
                 className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white shadow-xl"
                 style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 8px 30px color-mix(in srgb, var(--tc-primary) 35%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)`, willChange: "transform, box-shadow" }}>
-                <LogIn className="w-4 h-4" /> Portal Login <ArrowRight className="w-4 h-4" />
+                <LogIn className="w-4 h-4" /> Employee Login
+              </motion.button>
+            </Link>
+            <Link href="/admin/login">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-colors"
+                style={{ background: `color-mix(in srgb, var(--tc-primary) 8%, transparent)`, border: `1px solid color-mix(in srgb, var(--tc-primary) 20%, transparent)`, color: textMain }}>
+                <Shield className="w-4 h-4" /> Admin Portal <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
           </motion.div>
@@ -305,11 +320,18 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black mb-3" style={{ color: textMain }}>Ready to get started?</h2>
             <p className="text-sm mb-8" style={{ color: textMuted }}>Join TCS iON examination centres across India on this platform.</p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <Link href="/login">
+              <Link href="/employee/login">
                 <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
                   className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white"
                   style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))`, boxShadow: `0 0 25px color-mix(in srgb, var(--tc-primary) 27%, transparent)` }}>
-                  <LogIn className="w-4 h-4" /> Portal Login <ArrowRight className="w-4 h-4" />
+                  <LogIn className="w-4 h-4" /> Employee Login
+                </motion.button>
+              </Link>
+              <Link href="/admin/login">
+                <motion.button whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold"
+                  style={{ background: `color-mix(in srgb, var(--tc-primary) 10%, transparent)`, border: `1px solid color-mix(in srgb, var(--tc-primary) 30%, transparent)`, color: textMain }}>
+                  <Shield className="w-4 h-4" /> Admin Login <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </Link>
             </div>
@@ -321,7 +343,7 @@ export default function Home() {
         style={{ borderTop: `1px solid color-mix(in srgb, var(--tc-primary) 7%, transparent)`, color: textMuted, fontSize: 11 }}>
         <span>TCS iON Staff Portal © 2026</span>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 tc-gradient-text font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
+          <Link href="/super/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 tc-gradient-text font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
             Super Admin
           </Link>
           <span style={{ color: "var(--tc-primary)" }}>● ONLINE</span>
