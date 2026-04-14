@@ -306,7 +306,8 @@ export const POST = withAdmin(async (request, { userId }) => {
         subject: emailContent.subject,
         html: emailContent.html,
       });
-    } catch {
+    } catch (error) {
+      console.error("[Employees] Welcome email failed:", error);
       // Welcome email failure is not critical
     }
 
@@ -464,7 +465,8 @@ export const POST = withAdmin(async (request, { userId }) => {
       subject: emailContent.subject,
       html: emailContent.html,
     });
-  } catch {
+  } catch (error) {
+    console.error("[Employees] Welcome email failed:", error);
     // Welcome email failure is not critical
   }
 

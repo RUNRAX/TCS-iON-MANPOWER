@@ -24,9 +24,9 @@ import ThemePanel from "@/components/ThemePanel";
 
 const features = [
   { icon: CalendarDays, title: "Smart Scheduling", desc: "Post exam shifts instantly. Employees self-select based on their availability with zero friction." },
-  { icon: Users,        title: "Team Overview",    desc: "Live dashboard showing who's confirmed, pending, or completed across all exam centres." },
-  { icon: Zap,          title: "WhatsApp Alerts",  desc: "Instant automated notifications delivered to employee WhatsApp the moment shifts open." },
-  { icon: Shield,       title: "Secure Profiles",  desc: "Admin-verified identities with ID proof, bank details, and photo on record before access." },
+  { icon: Users, title: "Team Overview", desc: "Live dashboard showing who's confirmed, pending, or completed across all exam centres." },
+  { icon: Zap, title: "WhatsApp Alerts", desc: "Instant automated notifications delivered to employee WhatsApp the moment shifts open." },
+  { icon: Shield, title: "Secure Profiles", desc: "Admin-verified identities with ID proof, bank details, and photo on record before access." },
 ];
 
 // ── 3D Card component ─────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ function Card3D({ children, className, style, depth = 15 }: {
   const rawY = useMotionValue(0);
   const rotX = useSpring(useTransform(rawY, [-0.5, 0.5], [depth, -depth]), { stiffness: 240, damping: 30 });
   const rotY = useSpring(useTransform(rawX, [-0.5, 0.5], [-depth, depth]), { stiffness: 240, damping: 30 });
-  const z    = useSpring(0, { stiffness: 220, damping: 24 });
+  const z = useSpring(0, { stiffness: 220, damping: 24 });
 
   const onMove = (e: React.MouseEvent) => {
     const rect = ref.current?.getBoundingClientRect();
@@ -66,7 +66,7 @@ function FloatingCube({ size, x, y, color, delay }: { size: number; x: string; y
   // color is always a CSS var string like "var(--tc-primary)"
   const c13 = `color-mix(in srgb, ${color} 13%, transparent)`;
   const c27 = `color-mix(in srgb, ${color} 27%, transparent)`;
-  const c9  = `color-mix(in srgb, ${color} 9%, transparent)`;
+  const c9 = `color-mix(in srgb, ${color} 9%, transparent)`;
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ delay, duration: 1.5 }}
@@ -98,13 +98,13 @@ export default function Home() {
     mouseY.set(e.clientY / window.innerHeight);
   }, [mouseX, mouseY]);
 
-  const darkBg  = "linear-gradient(135deg, #050505 0%, #111111 40%, #0a0a0a 100%)";
+  const darkBg = "linear-gradient(135deg, #050505 0%, #111111 40%, #0a0a0a 100%)";
   const lightBg = "linear-gradient(135deg, #f5f5f5 0%, #eaeaea 40%, #ffffff 100%)";
-  const bgMain  = dark ? darkBg : lightBg;
-  const textMain  = dark ? "#ffffff" : "#0f0a2e";
+  const bgMain = dark ? darkBg : lightBg;
+  const textMain = dark ? "#ffffff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,200,230,0.5)" : "rgba(30,20,80,0.5)";
-  const cardBg    = dark ? "rgba(12,10,30,0.7)"   : "rgba(255,255,255,0.45)";
-  const navBg     = dark ? "rgba(7,7,18,0.75)"    : "rgba(240,238,255,0.40)";
+  const cardBg = dark ? "rgba(12,10,30,0.7)" : "rgba(255,255,255,0.45)";
+  const navBg = dark ? "rgba(7,7,18,0.75)" : "rgba(240,238,255,0.40)";
 
   return (
     <div
@@ -127,12 +127,12 @@ export default function Home() {
 
       {/* Floating cubes */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <FloatingCube size={55} x="7%"  y="15%" color="var(--tc-primary)"   delay={0.2} />
-        <FloatingCube size={30} x="82%" y="8%"  color="var(--tc-secondary)" delay={0.6} />
-        <FloatingCube size={65} x="85%" y="55%" color="var(--tc-accent)"    delay={0.4} />
-        <FloatingCube size={38} x="3%"  y="68%" color="var(--tc-secondary)" delay={0.9} />
-        <FloatingCube size={22} x="60%" y="82%" color="var(--tc-primary)"   delay={1.1} />
-        <FloatingCube size={48} x="42%" y="6%"  color="var(--tc-accent)"    delay={1.3} />
+        <FloatingCube size={55} x="7%" y="15%" color="var(--tc-primary)" delay={0.2} />
+        <FloatingCube size={30} x="82%" y="8%" color="var(--tc-secondary)" delay={0.6} />
+        <FloatingCube size={65} x="85%" y="55%" color="var(--tc-accent)" delay={0.4} />
+        <FloatingCube size={38} x="3%" y="68%" color="var(--tc-secondary)" delay={0.9} />
+        <FloatingCube size={22} x="60%" y="82%" color="var(--tc-primary)" delay={1.1} />
+        <FloatingCube size={48} x="42%" y="6%" color="var(--tc-accent)" delay={1.3} />
       </div>
 
       {/* NAVBAR */}
@@ -240,9 +240,9 @@ export default function Home() {
                 <span className="ml-auto text-[10px] px-2 py-1 rounded-full font-bold" style={{ background: "rgba(16,185,129,0.2)", color: "#34d399" }}>● LIVE</span>
               </div>
               {[
-                { name: "Priya Sharma",  shift: "Shift 1 · 9AM", status: "confirmed", color: "#34d399" },
-                { name: "Rajesh Kumar",  shift: "Shift 2 · 2PM", status: "pending",   color: "#f59e0b" },
-                { name: "Anil Verma",    shift: "Shift 1 · 9AM", status: "completed", color: "var(--tc-primary)" },
+                { name: "Priya Sharma", shift: "Shift 1 · 9AM", status: "confirmed", color: "#34d399" },
+                { name: "Rajesh Kumar", shift: "Shift 2 · 2PM", status: "pending", color: "#f59e0b" },
+                { name: "Anil Verma", shift: "Shift 1 · 9AM", status: "completed", color: "var(--tc-primary)" },
               ].map((e, i) => (
                 <motion.div key={e.name} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.1 + i * 0.15 }}
                   className="flex items-center gap-3 py-2.5 border-t" style={{ borderColor: `color-mix(in srgb, var(--tc-primary) 8%, transparent)` }}>
@@ -296,7 +296,7 @@ export default function Home() {
         <div className="grid grid-cols-3 gap-4">
           {[
             { value: "100%", label: "Digital Workflow", sub: "Zero paperwork" },
-            { value: "Live",  label: "Real-time Updates", sub: "Instant sync" },
+            { value: "Live", label: "Real-time Updates", sub: "Instant sync" },
             { value: "Secure", label: "Verified Profiles", sub: "ID checked" },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }}>
@@ -339,10 +339,15 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <footer className="relative z-10 px-6 md:px-16 py-6 flex items-center justify-between"
+      <footer className="relative z-10 px-6 md:px-16 py-6 flex items-center justify-between group"
         style={{ borderTop: `1px solid color-mix(in srgb, var(--tc-primary) 7%, transparent)`, color: textMuted, fontSize: 11 }}>
         <span>TCS iON Staff Portal © 2026</span>
-        <span style={{ color: "var(--tc-primary)" }}>● ONLINE</span>
+        <div className="flex items-center gap-4">
+          <Link href="/super/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 tc-gradient-text font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
+            Super Admin
+          </Link>
+          <span style={{ color: "var(--tc-primary)" }}>● ONLINE</span>
+        </div>
       </footer>
     </div>
   );

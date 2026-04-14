@@ -33,9 +33,9 @@ const PUBLIC_ROUTES = [
 ];
 
 const RL_CONFIG: Record<string, number> = {
-  "/api/auth":     30,
-  "/api/super":   300,
-  "/api/admin":   300,
+  "/api/auth": 30,
+  "/api/super": 300,
+  "/api/admin": 300,
   "/api/employee": 120,
 };
 
@@ -133,14 +133,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── 6. Read role from JWT app_metadata (server-only writable — safe)
-  const userId    = session.user.id;
+  const userId = session.user.id;
   const userEmail = session.user.email ?? "";
-  const userRole  = (session.user.app_metadata?.role as string) ?? "employee";
+  const userRole = (session.user.app_metadata?.role as string) ?? "employee";
 
   const isSuperAdmin = userRole === "super_admin";
-  const isAdmin      = userRole === "admin" || isSuperAdmin;
+  const isAdmin = userRole === "admin" || isSuperAdmin;
 
   // ── 7. STRICT ROLE-ROUTE ENFORCEMENT
+
+  // Ensure all sensitive API prefixes are strictly gated
+  if (pathname.startsWith("/api/super") && !isSuperAdmin) {
+    return NextResponse.rewrite(new URL("/404", request.url));
+  }
+  if (pathname.startsWith("/api/admin") && !isAdmin) {
+    return NextResponse.rewrite(new URL("/404", request.url));
+  }
 
   // super_admin must use /super/* — redirect if they land on /admin or /employee
   if (isSuperAdmin && pathname.startsWith("/admin")) {
@@ -170,7 +178,7 @@ export async function middleware(request: NextRequest) {
 
   // employee must NOT access /admin/* — hard block
   if (pathname.startsWith("/admin") && !isAdmin) {
-    return NextResponse.redirect(new URL("/employee/dashboard", request.url));
+    return NextResponse.rewrite(new URL("/404", request.url));
   }
 
   // If an employee hits EXACTLY /employee, helpfully route to their dashboard
@@ -185,9 +193,9 @@ export async function middleware(request: NextRequest) {
 
   // ── 8. Inject verified user headers for API routes
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-user-id",    userId);
+  requestHeaders.set("x-user-id", userId);
   requestHeaders.set("x-user-email", userEmail);
-  requestHeaders.set("x-user-role",  userRole);
+  requestHeaders.set("x-user-role", userRole);
 
   const finalResponse = NextResponse.next({
     request: { headers: requestHeaders },
