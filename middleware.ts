@@ -14,10 +14,11 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { rateLimit } from "@/lib/ratelimit";
 
-// ── Routes that need NO authentication ──────────────────────────────
 const PUBLIC_ROUTES = [
   "/",
-  "/login",
+  "/admin/login",
+  "/employee/login",
+  "/super/login",
   "/forgot-password",
   "/reset-password",
   "/change-password",
@@ -27,34 +28,17 @@ const PUBLIC_ROUTES = [
   "/api/auth/change-password",
   "/api/health",
   "/api/webhooks",
-  // ❌ /register is intentionally NOT here — it is BLOCKED
 ];
-
-const RL_CONFIG: Record<string, number> = {
-  "/api/auth": 30,
-  "/api/super": 300,
-  "/api/admin": 300,
-  "/api/employee": 120,
-};
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── 1. Block /register entirely — employees created by admin only
   if (pathname.startsWith("/register")) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
-  // ── 2. Rate limiting (API routes only)
-  if (pathname.startsWith("/api/")) {
-    for (const [prefix, limit] of Object.entries(RL_CONFIG)) {
-      if (pathname.startsWith(prefix)) {
-        const rateLimitResponse = await rateLimit(request, prefix, limit);
-        if (rateLimitResponse) return rateLimitResponse;
-        break;
-      }
-    }
-  }
+  // ── 2. (Removed rate limiting from middleware to improve performance; it should be handled per-route)
 
   // ── 3. Allow public routes — no auth needed
   const isPublic =
@@ -100,7 +84,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
 
   // ── 4a. Redirect authenticated users AWAY from login pages
-  const AUTH_PAGES = ["/login"];
+  const AUTH_PAGES = ["/login", "/admin/login", "/employee/login", "/super/login"];
   if (session && AUTH_PAGES.includes(pathname)) {
     const role = (session.user.app_metadata?.role as string) ?? "employee";
     if (role === "super_admin") {
@@ -121,11 +105,16 @@ export async function middleware(request: NextRequest) {
   // ── 5. No session → redirect to appropriate login
   if (!session) {
     if (pathname.startsWith("/super")) {
-      // Throw 404 error if an unauthenticated user tries to guess super admin routes
       return NextResponse.rewrite(new URL("/404", request.url));
     }
-    // Any other protected route redirects to unified login
-    return NextResponse.redirect(new URL("/login", request.url));
+    if (pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+    if (pathname.startsWith("/employee")) {
+      return NextResponse.redirect(new URL("/employee/login", request.url));
+    }
+    // Any other protected route redirects to employee login
+    return NextResponse.redirect(new URL("/employee/login", request.url));
   }
 
   // ── 6. Read role from JWT app_metadata (server-only writable — safe)
@@ -213,6 +202,6 @@ function withSecurityHeaders(res: NextResponse): NextResponse {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/webhooks).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

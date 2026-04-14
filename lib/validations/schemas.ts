@@ -18,6 +18,7 @@ export const LoginSchema = z.object({
     .string()
     .min(6, "Password must be at least 6 characters")
     .max(128),
+  expected_role: z.enum(["admin", "employee", "super_admin"]).optional(),
 });
 
 export const VerifyOtpSchema = z.object({

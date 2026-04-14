@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   const parsed = await parseBody(request, LoginSchema);
   if ("error" in parsed) return parsed.error;
 
-  const { identifier, password } = parsed.data;
+  const { identifier, password, expected_role } = parsed.data;
 
   // Admin client — used only for privileged DB lookups (no cookie ops)
   const adminClient = createAdminClient();
@@ -98,6 +98,12 @@ export async function POST(request: NextRequest) {
       console.error(`[Auth] Unknown role "${dbUser.role}" for user ${authData.user.id}`);
       await ssrClient.auth.signOut();
       return unauthorized("Invalid account configuration. Contact your admin.");
+    }
+
+    if (expected_role && dbRole !== expected_role) {
+      // e.g. trying to log in as employee on admin login page
+      await ssrClient.auth.signOut();
+      return unauthorized("Invalid credentials for this portal.");
     }
 
     // ── 6. Sync role into app_metadata (server-only, not client-writable)

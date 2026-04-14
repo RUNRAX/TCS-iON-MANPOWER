@@ -3,50 +3,51 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function LoginPage() {
-  const router   = useRouter();
-  const supabase = createClient();
+export default function AdminLoginPage() {
+  const router = useRouter();
 
-  const [email,    setEmail]    = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password, expected_role: "admin" }),
+      });
 
-    if (authError) {
-      setError("Invalid credentials.");
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(data.error || "Invalid credentials.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.data?.redirectTo) {
+        router.push(data.data.redirectTo);
+      } else {
+        router.push("/admin/dashboard");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-      return;
-    }
-
-    const role = (data.user?.app_metadata?.role as string | undefined) ?? "employee";
-
-    if (role === "super_admin") {
-      router.push("/super/dashboard");
-    } else if (role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/employee/dashboard");
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 overflow-hidden relative">
-      {/* Background Animated 3D Spheres */}
       <motion.div 
         animate={{ y: [-150, 150, -150], x: [-100, 100, -100] }}
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
@@ -57,37 +58,17 @@ export default function LoginPage() {
         transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
         className="absolute bottom-[20%] right-[20%] w-80 h-80 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fcd34d,#f59e0b_40%,#b45309_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.6),inset_10px_10px_30px_rgba(255,255,255,0.4),0_0_150px_rgba(245,158,11,0.8)]" 
       />
-      <motion.div 
-        animate={{ scale: [1, 1.2, 1], x: [-50, 50, -50], y: [-50, 50, -50] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[40%] left-[45%] w-48 h-48 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fde047,#eab308_40%,#a16207_90%)] shadow-[inset_-20px_-20px_40px_rgba(0,0,0,0.6),inset_10px_10px_30px_rgba(255,255,255,0.4),0_0_100px_rgba(234,179,8,0.8)]" 
-      />
-
+      
       <div className="relative z-10 w-full max-w-md">
         <div className="relative w-full max-w-[420px] mx-auto">
-          {/* Small Floating Edge Spheres */}
-          <motion.div 
-            animate={{ y: [-12, 12, -12], x: [-6, 6, -6] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fdba74,#f97316_40%,#9a3412_90%)] shadow-[inset_-6px_-6px_12px_rgba(0,0,0,0.6),inset_3px_3px_12px_rgba(255,255,255,0.4),0_0_25px_rgba(234,88,12,0.6)] z-20 pointer-events-none"
-          />
-          <motion.div 
-            animate={{ y: [12, -12, 12], x: [6, -6, 6] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-[radial-gradient(circle_at_30%_30%,#fcd34d,#f59e0b_40%,#b45309_90%)] shadow-[inset_-6px_-6px_12px_rgba(0,0,0,0.6),inset_3px_3px_12px_rgba(255,255,255,0.4),0_0_30px_rgba(245,158,11,0.6)] z-20 pointer-events-none"
-          />
-
-          {/* Glassmorphic Square Panel */}
           <motion.div 
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="aspect-square w-full flex flex-col items-center justify-center bg-white/[0.04] border border-white/10 rounded-[40px] p-8 backdrop-blur-[16px] shadow-2xl relative overflow-hidden"
           >
-          {/* Inner ambient glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none" />
 
-          {/* Fading Content Container (delayed slightly perfectly for blur entrance) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,7 +77,7 @@ export default function LoginPage() {
           >
             <div className="text-center mb-8 relative z-10 w-full">
               <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">Login</h1>
-              <p className="text-xs font-medium text-orange-400 tracking-wide">Staff Portal</p>
+              <p className="text-xs font-medium text-orange-400 tracking-wide">Administrator Portal</p>
             </div>
 
             {error && (
@@ -108,11 +89,11 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-4 w-full px-2 relative z-10">
               <motion.div whileHover={{ scale: 1.02 }} className="w-full">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  placeholder="email address"
+                  placeholder="email or phone number"
                   className="w-full bg-[#f3efe6] rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium shadow-inner"
                 />
               </motion.div>
@@ -154,7 +135,7 @@ export default function LoginPage() {
               </div>
             </form>
           </motion.div>
-        </motion.div>
+          </motion.div>
         </div>
         
         <p className="text-center text-xs text-white/20 mt-8">
