@@ -7,8 +7,15 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
-  withAdmin, parseBody, ok, created, conflict,
-  serverError, badRequest, unauthorized, auditLog,
+  withAdmin,
+  parseBody,
+  ok,
+  created,
+  conflict,
+  serverError,
+  badRequest,
+  unauthorized,
+  auditLog,
   validationError,
 } from "@/lib/utils/api";
 import { AddEmployeeSchema } from "@/lib/validations/schemas";
@@ -18,47 +25,56 @@ import { encrypt } from "@/lib/utils/encryption";
 import { z } from "zod";
 
 /* ── Flexible schema — accepts both camelCase and snake_case field names ── */
-const createEmployeeSchema = z.object({
-  // Name — camelCase (modal) or snake_case
-  full_name:    z.string().min(2, "Name must be at least 2 characters").optional(),
-  fullName:     z.string().min(2, "Name must be at least 2 characters").optional(),
-  email:        z.string().email("Invalid email"),
-  password:     z.string().min(8).optional(),
-  // Phone — any of these
-  phone:        z.string().min(10).max(15).optional(),
-  phone_number: z.string().min(10).max(15).optional(),
-  phoneNumber:  z.string().min(10).max(15).optional(),
-  state:        z.string().optional(),
-  city:         z.string().optional(),
-  pincode:      z.string().max(10).optional(),
-  // ID proof — any of these
-  id_proof:     z.string().optional(),
-  id_proof_type:z.string().optional(),
-  id_type:      z.string().optional(),
-  idProofType:  z.string().optional(),
-  role:         z.enum(["employee", "admin"]).default("employee"),
-  center_code:  z.string().optional(),
-  department:   z.string().optional(),
-  designation:  z.string().optional(),
-  // Optional fields from multi-step form (camelCase)
-  altPhone:     z.string().optional(),
-  addressLine1: z.string().optional(),
-  addressLine2: z.string().optional(),
-  bankAccount:  z.string().optional(),
-  bankIfsc:     z.string().optional(),
-  bankName:     z.string().optional(),
-  notes:        z.string().optional(),
-}).refine(
-  (d) => !!(d.full_name || d.fullName),
-  { message: "Name is required", path: ["fullName"] }
-);
+const createEmployeeSchema = z
+  .object({
+    // Name — camelCase (modal) or snake_case
+    full_name: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .optional(),
+    fullName: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .optional(),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(8).optional(),
+    // Phone — any of these
+    phone: z.string().min(10).max(15).optional(),
+    phone_number: z.string().min(10).max(15).optional(),
+    phoneNumber: z.string().min(10).max(15).optional(),
+    state: z.string().optional(),
+    city: z.string().optional(),
+    pincode: z.string().max(10).optional(),
+    // ID proof — any of these
+    id_proof: z.string().optional(),
+    id_proof_type: z.string().optional(),
+    id_type: z.string().optional(),
+    idProofType: z.string().optional(),
+    role: z.literal("employee").optional(),
+    center_code: z.string().optional(),
+    department: z.string().optional(),
+    designation: z.string().optional(),
+    // Optional fields from multi-step form (camelCase)
+    altPhone: z.string().optional(),
+    addressLine1: z.string().optional(),
+    addressLine2: z.string().optional(),
+    bankAccount: z.string().optional(),
+    bankIfsc: z.string().optional(),
+    bankName: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .refine((d) => !!(d.full_name || d.fullName), {
+    message: "Name is required",
+    path: ["fullName"],
+  });
 
 /* ── Secure temp password generator ── */
 function generateTempPassword(): string {
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
   return (
-    Array.from({ length: 12 }, () =>
-      chars[Math.floor(Math.random() * chars.length)]
+    Array.from(
+      { length: 12 },
+      () => chars[Math.floor(Math.random() * chars.length)],
     ).join("") + "Aa1!"
   );
 }
@@ -67,12 +83,12 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3018";
 
 // ── GET /api/admin/employees ─────────────────────────────────────────────────
 export const GET = withAdmin(async (request, { userId, userRole }) => {
-  const url    = new URL(request.url);
+  const url = new URL(request.url);
   const status = url.searchParams.get("status") ?? "all";
   const search = (url.searchParams.get("search") ?? "").trim();
-  const page   = Math.max(1, parseInt(url.searchParams.get("page") ?? "1"));
-  const limit  = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50"));
-  const from   = (page - 1) * limit;
+  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, parseInt(url.searchParams.get("limit") ?? "50"));
+  const from = (page - 1) * limit;
 
   const supabase = createAdminClient();
 
@@ -85,7 +101,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       .select("id")
       .neq("role", "super_admin")
       .or(`email.ilike.%${search}%,phone.ilike.%${search}%`);
-    
+
     let profilesQuery = supabase
       .from("employee_profiles")
       .select("user_id")
@@ -96,14 +112,22 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       usersQuery = usersQuery.or(`role.eq.employee,role.eq.admin`);
     }
 
-    const [userRes, profileRes] = await Promise.all([usersQuery, profilesQuery]).catch(() => [{ data: null }, { data: null }]);
+    const [userRes, profileRes] = await Promise.all([
+      usersQuery,
+      profilesQuery,
+    ]).catch(() => [{ data: null }, { data: null }]);
 
-    const fromUsers    = (userRes.data ?? []).map((u: { id: string }) => u.id);
-    const fromProfiles = (profileRes.data ?? []).map((p: { user_id: string }) => p.user_id);
+    const fromUsers = (userRes.data ?? []).map((u: { id: string }) => u.id);
+    const fromProfiles = (profileRes.data ?? []).map(
+      (p: { user_id: string }) => p.user_id,
+    );
     matchedUserIds = [...new Set([...fromUsers, ...fromProfiles])];
 
     if (matchedUserIds.length === 0) {
-      return ok({ employees: [], pagination: { page, limit, total: 0, totalPages: 0 } });
+      return ok({
+        employees: [],
+        pagination: { page, limit, total: 0, totalPages: 0 },
+      });
     }
   }
 
@@ -112,11 +136,11 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     .from("users")
     .select(
       `id, email, phone, is_active, role, created_at,
-       employee_profiles!left(
+       employee_profiles!employee_profiles_user_id_fkey(
          id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
        )`,
-      { count: "exact" }
+      { count: "exact" },
     )
     .neq("role", "super_admin")
     .order("created_at", { ascending: false });
@@ -130,41 +154,53 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     query = query.in("id", matchedUserIds);
   }
 
-  const { data, error, count } = await Promise.resolve(query.range(from, from + limit - 1)).catch((err: any) => {
+  const { data, error, count } = await Promise.resolve(
+    query.range(from, from + limit - 1),
+  ).catch((err: any) => {
     console.error("[Admin/Employees GET] Promise rejection:", err);
     return { data: null, error: err, count: 0 };
   });
-  if (error) { console.error("[Admin/Employees GET]:", error); return serverError("Failed to fetch employees"); }
+  if (error) {
+    console.error("[Admin/Employees GET]:", error);
+    return serverError("Failed to fetch employees");
+  }
 
   // ── Step 3: flatten + apply status filter ─────────────────────────────────
   const employees = (data ?? []).flatMap((u: Record<string, unknown>) => {
     const profiles = u.employee_profiles;
-    const p = Array.isArray(profiles) ? profiles[0] : profiles as Record<string, unknown> | null;
+    const p = Array.isArray(profiles)
+      ? profiles[0]
+      : (profiles as Record<string, unknown> | null);
     const profileStatus: string = (p?.status as string) ?? "no_profile";
 
     if (status !== "all" && profileStatus !== status) return [];
 
-    return [{
-      id:               u.id as string,
-      email:            u.email as string,
-      phone:            u.phone as string | null,
-      is_active:        u.is_active as boolean,
-      full_name:        (p?.full_name as string) ?? (u.role === "admin" ? "PORTAL ADMIN" : null),
-      city:             (p?.city as string) ?? null,
-      state:            (p?.state as string) ?? null,
-      status:           u.role === "admin" ? "approved" : profileStatus,
-      employee_code:    (p?.employee_code as string) ?? null,
-      rejection_reason: (p?.rejection_reason as string) ?? null,
-      photo_url:        (p?.photo_url as string) ?? null,
-      joined_at:        (p?.created_at as string) ?? (u.created_at as string),
-      profile_id:       (p?.id as string) ?? null,
-    }];
+    return [
+      {
+        id: u.id as string,
+        email: u.email as string,
+        phone: u.phone as string | null,
+        is_active: u.is_active as boolean,
+        full_name:
+          (p?.full_name as string) ??
+          (u.role === "admin" ? "PORTAL ADMIN" : null),
+        city: (p?.city as string) ?? null,
+        state: (p?.state as string) ?? null,
+        status: u.role === "admin" ? "approved" : profileStatus,
+        employee_code: (p?.employee_code as string) ?? null,
+        rejection_reason: (p?.rejection_reason as string) ?? null,
+        photo_url: (p?.photo_url as string) ?? null,
+        joined_at: (p?.created_at as string) ?? (u.created_at as string),
+        profile_id: (p?.id as string) ?? null,
+      },
+    ];
   });
 
   return ok({
     employees,
     pagination: {
-      page, limit,
+      page,
+      limit,
       total: status === "all" ? (count ?? 0) : employees.length,
       totalPages: Math.ceil((count ?? 0) / limit),
     },
@@ -189,9 +225,14 @@ export const POST = withAdmin(async (request, { userId }) => {
     const supabase = createAdminClient();
 
     // ── Normalise aliased fields (camelCase + snake_case) ──
-    const fullName     = data.fullName ?? data.full_name ?? "";
-    const phone        = data.phone ?? data.phone_number ?? data.phoneNumber ?? null;
-    const idProofType  = data.idProofType ?? data.id_proof ?? data.id_proof_type ?? data.id_type ?? null;
+    const fullName = data.fullName ?? data.full_name ?? "";
+    const phone = data.phone ?? data.phone_number ?? data.phoneNumber ?? null;
+    const idProofType =
+      data.idProofType ??
+      data.id_proof ??
+      data.id_proof_type ??
+      data.id_type ??
+      null;
     const tempPassword = data.password ?? generateTempPassword();
 
     // ── Check uniqueness ──
@@ -204,8 +245,10 @@ export const POST = withAdmin(async (request, { userId }) => {
 
       if (existing && existing.length > 0) {
         const dup = existing[0] as { email: string; phone: string };
-        if (dup.email === data.email) return conflict("An employee with this email already exists.");
-        if (dup.phone === phone) return conflict("An employee with this phone number already exists.");
+        if (dup.email === data.email)
+          return conflict("An employee with this email already exists.");
+        if (dup.phone === phone)
+          return conflict("An employee with this phone number already exists.");
       }
     } else {
       const { data: existing } = await supabase
@@ -225,12 +268,18 @@ export const POST = withAdmin(async (request, { userId }) => {
       .eq("id", userId)
       .single();
 
-    const centerCode = data.center_code ?? (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
+    const centerCode =
+      data.center_code ??
+      (adminUser as { center_code: string } | null)?.center_code ??
+      "GEN";
 
     // ── Generate employee code: XMP-{CENTER}59{SEQ} ──
     let employeeCode: string;
     try {
-      const { data: seqData, error: seqError } = await supabase.rpc("next_employee_code", { p_center: centerCode });
+      const { data: seqData, error: seqError } = await supabase.rpc(
+        "next_employee_code",
+        { p_center: centerCode },
+      );
       if (seqError) throw seqError;
       employeeCode = seqData as string;
     } catch {
@@ -238,48 +287,71 @@ export const POST = withAdmin(async (request, { userId }) => {
     }
 
     // ── Create auth user ──
-    const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
-      email:         data.email,
-      password:      tempPassword,
-      email_confirm: true,
-      app_metadata:  { role: data.role ?? "employee" },
-      user_metadata: {
-        full_name:   fullName,
-        phone,
-        center_code: data.center_code ?? null,
-      },
-    });
+    const { data: authUser, error: createError } =
+      await supabase.auth.admin.createUser({
+        email: data.email,
+        password: tempPassword,
+        email_confirm: true,
+        app_metadata: { role: "employee" },
+        user_metadata: {
+          full_name: fullName,
+          phone,
+          center_code: centerCode,
+          role: "employee",
+        },
+      });
 
     if (createError || !authUser.user) {
       console.error("[Admin/Employees POST]:", createError);
       return serverError("Failed to create employee account.");
     }
 
-    // ── Update users table ──
-    await supabase.from("users").update({
-      phone: phone ?? undefined,
-      created_by_admin: userId,
-    }).eq("id", authUser.user.id);
+    // ── Update users table (critical ownership link) ──
+    const { data: linkedRows, error: linkError } = await supabase
+      .from("users")
+      .update({
+        phone: phone ?? undefined,
+        center_code: centerCode,
+        role: "employee",
+        created_by_admin: userId,
+      })
+      .eq("id", authUser.user.id)
+      .select("id");
+
+    if (linkError || !linkedRows || linkedRows.length === 0) {
+      console.error(
+        "[Admin/Employees POST] Failed to persist created_by_admin link",
+        {
+          adminId: userId,
+          newUserId: authUser.user.id,
+          error: linkError,
+        },
+      );
+      await supabase.auth.admin.deleteUser(authUser.user.id).catch(() => {});
+      return serverError("Failed to link employee to admin owner.");
+    }
 
     // ── Create employee profile ──
-    const { error: profileError } = await supabase.from("employee_profiles").insert({
-      user_id:       authUser.user.id,
-      full_name:     fullName,
-      phone:         phone ?? "",
-      email:         data.email,
-      city:          data.city ?? "",
-      state:         data.state ?? "",
-      pincode:       data.pincode ?? "",
-      id_proof_type: idProofType,
-      employee_code: employeeCode,
-      status:        "approved",
-      approved_by:   userId,
-      approved_at:   new Date().toISOString(),
-      address_line1: data.addressLine1 || "",
-      address_line2: data.addressLine2 || null,
-      alt_phone:     data.altPhone || null,
-      bank_name:     data.bankName || null,
-    });
+    const { error: profileError } = await supabase
+      .from("employee_profiles")
+      .insert({
+        user_id: authUser.user.id,
+        full_name: fullName,
+        phone: phone ?? "",
+        email: data.email,
+        city: data.city ?? "",
+        state: data.state ?? "",
+        pincode: data.pincode ?? "",
+        id_proof_type: idProofType,
+        employee_code: employeeCode,
+        status: "approved",
+        approved_by: userId,
+        approved_at: new Date().toISOString(),
+        address_line1: data.addressLine1 || "",
+        address_line2: data.addressLine2 || null,
+        alt_phone: data.altPhone || null,
+        bank_name: data.bankName || null,
+      });
 
     if (profileError) {
       console.error("[Employees] Profile insert failed:", profileError);
@@ -317,14 +389,14 @@ export const POST = withAdmin(async (request, { userId }) => {
     });
 
     return created({
-      success:  true,
+      success: true,
       employee: {
-        id:          authUser.user.id,
-        full_name:   fullName,
-        email:       data.email,
+        id: authUser.user.id,
+        full_name: fullName,
+        email: data.email,
         phone,
-        role:        data.role ?? "employee",
-        center_code: data.center_code ?? null,
+        role: "employee",
+        center_code: centerCode,
       },
       // Return BOTH camelCase (for modal) and snake_case (for backward compat)
       employeeCode,
@@ -344,15 +416,26 @@ export const POST = withAdmin(async (request, { userId }) => {
         acc[field].push(issue.message);
         return acc;
       },
-      {} as Record<string, string[]>
+      {} as Record<string, string[]>,
     );
     return validationError(errors);
   }
 
   const {
-    fullName, email, phone, state, city, idProofType,
-    altPhone, addressLine1, addressLine2, pincode,
-    bankAccount, bankIfsc, bankName, notes: empNotes,
+    fullName,
+    email,
+    phone,
+    state,
+    city,
+    idProofType,
+    altPhone,
+    addressLine1,
+    addressLine2,
+    pincode,
+    bankAccount,
+    bankIfsc,
+    bankName,
+    notes: empNotes,
   } = parsed.data;
   const supabase = createAdminClient();
 
@@ -365,8 +448,10 @@ export const POST = withAdmin(async (request, { userId }) => {
 
   if (existing && existing.length > 0) {
     const dup = existing[0] as { email: string; phone: string };
-    if (dup.email === email) return conflict("An employee with this email already exists.");
-    if (dup.phone === phone) return conflict("An employee with this phone number already exists.");
+    if (dup.email === email)
+      return conflict("An employee with this email already exists.");
+    if (dup.phone === phone)
+      return conflict("An employee with this phone number already exists.");
   }
 
   // ── Get admin's center_code ──
@@ -376,12 +461,16 @@ export const POST = withAdmin(async (request, { userId }) => {
     .eq("id", userId)
     .single();
 
-  const centerCode = (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
+  const centerCode =
+    (adminUser as { center_code: string } | null)?.center_code ?? "GEN";
 
   // ── Generate employee code ──
   let employeeCode: string;
   try {
-    const { data: seqData, error: seqError } = await supabase.rpc("next_employee_code", { p_center: centerCode });
+    const { data: seqData, error: seqError } = await supabase.rpc(
+      "next_employee_code",
+      { p_center: centerCode },
+    );
     if (seqError) throw seqError;
     employeeCode = seqData as string;
   } catch {
@@ -391,55 +480,90 @@ export const POST = withAdmin(async (request, { userId }) => {
   const tempPassword = generatePassword();
 
   // ── Create auth user ──
-  const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-    email,
-    phone: `+91${phone}`,
-    password: tempPassword,
-    email_confirm: true,
-    user_metadata: { role: "employee", full_name: fullName, phone, employee_code: employeeCode, invited_by: userId },
-  });
+  const { data: newUser, error: createError } =
+    await supabase.auth.admin.createUser({
+      email,
+      phone: `+91${phone}`,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: {
+        role: "employee",
+        full_name: fullName,
+        phone,
+        employee_code: employeeCode,
+        invited_by: userId,
+      },
+    });
 
   if (createError || !newUser.user) {
     console.error("[Admin/Employees POST]:", createError);
     return serverError("Failed to create employee account.");
   }
 
-  await supabase.from("users").update({ phone, created_by_admin: userId }).eq("id", newUser.user.id);
+  const { data: linkedRows, error: linkError } = await supabase
+    .from("users")
+    .update({
+      phone,
+      center_code: centerCode,
+      role: "employee",
+      created_by_admin: userId,
+    })
+    .eq("id", newUser.user.id)
+    .select("id");
+
+  if (linkError || !linkedRows || linkedRows.length === 0) {
+    console.error(
+      "[Admin/Employees POST] Failed to persist created_by_admin link",
+      {
+        adminId: userId,
+        newUserId: newUser.user.id,
+        error: linkError,
+      },
+    );
+    await supabase.auth.admin.deleteUser(newUser.user.id).catch(() => {});
+    return serverError("Failed to link employee to admin owner.");
+  }
 
   let bankAccountEncrypted: string | null = null;
   let bankIfscEncrypted: string | null = null;
 
   if (bankAccount) {
-    try { bankAccountEncrypted = await encrypt(bankAccount); } catch {
+    try {
+      bankAccountEncrypted = await encrypt(bankAccount);
+    } catch {
       // Encryption failure — continue without
     }
   }
   if (bankIfsc) {
-    try { bankIfscEncrypted = await encrypt(bankIfsc); } catch {
+    try {
+      bankIfscEncrypted = await encrypt(bankIfsc);
+    } catch {
       // Encryption failure — continue without
     }
   }
 
-  const { error: profileError } = await supabase.from("employee_profiles").insert({
-    user_id:       newUser.user.id,
-    full_name:     fullName,
-    phone,
-    alt_phone:     altPhone || null,
-    email,
-    address_line1: addressLine1 || "",
-    address_line2: addressLine2 || null,
-    city,
-    state,
-    pincode:       pincode || "",
-    id_proof_type: idProofType,
-    employee_code: employeeCode,
-    status:        "approved",
-    approved_by:   userId,
-    approved_at:   new Date().toISOString(),
-    bank_account_encrypted: bankAccountEncrypted,
-    bank_ifsc_encrypted:    bankIfscEncrypted,
-    bank_name:              bankName || null,
-  });
+  const { error: profileError } = await supabase
+    .from("employee_profiles")
+    .insert({
+      user_id: newUser.user.id,
+      full_name: fullName,
+      phone,
+      alt_phone: altPhone || null,
+      email,
+      address_line1: addressLine1 || "",
+      address_line2: addressLine2 || null,
+      city,
+      state,
+      pincode: pincode || "",
+      id_proof_type: idProofType,
+      employee_code: employeeCode,
+      status: "approved",
+      approved_by: userId,
+      approved_at: new Date().toISOString(),
+      bank_account_encrypted: bankAccountEncrypted,
+      bank_ifsc_encrypted: bankIfscEncrypted,
+      bank_name: bankName || null,
+    });
 
   if (profileError) {
     console.error("[Employees] Profile insert failed:", profileError);
@@ -493,7 +617,10 @@ export const POST = withAdmin(async (request, { userId }) => {
 // ── PATCH /api/admin/employees — Approve / reject / toggle / edit ─────────────
 export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
   const supabase = createAdminClient();
-  const body = await request.json().catch(() => ({})) as Record<string, string>;
+  const body = (await request.json().catch(() => ({}))) as Record<
+    string,
+    string
+  >;
   const { employeeId, action, reason, fullName, phone, city } = body;
 
   if (!employeeId) return badRequest("EMPLOYEE ID REQUIRED");
@@ -518,16 +645,30 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
   }
 
   if (action === "toggle_active") {
-    const { data: u } = await supabase.from("users").select("is_active").eq("id", employeeId).single();
+    const { data: u } = await supabase
+      .from("users")
+      .select("is_active")
+      .eq("id", employeeId)
+      .single();
     const newActive = !(u as { is_active: boolean } | null)?.is_active;
-    const { error } = await supabase.from("users").update({ is_active: newActive }).eq("id", employeeId);
+    const { error } = await supabase
+      .from("users")
+      .update({ is_active: newActive })
+      .eq("id", employeeId);
     if (error) return serverError();
     if (!newActive) {
-      await supabase.auth.admin.updateUserById(employeeId, { ban_duration: "876600h" }).catch(() => {});
+      await supabase.auth.admin
+        .updateUserById(employeeId, { ban_duration: "876600h" })
+        .catch(() => {});
     } else {
-      await supabase.auth.admin.updateUserById(employeeId, { ban_duration: "none" }).catch(() => {});
+      await supabase.auth.admin
+        .updateUserById(employeeId, { ban_duration: "none" })
+        .catch(() => {});
     }
-    return ok({ active: newActive, message: newActive ? "Employee activated." : "Employee deactivated." });
+    return ok({
+      active: newActive,
+      message: newActive ? "Employee activated." : "Employee deactivated.",
+    });
   }
 
   if (action === "edit") {
@@ -540,7 +681,10 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
     if (fullName) profileUpdates.full_name = fullName;
     if (city) profileUpdates.city = city;
     if (Object.keys(profileUpdates).length > 0) {
-      await supabase.from("employee_profiles").update(profileUpdates).eq("user_id", employeeId);
+      await supabase
+        .from("employee_profiles")
+        .update(profileUpdates)
+        .eq("user_id", employeeId);
     }
     return ok({ message: "Employee updated." });
   }
@@ -549,8 +693,8 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
 });
 
 function generatePassword(): string {
-  const lower  = "abcdefghjkmnpqrstuvwxyz";
-  const upper  = "ABCDEFGHJKMNPQRSTUVWXYZ";
+  const lower = "abcdefghjkmnpqrstuvwxyz";
+  const upper = "ABCDEFGHJKMNPQRSTUVWXYZ";
   const digits = "23456789";
   const special = "@#$%&*!";
   const all = lower + upper + digits + special;

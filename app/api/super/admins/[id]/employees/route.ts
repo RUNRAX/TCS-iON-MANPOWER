@@ -13,23 +13,76 @@ export const GET = withSuperAdmin(async (request, _ctx, params) => {
   const supabase = createAdminClient();
 
   // Fetch employees created by this admin
-  const { data, error } = await supabase
+  const { data: directData, error: directError } = await supabase
     .from("users")
     .select(
       `id, email, phone, is_active, role, created_at,
-       employee_profiles!left(
-         id, full_name, city, state, status, employee_code,
-         phone, created_at
-       )`
+       employee_profiles!employee_profiles_user_id_fkey(
+          id, full_name, city, state, status, employee_code,
+          phone, created_at
+        )`,
     )
     .eq("created_by_admin", adminId)
     .eq("role", "employee")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("[Super/Admins/Employees GET]:", error);
+  if (directError) {
+    console.error(
+      "[Super/Admins/Employees GET] direct query error:",
+      directError,
+    );
     return serverError("Failed to fetch admin's employees");
   }
+
+  // Fallback for legacy rows where created_by_admin link was not persisted,
+  // but employee profile was approved by this admin.
+  const directIds = new Set((directData ?? []).map((u: any) => u.id));
+
+  const { data: profileLinks, error: profileLinkError } = await supabase
+    .from("employee_profiles")
+    .select("user_id")
+    .eq("approved_by", adminId);
+
+  if (profileLinkError) {
+    console.error(
+      "[Super/Admins/Employees GET] profile link query error:",
+      profileLinkError,
+    );
+    return serverError("Failed to fetch admin's employees");
+  }
+
+  const fallbackIds = (profileLinks ?? [])
+    .map((p: any) => p.user_id)
+    .filter((id: string) => !!id && !directIds.has(id));
+
+  let fallbackData: any[] = [];
+  if (fallbackIds.length > 0) {
+    const { data: fData, error: fError } = await supabase
+      .from("users")
+      .select(
+        `id, email, phone, is_active, role, created_at,
+         employee_profiles!employee_profiles_user_id_fkey(
+           id, full_name, city, state, status, employee_code,
+           phone, created_at
+         )`,
+      )
+      .in("id", fallbackIds)
+      .eq("role", "employee");
+
+    if (fError) {
+      console.error(
+        "[Super/Admins/Employees GET] fallback query error:",
+        fError,
+      );
+      return serverError("Failed to fetch admin's employees");
+    }
+    fallbackData = fData ?? [];
+  }
+
+  const data = [...(directData ?? []), ...fallbackData].sort(
+    (a: any, b: any) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 
   const employees = (data ?? []).map((u: any) => {
     const profiles = u.employee_profiles;
