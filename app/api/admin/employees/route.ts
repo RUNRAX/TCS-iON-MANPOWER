@@ -92,13 +92,8 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       .or(`full_name.ilike.%${search}%,employee_code.ilike.%${search}%`);
 
     if (userRole !== "super_admin") {
-      // Admins see employees they created OR co-admins
-      // PostgREST chaining caveat: To avoid multiple .or overrides, we use filter or just assume the first is fine. 
-      // Actually, since we already did .or(), we should use .filter or string builder. 
-      // Wait, we only need to search if it matches search AND (created_by_admin=... OR role=admin).
-      usersQuery = usersQuery.or(`created_by_admin.eq.${userId},role.eq.admin`);
-
-      profilesQuery = profilesQuery.eq("approved_by", userId);
+      // Admins see all employees + co-admins (broadened from created_by_admin only)
+      usersQuery = usersQuery.or(`role.eq.employee,role.eq.admin`);
     }
 
     const [userRes, profileRes] = await Promise.all([usersQuery, profilesQuery]).catch(() => [{ data: null }, { data: null }]);
@@ -127,8 +122,8 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     .order("created_at", { ascending: false });
 
   if (userRole !== "super_admin") {
-    // Admins see employees they created OR co-admins
-    query = query.or(`created_by_admin.eq.${userId},role.eq.admin`);
+    // Admins see all employees + co-admins (broadened so no employee is hidden)
+    query = query.or(`role.eq.employee,role.eq.admin`);
   }
 
   if (matchedUserIds !== null) {

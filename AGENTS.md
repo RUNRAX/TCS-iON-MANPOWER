@@ -10,7 +10,7 @@ Violating this rule wastes credits and is forbidden.
 ## Checkpoint Protocol — MANDATORY ON EVERY SESSION START
 
 At the start of EVERY conversation AND whenever the user says 
-"continue", "resume", or "retry" — execute this protocol fully 
+"x", "continue", "resume", or "retry" — execute this protocol fully 
 before doing anything else. No exceptions.
 
 ---
@@ -24,7 +24,7 @@ This is always the very first action, no matter what.
 ### Step 2 — Determine Mode
 
 **Mode A — Resuming:**
-- User said "continue" / "resume" / "retry", OR
+- User said "x" / "continue" / "resume" / "retry", OR
 - A checkpoint exists AND it matches the current task context
 
 **Mode B — New Task:**
@@ -121,16 +121,16 @@ At that point:
 
 ---
 
-### Step 9 — "continue" Mid-Session Rule
+### Step 9 — "x" / "continue" Mid-Session Rule
 
-If an error occurs mid-task and you are told "continue":
+If an error occurs mid-task and you are told "x" or "continue":
 1. Treat it as Mode A regardless of anything else
 2. Call `memory:search_nodes("checkpoint_latest")` immediately
 3. Load from "Next step" field
 4. Call targeted graphify for that step only
 5. Resume — never re-read full chat history
 
-This cycle repeats automatically on every session start and "continue".
+This cycle repeats automatically on every session start and "x".
 
 ## Planning Mode & Token Saving
 - For any task involving more than one file or step, use Planning Mode.
@@ -161,5 +161,5 @@ or validate any UI or browser-based task.
 - Implement one feature at a time
 - Do not run automated tests — I will test manually
 - Do not call any MCP tools unless they are genuinely needed
-- When receiving "continue" — NEVER re-read full chat history,
+- When receiving "x" or "continue" — NEVER re-read full chat history,
   always load from checkpoint_latest first

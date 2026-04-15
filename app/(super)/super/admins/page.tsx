@@ -10,7 +10,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useSuperAdminList, QK } from "@/hooks/use-api";
 import { toast } from "sonner";
 import {
@@ -28,6 +28,11 @@ import {
   Mail,
   Phone,
   Building2,
+  Eye,
+  EyeOff,
+  Users,
+  Calendar,
+  Shield,
 } from "lucide-react";
 
 /* ── Master palette ───────────────────────────────────────────────────────── */
@@ -57,6 +62,7 @@ export default function SuperAdminsPage() {
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(null);
+  const [selectedAdmin, setSelectedAdmin] = useState<any | null>(null);
 
   // ── Style tokens
   // Glass frost bindings
@@ -203,7 +209,8 @@ export default function SuperAdminsPage() {
             filtered.map((admin: any) => (
               <motion.div key={admin.id} variants={item}
                 whileHover={{ y: -2, boxShadow: `0 16px 48px color-mix(in srgb, var(--tc-primary) 15%, transparent), ${masterGlass.boxShadow}` }}
-                style={{ ...masterGlass, padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, cursor: "default" }}>
+                onClick={() => setSelectedAdmin(admin)}
+                style={{ ...masterGlass, padding: "18px 22px", display: "flex", alignItems: "center", gap: 16, cursor: "pointer" }}>
                 {/* Avatar */}
                 <div style={{
                   width: 44, height: 44, borderRadius: 12, flexShrink: 0,
@@ -363,6 +370,19 @@ export default function SuperAdminsPage() {
             dimText={dimText}
             glassOpacity={glassOpacity}
             onClose={() => { setShowCreate(false); queryClient.invalidateQueries({ queryKey: QK.superAdmins }); queryClient.invalidateQueries({ queryKey: QK.superStats }); }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Admin Detail Modal ── */}
+      <AnimatePresence>
+        {selectedAdmin && (
+          <AdminDetailModal
+            admin={selectedAdmin}
+            dark={dark}
+            masterGlass={masterGlass}
+            dimText={dimText}
+            onClose={() => setSelectedAdmin(null)}
           />
         )}
       </AnimatePresence>
@@ -608,6 +628,325 @@ function CreateAdminModal({
             </motion.button>
           </div>
         )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ADMIN DETAIL MODAL — Glass-frost overlay showing admin info + employees
+   ══════════════════════════════════════════════════════════════════════════════ */
+function AdminDetailModal({
+  admin,
+  dark,
+  masterGlass,
+  dimText,
+  onClose,
+}: {
+  admin: any;
+  dark: boolean;
+  masterGlass: Record<string, any>;
+  dimText: string;
+  onClose: () => void;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Fetch employees belonging to this admin
+  const { data: empData, isLoading: empLoading } = useQuery({
+    queryKey: ["super", "admin-employees", admin.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/super/admins/${admin.id}/employees`);
+      const json = await res.json();
+      return json.data;
+    },
+    staleTime: 15_000,
+  });
+
+  const employees: any[] = empData?.employees ?? [];
+
+  const infoItems = [
+    { icon: Mail, label: "Email", value: admin.email ?? "—" },
+    { icon: Phone, label: "Phone", value: admin.phone ?? "—" },
+    { icon: Building2, label: "Center Code", value: admin.centerCode ?? "—" },
+    { icon: Calendar, label: "Last Login", value: admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "Never" },
+    { icon: Shield, label: "Status", value: admin.isActive ? "Active" : "Inactive" },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "rgba(0,0,0,0.60)", backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 20,
+      }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.88, opacity: 0, y: 30 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.88, opacity: 0, y: 30 }}
+        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          ...masterGlass,
+          padding: "32px 36px",
+          maxWidth: 620,
+          width: "100%",
+          maxHeight: "85vh",
+          overflowY: "auto",
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+              background: admin.role === "super_admin"
+                ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))"
+                : "linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 60%, transparent), color-mix(in srgb, var(--tc-secondary) 60%, transparent))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 8px 24px color-mix(in srgb, var(--tc-primary) 40%, transparent)",
+              fontSize: 20, fontWeight: 800, color: "#fff",
+            }}>
+              {admin.fullName?.[0]?.toUpperCase() ?? "A"}
+            </div>
+            <div>
+              <h2 style={{
+                fontSize: 18, fontWeight: 800, color: dark ? "#e8f4ff" : "#0a2060",
+                fontFamily: "var(--font-jetbrains-mono)", letterSpacing: 1,
+              }}>
+                {admin.fullName ?? "—"}
+              </h2>
+              {admin.role === "super_admin" && (
+                <span style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase",
+                  padding: "2px 8px", borderRadius: 6, color: "var(--tc-accent)",
+                  background: dark ? "color-mix(in srgb, var(--tc-primary) 15%, transparent)" : "color-mix(in srgb, var(--tc-primary) 8%, transparent)",
+                  border: `1px solid ${dark ? "color-mix(in srgb, var(--tc-primary) 25%, transparent)" : "color-mix(in srgb, var(--tc-primary) 20%, transparent)"}`,
+                  fontFamily: "var(--font-jetbrains-mono)",
+                }}>SUPER ADMIN</span>
+              )}
+            </div>
+          </div>
+          <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }} onClick={onClose}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: dimText, padding: 4 }}>
+            <X size={20} />
+          </motion.button>
+        </div>
+
+        {/* Info Grid */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20,
+        }}>
+          {infoItems.map((item) => (
+            <div key={item.label} style={{
+              padding: "12px 16px", borderRadius: 14,
+              background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+              border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+              display: "flex", alignItems: "center", gap: 10,
+            }}>
+              <item.icon size={14} style={{ color: "var(--tc-primary)", flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <p style={{
+                  fontSize: 9, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase",
+                  color: dimText, fontFamily: "var(--font-jetbrains-mono)", marginBottom: 2,
+                }}>{item.label}</p>
+                <p style={{
+                  fontSize: 13, fontWeight: 600,
+                  color: item.label === "Status"
+                    ? (admin.isActive ? "#22c55e" : "#ef4444")
+                    : (dark ? "#daeeff" : "#0a2060"),
+                  fontFamily: item.label === "Center Code" ? "var(--font-jetbrains-mono)" : "var(--font-outfit)",
+                  letterSpacing: item.label === "Center Code" ? 3 : 0,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>{item.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Password (hidden) */}
+        <div style={{
+          padding: "14px 18px", borderRadius: 14, marginBottom: 24,
+          background: dark ? "rgba(239,68,68,0.06)" : "rgba(239,68,68,0.04)",
+          border: `1px solid ${dark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.10)"}`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <KeyRound size={14} style={{ color: "#ef4444", flexShrink: 0 }} />
+            <div>
+              <p style={{
+                fontSize: 9, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase",
+                color: dimText, fontFamily: "var(--font-jetbrains-mono)", marginBottom: 2,
+              }}>Password</p>
+              <p style={{
+                fontSize: 14, fontWeight: 700, color: "#ef4444",
+                fontFamily: "var(--font-jetbrains-mono)", letterSpacing: showPassword ? 1 : 3,
+              }}>
+                {showPassword ? "(managed by auth)" : "••••••••••••"}
+              </p>
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              background: "transparent",
+              border: `1px solid ${dark ? "rgba(239,68,68,0.20)" : "rgba(239,68,68,0.15)"}`,
+              borderRadius: 8, padding: "6px 8px", cursor: "pointer", color: "#ef4444",
+            }}
+          >
+            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+          </motion.button>
+        </div>
+
+        {/* Employee List Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          marginBottom: 14,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Users size={16} style={{ color: "var(--tc-primary)" }} />
+            <h3 style={{
+              fontSize: 13, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase",
+              color: dark ? "#e8f4ff" : "#0a2060", fontFamily: "var(--font-jetbrains-mono)",
+            }}>
+              Employees
+            </h3>
+          </div>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: "var(--tc-primary)",
+            fontFamily: "var(--font-jetbrains-mono)",
+            padding: "3px 10px", borderRadius: 8,
+            background: "color-mix(in srgb, var(--tc-primary) 10%, transparent)",
+          }}>
+            {empLoading ? "..." : employees.length}
+          </span>
+        </div>
+
+        {/* Employee List */}
+        <div style={{
+          borderRadius: 16, overflow: "hidden",
+          border: `1px solid ${dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+        }}>
+          {empLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} style={{
+                padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+                borderBottom: i < 2 ? `1px solid ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}` : "none",
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: "color-mix(in srgb, var(--tc-primary) 10%, transparent)",
+                  animation: "shimmer 1.4s ease infinite",
+                  backgroundSize: "400px 100%",
+                }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    height: 12, width: "60%", borderRadius: 4, marginBottom: 6,
+                    background: "color-mix(in srgb, var(--tc-primary) 8%, transparent)",
+                    animation: "shimmer 1.4s ease infinite", backgroundSize: "400px 100%",
+                  }} />
+                  <div style={{
+                    height: 10, width: "40%", borderRadius: 4,
+                    background: "color-mix(in srgb, var(--tc-primary) 5%, transparent)",
+                    animation: "shimmer 1.4s ease infinite", backgroundSize: "400px 100%",
+                  }} />
+                </div>
+              </div>
+            ))
+          ) : employees.length === 0 ? (
+            <div style={{
+              padding: "32px 20px", textAlign: "center", color: dimText,
+            }}>
+              <Users size={28} style={{ opacity: 0.3, marginBottom: 8 }} />
+              <p style={{ fontSize: 13 }}>No employees found for this admin</p>
+            </div>
+          ) : (
+            employees.map((emp: any, i: number) => {
+              const statusColors: Record<string, { bg: string; fg: string }> = {
+                approved: { bg: "rgba(34,197,94,0.12)", fg: "#22c55e" },
+                pending: { bg: "rgba(245,158,11,0.12)", fg: "#f59e0b" },
+                rejected: { bg: "rgba(239,68,68,0.12)", fg: "#ef4444" },
+                no_profile: { bg: "rgba(148,163,184,0.12)", fg: "#94a3b8" },
+              };
+              const sc = statusColors[emp.status] ?? { bg: "color-mix(in srgb, var(--tc-primary) 10%, transparent)", fg: "var(--tc-primary)" };
+
+              return (
+                <motion.div
+                  key={emp.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.2 }}
+                  style={{
+                    padding: "14px 16px",
+                    display: "flex", alignItems: "center", gap: 12,
+                    borderBottom: i < employees.length - 1
+                      ? `1px solid ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`
+                      : "none",
+                    background: "transparent",
+                    transition: "background 0.15s",
+                  }}
+                  whileHover={{
+                    background: dark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                  }}
+                >
+                  {/* Avatar */}
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    background: "linear-gradient(135deg, color-mix(in srgb, var(--tc-primary) 40%, transparent), color-mix(in srgb, var(--tc-secondary) 40%, transparent))",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 13, fontWeight: 800, color: "#fff",
+                  }}>
+                    {(emp.full_name ?? emp.email)?.[0]?.toUpperCase() ?? "?"}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      fontSize: 13, fontWeight: 700,
+                      color: dark ? "#e8f4ff" : "#0a2060",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {emp.full_name ?? emp.email}
+                    </p>
+                    <p style={{
+                      fontSize: 11, color: dimText, marginTop: 1,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {emp.email}
+                      {emp.city ? ` · ${emp.city}` : ""}
+                    </p>
+                  </div>
+
+                  {/* Employee code */}
+                  {emp.employee_code && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, color: "var(--tc-primary)",
+                      fontFamily: "var(--font-jetbrains-mono)", letterSpacing: 1,
+                      padding: "3px 8px", borderRadius: 6,
+                      background: "color-mix(in srgb, var(--tc-primary) 8%, transparent)",
+                      flexShrink: 0,
+                    }}>
+                      {emp.employee_code}
+                    </span>
+                  )}
+
+                  {/* Status badge */}
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 8,
+                    background: sc.bg, color: sc.fg, textTransform: "capitalize", flexShrink: 0,
+                  }}>
+                    {emp.status?.replace("_", " ")}
+                  </span>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );
