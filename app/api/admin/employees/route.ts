@@ -625,6 +625,20 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
 
   if (!employeeId) return badRequest("EMPLOYEE ID REQUIRED");
 
+  if (action === "delete") {
+    // Also delete explicitly from users table in case the db cascade is not set
+    await supabase.from("users").delete().eq("id", employeeId);
+    
+    // Auth admin deleteUser will clean up the actual identity
+    const { error } = await supabase.auth.admin.deleteUser(employeeId);
+    if (error) {
+      console.error("[Delete Employee]:", error);
+      return serverError("Failed to delete the employee.");
+    }
+    
+    return ok({ message: "Employee removed successfully." });
+  }
+
   if (action === "approve") {
     const { error } = await supabase
       .from("employee_profiles")

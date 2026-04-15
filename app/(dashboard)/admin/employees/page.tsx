@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminEmployees, useApproveEmployee } from "@/hooks/use-api";
 import { Users, Search, CheckCircle, XCircle, ChevronLeft, ChevronRight, UserX, Save, Edit3, Trash2, Phone, MapPin, CalendarDays, Shield, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import CreateEmployeeModal from "@/components/admin/CreateEmployeeModal";
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
@@ -33,6 +34,47 @@ export default function AdminEmployees() {
   const [selectedEmpDetail, setSelectedEmpDetail] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ fullName: "", phone: "", city: "" });
+
+  const qc = useQueryClient();
+
+  const { mutate: editEmployee, isPending: editing } = useMutation({
+    mutationFn: async (data: { employeeId: string; fullName: string; phone: string; city: string }) => {
+      const res = await fetch("/api/admin/employees", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "edit", ...data }),
+      });
+      if (!res.ok) throw new Error("Failed to update employee");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Employee updated successfully");
+      setEditingId(null);
+      qc.invalidateQueries({ queryKey: ["admin", "employees"] });
+    },
+    onError: () => toast.error("Failed to update employee")
+  });
+
+  const { mutate: deleteEmployee, isPending: deleting } = useMutation({
+    mutationFn: async (employeeId: string) => {
+      const res = await fetch("/api/admin/employees", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", employeeId }),
+      });
+      if (!res.ok) throw new Error("Failed to remove employee");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Employee removed successfully");
+      setSelectedEmpDetail(null);
+      qc.invalidateQueries({ queryKey: ["admin", "employees"] });
+    },
+    onError: () => toast.error("Failed to remove employee")
+  });
 
   // Debounce search so we don't fire on every keystroke
   const search = useDebounce(rawSearch, 350);
@@ -264,14 +306,23 @@ export default function AdminEmployees() {
                         <div className="admin-panel" style={{ position: "relative", margin: "8px 16px 14px", borderRadius: 18, padding: 22 }}>
                           {/* Top row: avatar + name + status */}
                           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 18 }}>
-                            <div style={{ width: 52, height: 52, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: "#fff", background: "linear-gradient(135deg, var(--tc-primary), var(--tc-accent))", boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)" }}>
+                            <div style={{ width: 52, height: 52, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: "#fff", background: "linear-gradient(135deg, var(--tc-primary), var(--tc-accent))", boxShadow: "0 6px 20px color-mix(in srgb, var(--tc-primary) 30%, transparent)", flexShrink: 0 }}>
                               {initials(emp.full_name, emp.email)}
                             </div>
-                            <div style={{ flex: 1 }}>
-                              <h3 style={{ fontSize: 16, fontWeight: 800, color: textMain, marginBottom: 2 }}>{emp.full_name ?? "No Name"}</h3>
-                              <p style={{ fontSize: 12, color: textMuted }}>{emp.email}</p>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              {editingId === emp.id ? (
+                                <input
+                                  value={editForm.fullName}
+                                  onChange={e => setEditForm(p => ({ ...p, fullName: e.target.value }))}
+                                  placeholder="Full Name"
+                                  style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${border}`, color: textMain, borderRadius: 8, padding: "4px 8px", fontSize: 16, fontWeight: 800, outline: "none", width: "100%", marginBottom: 4 }}
+                                />
+                              ) : (
+                                <h3 style={{ fontSize: 16, fontWeight: 800, color: textMain, marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{emp.full_name ?? "No Name"}</h3>
+                              )}
+                              <p style={{ fontSize: 12, color: textMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{emp.email}</p>
                             </div>
-                            <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: sc.bg, color: sc.fg }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: sc.bg, color: sc.fg, flexShrink: 0 }}>
                               {emp.status.replace("_", " ")}
                             </span>
                           </div>
@@ -280,18 +331,36 @@ export default function AdminEmployees() {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
                             <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
                               <Phone size={13} style={{ color: "var(--tc-primary)" }} />
-                              <div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Phone</p>
-                                <p style={{ fontSize: 12, fontWeight: 600, color: textMain }}>{emp.phone ?? "Not provided"}</p>
+                                {editingId === emp.id ? (
+                                  <input
+                                    value={editForm.phone}
+                                    onChange={e => setEditForm(p => ({ ...p, phone: e.target.value }))}
+                                    placeholder="Phone"
+                                    style={{ background: "transparent", border: "none", borderBottom: `1px solid ${border}`, color: textMain, fontSize: 12, fontWeight: 600, outline: "none", width: "100%" }}
+                                  />
+                                ) : (
+                                  <p style={{ fontSize: 12, fontWeight: 600, color: textMain, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{emp.phone ?? "Not provided"}</p>
+                                )}
                               </div>
                             </div>
                             <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
                               <MapPin size={13} style={{ color: "var(--tc-secondary)" }} />
-                              <div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ fontSize: 9, fontWeight: 700, color: textMuted, letterSpacing: 1.5, textTransform: "uppercase" }}>Location</p>
-                                <p style={{ fontSize: 12, fontWeight: 600, color: textMain }}>
-                                  {emp.city || emp.state ? `${emp.city ?? ""}${emp.city && emp.state ? ", " : ""}${emp.state ?? ""}` : "Not provided"}
-                                </p>
+                                {editingId === emp.id ? (
+                                  <input
+                                    value={editForm.city}
+                                    onChange={e => setEditForm(p => ({ ...p, city: e.target.value }))}
+                                    placeholder="City"
+                                    style={{ background: "transparent", border: "none", borderBottom: `1px solid ${border}`, color: textMain, fontSize: 12, fontWeight: 600, outline: "none", width: "100%" }}
+                                  />
+                                ) : (
+                                  <p style={{ fontSize: 12, fontWeight: 600, color: textMain, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {emp.city || emp.state ? `${emp.city ?? ""}${emp.city && emp.state ? ", " : ""}${emp.state ?? ""}` : "Not provided"}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <div className="admin-panel" style={{ position: "relative", borderRadius: 12, padding: "10px 14px", display: "flex", alignItems: "center", gap: 8 }}>
@@ -323,17 +392,40 @@ export default function AdminEmployees() {
 
                           {/* Action buttons */}
                           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            {editingId === emp.id ? (
+                              <>
+                                <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                                  onClick={() => editEmployee({ employeeId: emp.id, ...editForm })}
+                                  disabled={editing}
+                                  style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: editing ? "wait" : "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                                  {editing ? "Saving..." : <><Save size={13} /> Save</>}
+                                </motion.button>
+                                <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                                  onClick={() => setEditingId(null)}
+                                  style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                                  <XCircle size={13} /> Cancel
+                                </motion.button>
+                              </>
+                            ) : (
+                              <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                                onClick={() => {
+                                  setEditingId(emp.id);
+                                  setEditForm({ fullName: emp.full_name ?? "", phone: emp.phone ?? "", city: emp.city ?? "" });
+                                }}
+                                style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                                <Edit3 size={13} /> Modify
+                              </motion.button>
+                            )}
+
                             <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
-                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.25)", color: "#34d399", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
-                              <Save size={13} /> Save
-                            </motion.button>
-                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
-                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "color-mix(in srgb, var(--tc-primary) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--tc-primary) 25%, transparent)", color: "var(--tc-primary)", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
-                              <Edit3 size={13} /> Modify
-                            </motion.button>
-                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
-                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
-                              <Trash2 size={13} /> Remove
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to completely remove this employee?")) {
+                                  deleteEmployee(emp.id);
+                                }
+                              }}
+                              disabled={deleting}
+                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171", cursor: deleting ? "wait" : "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                              {deleting ? "Removing..." : <><Trash2 size={13} /> Remove</>}
                             </motion.button>
                           </div>
                         </div>
