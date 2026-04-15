@@ -35,7 +35,7 @@ export const LiveClock = memo(function LiveClock() {
 
   const glassBg     = dark ? "rgba(10,8,24,0.45)"      : "rgba(255,255,255,0.55)";
   const glassBorder = dark ? "rgba(255,255,255,0.10)"   : "rgba(0,0,0,0.08)";
-  const timeColor   = dark ? "#f97316"                  : "#ea580c";
+  const timeColor   = "var(--tc-primary)";
   const dateColor   = dark ? "rgba(200,195,240,0.40)"   : "rgba(30,20,80,0.40)";
 
   return (

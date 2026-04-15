@@ -396,45 +396,36 @@ export default function SuperSiteLayout({
         <div className="px-4 py-4 relative z-10" style={{ borderBottom: `1px solid ${borderCol}` }}>
           {isSuperAdmin ? (
             /* ── MASTER CONTROL badge — Glassmorphism reference style ── */
-            <div className="relative px-4 py-3 rounded-full flex items-center shadow-lg" style={{
+            <div className="relative px-4 py-3 rounded-full flex items-center shadow-lg overflow-hidden border" style={{
               background: dark 
                 ? "linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))"
                 : "linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.01))",
               backdropFilter: "blur(12px)",
-              border: `1px solid ${dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"}`,
-              boxShadow: dark ? "inset 0 1px 0 rgba(255,255,255,0.1)" : "inset 0 1px 0 rgba(255,255,255,0.6)",
+              borderColor: `color-mix(in srgb, var(--tc-primary) 30%, transparent)`,
+              boxShadow: `0 0 15px color-mix(in srgb, var(--tc-primary) 20%, transparent), inset 0 1px 0 rgba(255,255,255,0.1)`,
             }}>
-              <p style={{
+              {/* Continuous Shine Animation */}
+              <motion.div 
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 z-0 pointer-events-none"
+                style={{
+                  background: "linear-gradient(90deg, transparent, color-mix(in srgb, var(--tc-primary) 40%, transparent), transparent)",
+                  width: "50%",
+                  transform: "skewX(-20deg)",
+                }}
+              />
+              <p className="relative z-10" style={{
                 fontSize: 13, 
-                fontWeight: 300, 
+                fontWeight: 600, 
                 letterSpacing: "0.08em",
-                color: dark ? "#cbd5e1" : "#475569",
+                color: dark ? "#fff" : "var(--tc-primary)",
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
                 flex: 1,
                 textAlign: "center",
-                paddingRight: "8px"
               }}>
-                Master Control
+                MASTER CONTROL
               </p>
-              
-              {/* Floating Spheres (Glassmorphism Reference) */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[4px] w-6 h-10 pointer-events-none z-10 flex flex-col justify-center gap-[2px]">
-                 {/* Top medium sphere */}
-                 <div className="absolute -top-[6px] right-[4px] w-[18px] h-[18px] rounded-full" style={{
-                   background: dark ? "radial-gradient(circle at 30% 30%, #e2e8f0, #64748b)" : "radial-gradient(circle at 30% 30%, #ffffff, #94a3b8)",
-                   boxShadow: "0 2px 5px rgba(0,0,0,0.4)"
-                 }} />
-                 {/* Middle large sphere */}
-                 <div className="absolute top-[6px] -right-[6px] w-[22px] h-[22px] rounded-full z-10" style={{
-                   background: dark ? "radial-gradient(circle at 30% 30%, #f1f5f9, #475569)" : "radial-gradient(circle at 30% 30%, #ffffff, #64748b)",
-                   boxShadow: "0 4px 8px rgba(0,0,0,0.5)"
-                 }} />
-                 {/* Bottom small sphere */}
-                 <div className="absolute top-[22px] right-[10px] w-[14px] h-[14px] rounded-full" style={{
-                   background: dark ? "radial-gradient(circle at 30% 30%, #e2e8f0, #64748b)" : "radial-gradient(circle at 30% 30%, #ffffff, #94a3b8)",
-                   boxShadow: "0 2px 4px rgba(0,0,0,0.3)"
-                 }} />
-              </div>
             </div>
           ) : (
             /* ── Normal TCS iON logo for admin/employee ── */

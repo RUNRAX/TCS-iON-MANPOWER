@@ -224,7 +224,7 @@ export function ThemeProvider({
   const isSuperAdmin = isSuperAdminRoute(pathname) && userRole === "super_admin";
 
   // Determine the role-based default theme key
-  const roleDefault = isSuperAdmin ? "fire" : DEFAULT_KEY; // "fire" = red tones for super admin
+  const roleDefault = isSuperAdmin ? "ocean" : DEFAULT_KEY; // "ocean" = blue tones for super admin
 
   // Init state with defaults so Server & Client HTML match (prevents hydration errors).
   // Then sync from sessionStorage in useLayoutEffect (before paint).

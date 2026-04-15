@@ -626,6 +626,9 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
   if (!employeeId) return badRequest("EMPLOYEE ID REQUIRED");
 
   if (action === "delete") {
+    // Manually delete profile first to satisfy foreign key constraints
+    await supabase.from("employee_profiles").delete().eq("user_id", employeeId);
+    
     // Also delete explicitly from users table in case the db cascade is not set
     await supabase.from("users").delete().eq("id", employeeId);
     
@@ -633,7 +636,7 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
     const { error } = await supabase.auth.admin.deleteUser(employeeId);
     if (error) {
       console.error("[Delete Employee]:", error);
-      return serverError("Failed to delete the employee.");
+      return serverError("Failed to delete the employee identity.");
     }
     
     return ok({ message: "Employee removed successfully." });

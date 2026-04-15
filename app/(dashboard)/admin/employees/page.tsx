@@ -235,8 +235,10 @@ export default function AdminEmployees() {
                       scale: 1.015, 
                       y: -4, 
                       z: 20, 
-                      background: "rgba(255,255,255,0.03)",
-                      boxShadow: dark ? "0 20px 40px rgba(0,0,0,0.3)" : "0 10px 25px rgba(0,0,0,0.05)"
+                      background: dark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.8)",
+                      boxShadow: dark 
+                        ? "inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.5)" 
+                        : "inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.05), 0 12px 30px rgba(0,0,0,0.12)"
                     }}
                     className="px-5 py-4 flex items-center gap-4 cursor-pointer relative group"
                     onClick={() => setSelectedEmpDetail(selectedEmpDetail === emp.id ? null : emp.id)}
