@@ -20,6 +20,7 @@ export default function GlassCalendar({ selectedDate, onSelect, onClose, minDate
     const d = new Date(selectedDate);
     return isNaN(d.getTime()) ? new Date() : d;
   });
+  const [direction, setDirection] = useState(0);
 
   const currentYear = viewDate.getFullYear();
   const currentMonth = viewDate.getMonth();
@@ -38,8 +39,31 @@ export default function GlassCalendar({ selectedDate, onSelect, onClose, minDate
 
   const monthName = viewDate.toLocaleString("default", { month: "long" });
 
-  const handlePrevMonth = () => setViewDate(new Date(currentYear, currentMonth - 1, 1));
-  const handleNextMonth = () => setViewDate(new Date(currentYear, currentMonth + 1, 1));
+  const handlePrevMonth = () => {
+    setDirection(-1);
+    setViewDate(new Date(currentYear, currentMonth - 1, 1));
+  };
+  const handleNextMonth = () => {
+    setDirection(1);
+    setViewDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+
+  const slideVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 100 : -100,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 30 }
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -100 : 100,
+      opacity: 0,
+      transition: { duration: 0.2 }
+    }),
+  };
 
   const isToday = (day: number) => {
     const today = new Date();
@@ -117,44 +141,61 @@ export default function GlassCalendar({ selectedDate, onSelect, onClose, minDate
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((day, i) => (
-          <div key={i} className="aspect-square flex items-center justify-center">
-            {day && (
-              <motion.button
-                whileHover={!isDisabled(day) ? { scale: 1.15, z: 10 } : {}}
-                whileTap={!isDisabled(day) ? { scale: 0.9 } : {}}
-                onClick={() => onDateClick(day)}
-                disabled={isDisabled(day)}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: 10,
-                  fontSize: 13,
-                  fontWeight: isSelected(day) ? 700 : 500,
-                  background: isSelected(day) 
-                    ? "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" 
-                    : isToday(day)
-                    ? "color-mix(in srgb, var(--tc-primary) 12%, transparent)"
-                    : "transparent",
-                  color: isSelected(day) ? "#fff" : isDisabled(day) ? "rgba(255,255,255,0.15)" : textMain,
-                  border: isToday(day) && !isSelected(day) ? "1px solid var(--tc-primary)" : "none",
-                  cursor: isDisabled(day) ? "not-allowed" : "pointer",
-                  transition: "background 0.2s, color 0.2s",
-                }}
-              >
-                {day}
-              </motion.button>
-            )}
-          </div>
-        ))}
+      {/* Grid wrapper with AnimatePresence */}
+      <div className="relative border-t border-white/5 pt-2" style={{ minHeight: 220, overflow: "hidden" }}>
+        <AnimatePresence mode="popLayout" custom={direction}>
+          <motion.div
+            key={`${currentYear}-${currentMonth}`}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="grid grid-cols-7 gap-1"
+          >
+            {days.map((day, i) => (
+              <div key={i} className="aspect-square flex items-center justify-center relative">
+                {day && (
+                  <>
+                    {isSelected(day) && (
+                      <motion.div
+                        layoutId="selected-day"
+                        className="absolute inset-0 rounded-xl"
+                        style={{ background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))" }}
+                      />
+                    )}
+                    <motion.button
+                      whileHover={!isDisabled(day) ? { scale: 1.15, z: 10 } : {}}
+                      whileTap={!isDisabled(day) ? { scale: 0.9 } : {}}
+                      onClick={() => onDateClick(day)}
+                      disabled={isDisabled(day)}
+                      className="relative z-10 w-full h-full flex items-center justify-center rounded-xl transition-colors"
+                      style={{
+                        fontSize: 13,
+                        fontWeight: isSelected(day) ? 800 : 600,
+                        background: isToday(day) && !isSelected(day)
+                          ? "color-mix(in srgb, var(--tc-primary) 12%, transparent)"
+                          : "transparent",
+                        color: isSelected(day) ? "#fff" : isDisabled(day) ? "rgba(255,255,255,0.15)" : textMain,
+                        border: isToday(day) && !isSelected(day) ? "1px solid var(--tc-primary)" : "none",
+                        cursor: isDisabled(day) ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {day}
+                    </motion.button>
+                  </>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Footer */}
       <div className="mt-4 pt-4 flex justify-between items-center border-t border-white/5">
         <button 
           onClick={() => {
+            setDirection(0);
             const now = new Date();
             const yyyy = now.getFullYear();
             const mm = String(now.getMonth() + 1).padStart(2, "0");

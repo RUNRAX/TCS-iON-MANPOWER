@@ -201,7 +201,7 @@ export default function AdminEmployees() {
       </div>
 
       {/* Employee list */}
-      <div className="rounded-2xl overflow-hidden admin-panel" style={{ border: `1px solid ${border}`, perspective: "1000px" }}>
+      <div className="rounded-2xl admin-panel" style={{ border: `1px solid ${border}`, perspective: "1000px" }}>
         {isLoading
           ? Array(5).fill(0).map((_, i) => (
               <div key={i} className="px-5 py-4 flex gap-4" style={{ borderBottom: i < 4 ? `1px solid ${border}` : "none" }}>
@@ -228,19 +228,22 @@ export default function AdminEmployees() {
                   <React.Fragment key={emp.id}>
                   <motion.div
                     key={emp.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: -8, zIndex: 1 }}
+                    animate={{ opacity: 1, x: 0, zIndex: selectedEmpDetail === emp.id ? 10 : 1 }}
                     transition={{ delay: i * 0.03, duration: 0.22 }}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5, 
                       z: 30, 
-                      background: dark ? "rgba(30, 25, 50, 0.65)" : "rgba(255, 255, 255, 0.85)",
+                      zIndex: 50,
+                      rotateX: 4,
+                      rotateY: -2,
+                      background: dark ? "rgba(40, 30, 65, 0.75)" : "rgba(255, 255, 255, 0.95)",
                       backdropFilter: "blur(16px)",
-                      border: dark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(0,0,0,0.08)",
+                      border: dark ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(0,0,0,0.12)",
                       boxShadow: dark 
-                        ? "inset 0 1px 2px rgba(255,255,255,0.2), 0 8px 16px rgba(0,0,0,0.8), 0 16px 32px rgba(0,0,0,0.6)" 
-                        : "inset 0 1px 2px rgba(255,255,255,1), 0 8px 16px rgba(0,0,0,0.1), 0 16px 32px rgba(0,0,0,0.05)"
+                        ? "inset 0 1px 2px rgba(255,255,255,0.3), 0 12px 24px rgba(0,0,0,0.8), 0 24px 48px rgba(0,0,0,0.6)" 
+                        : "inset 0 1px 2px rgba(255,255,255,1), 0 12px 24px rgba(0,0,0,0.15), 0 24px 48px rgba(0,0,0,0.1)"
                     }}
                     className="px-5 py-4 flex items-center gap-4 cursor-pointer relative group"
                     onClick={() => setSelectedEmpDetail(selectedEmpDetail === emp.id ? null : emp.id)}
@@ -248,8 +251,7 @@ export default function AdminEmployees() {
                       borderRadius: "16px",
                       borderBottom: i < employees.length - 1 ? `1px solid ${border}` : "1px solid transparent",
                       transformStyle: "preserve-3d",
-                      willChange: "transform, background, box-shadow",
-                      zIndex: selectedEmpDetail === emp.id ? 10 : 1,
+                      willChange: "transform, background, box-shadow, z-index",
                     }}>
                     {/* Hover internal glow */}
                     <div className="absolute inset-0 bg-gradient-to-r from-var(--tc-primary)/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
