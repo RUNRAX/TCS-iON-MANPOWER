@@ -59,6 +59,20 @@ export default function AdminEmployees() {
     onError: () => toast.error("Failed to update employee")
   });
 
+  const { mutate: resendVerification, isPending: resending } = useMutation({
+    mutationFn: async (data: { employeeId: string; email: string; fullName: string }) => {
+      const res = await fetch("/api/admin/employees", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resend_verification", ...data }),
+      });
+      if (!res.ok) throw new Error("Failed to send verification link");
+      return res.json();
+    },
+    onSuccess: () => toast.success("Verification link sent!"),
+    onError: () => toast.error("Failed to send verification link")
+  });
+
   const { mutate: deleteEmployee, isPending: deleting } = useMutation({
     mutationFn: async (employeeId: string) => {
       const res = await fetch("/api/admin/employees", {
@@ -89,7 +103,7 @@ export default function AdminEmployees() {
 
   // API now returns snake_case: full_name, city, state, etc.
   const employees = (data as { employees?: Array<{
-    id: string; email: string; phone: string | null; is_active: boolean;
+    id: string; email: string; phone: string | null; is_active: boolean; email_verified: boolean;
     full_name: string | null; city: string | null; state: string | null;
     status: string; rejection_reason: string | null; joined_at: string; profile_id: string | null;
   }> } | undefined)?.employees ?? [];
@@ -239,14 +253,12 @@ export default function AdminEmployees() {
                       x: 0, 
                       zIndex: selectedEmpDetail === emp.id ? 10 : 1 
                     }}
-                    transition={{ delay: i * 0.03, duration: 0.28, ease: "easeOut" }}
+                    transition={{ delay: i * 0.03, duration: 0.35, ease: "easeInOut" }}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5, 
                       z: 30, 
                       zIndex: 50,
-                      rotateX: 4,
-                      rotateY: -2,
                       background: dark ? "rgba(25, 25, 35, 0.75)" : "rgba(255, 255, 255, 0.85)",
                       backdropFilter: "blur(24px) saturate(180%)",
                       border: dark ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(0,0,0,0.12)",
@@ -280,10 +292,18 @@ export default function AdminEmployees() {
                     </div>
 
                     {/* Status badge */}
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full capitalize flex-shrink-0"
-                      style={{ background: sc.bg, color: sc.fg }}>
-                      {emp.status.replace("_", " ")}
-                    </span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full capitalize"
+                        style={{ background: sc.bg, color: sc.fg }}>
+                        {emp.status.replace("_", " ")}
+                      </span>
+                      {emp.email_verified && (
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full capitalize flex items-center gap-1"
+                          style={{ background: "rgba(16,185,129,0.15)", color: "#10b981" }}>
+                          <CheckCircle size={10} /> Verified
+                        </span>
+                      )}
+                    </div>
 
                     {/* Actions for pending employees */}
                     {emp.status === "pending" && (
@@ -336,9 +356,16 @@ export default function AdminEmployees() {
                               )}
                               <p style={{ fontSize: 12, color: textMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{emp.email}</p>
                             </div>
-                            <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: sc.bg, color: sc.fg, flexShrink: 0 }}>
-                              {emp.status.replace("_", " ")}
-                            </span>
+                            <div style={{ display: "flex", gap: "8px", alignItems: "center", flexShrink: 0 }}>
+                              <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: sc.bg, color: sc.fg }}>
+                                {emp.status.replace("_", " ")}
+                              </span>
+                              {emp.email_verified && (
+                                <span style={{ fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: 99, textTransform: "capitalize", background: "rgba(16,185,129,0.15)", color: "#10b981", display: "flex", alignItems: "center", gap: "4px" }}>
+                                  <CheckCircle size={10} /> Verified
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Detail grid */}
@@ -430,6 +457,14 @@ export default function AdminEmployees() {
                                 <Edit3 size={13} /> Modify
                               </motion.button>
                             )}
+
+                            <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
+                              onClick={() => {
+                                if (!resending) resendVerification({ employeeId: emp.id, email: emp.email, fullName: emp.full_name || "Employee" });
+                              }}
+                              style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, padding: "9px 20px", borderRadius: 12, background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)", color: "#3b82f6", cursor: resending ? "wait" : "pointer", fontSize: 12, fontWeight: 700, transition: "all 0.22s" }}>
+                              <CheckCircle size={13} /> {resending ? "Sending..." : "Resend Verification"}
+                            </motion.button>
 
                             <motion.button whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.96 }} className="admin-panel"
                               onClick={() => {

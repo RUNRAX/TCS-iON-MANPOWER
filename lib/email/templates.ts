@@ -113,6 +113,30 @@ export function passwordResetEmail(opts: {
   };
 }
 
+/** Verification email */
+export function verificationEmail(opts: {
+  fullName: string;
+  verificationUrl: string;
+}): { subject: string; html: string } {
+  return {
+    subject: `Verify your Email — TCS iON Portal`,
+    html: baseTemplate("Email Verification", `
+      <h1>Account Verification 🛡️</h1>
+      <h2>Hi ${opts.fullName}, please verify your email address to secure your account.</h2>
+      <div class="divider"></div>
+      <p style="font-size:14px;color:rgba(200,195,240,0.7);line-height:1.6;">
+        Click the button below to verify your email. This link logs you into your account directly, formally concluding the verification process.
+      </p>
+      <div style="text-align:center;">
+        <a href="${opts.verificationUrl}" class="btn">Verify Email →</a>
+      </div>
+      <p style="font-size:12px;color:rgba(200,195,240,0.35);margin-top:16px;word-break:break-all;">
+        Or copy this link: ${opts.verificationUrl}
+      </p>
+    `),
+  };
+}
+
 /** Shift broadcast email */
 export function shiftBroadcastEmail(opts: {
   employeeName: string;

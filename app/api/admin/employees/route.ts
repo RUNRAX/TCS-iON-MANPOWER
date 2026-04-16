@@ -20,7 +20,7 @@ import {
 } from "@/lib/utils/api";
 import { AddEmployeeSchema } from "@/lib/validations/schemas";
 import { sendEmail } from "@/lib/email/send";
-import { employeeWelcomeEmail } from "@/lib/email/templates";
+import { employeeWelcomeEmail, verificationEmail } from "@/lib/email/templates";
 import { encrypt } from "@/lib/utils/encryption";
 import { z } from "zod";
 
@@ -135,7 +135,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
   let query = supabase
     .from("users")
     .select(
-      `id, email, phone, is_active, role, created_at,
+      `id, email, phone, is_active, role, created_at, email_verified,
        employee_profiles!employee_profiles_user_id_fkey(
          id, full_name, city, state, status, employee_code,
          rejection_reason, photo_url, created_at
@@ -181,6 +181,7 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
         email: u.email as string,
         phone: u.phone as string | null,
         is_active: u.is_active as boolean,
+        email_verified: (u.email_verified as boolean | null) ?? false,
         full_name:
           (p?.full_name as string) ??
           (u.role === "admin" ? "PORTAL ADMIN" : null),
@@ -621,9 +622,40 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
     string,
     string
   >;
-  const { employeeId, action, reason, fullName, phone, city } = body;
+  const { employeeId, action, reason, fullName, phone, city, email } = body;
 
   if (!employeeId) return badRequest("EMPLOYEE ID REQUIRED");
+
+  if (action === "resend_verification") {
+    if (!email) return badRequest("Email required for verification");
+    
+    // Generate magiclink / signup link to use as verification through Mailjet
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email: email,
+    });
+    
+    if (linkError || !linkData?.properties?.action_link) {
+      console.error("[Resend Verification Error]", linkError);
+      return serverError("Failed to generate verification link from Supabase.");
+    }
+    
+    try {
+      const emailContent = verificationEmail({
+        fullName: fullName || "Employee",
+        verificationUrl: linkData.properties.action_link,
+      });
+      await sendEmail({
+        to: email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+      return ok({ message: "Verification link sent successfully." });
+    } catch (e) {
+      console.error("[Resend Verification Email Delivery Error]", e);
+      return serverError("Failed to send verification email.");
+    }
+  }
 
   if (action === "delete") {
     // Manually delete profile first to satisfy foreign key constraints
