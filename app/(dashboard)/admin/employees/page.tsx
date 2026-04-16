@@ -232,20 +232,24 @@ export default function AdminEmployees() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.03, duration: 0.22 }}
                     whileHover={{ 
-                      scale: 1.015, 
-                      y: -4, 
-                      z: 20, 
-                      background: dark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.8)",
+                      scale: 1.02, 
+                      y: -5, 
+                      z: 30, 
+                      background: dark ? "rgba(30, 25, 50, 0.65)" : "rgba(255, 255, 255, 0.85)",
+                      backdropFilter: "blur(16px)",
+                      border: dark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(0,0,0,0.08)",
                       boxShadow: dark 
-                        ? "inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.5)" 
-                        : "inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.05), 0 12px 30px rgba(0,0,0,0.12)"
+                        ? "inset 0 1px 2px rgba(255,255,255,0.2), 0 8px 16px rgba(0,0,0,0.8), 0 16px 32px rgba(0,0,0,0.6)" 
+                        : "inset 0 1px 2px rgba(255,255,255,1), 0 8px 16px rgba(0,0,0,0.1), 0 16px 32px rgba(0,0,0,0.05)"
                     }}
                     className="px-5 py-4 flex items-center gap-4 cursor-pointer relative group"
                     onClick={() => setSelectedEmpDetail(selectedEmpDetail === emp.id ? null : emp.id)}
                     style={{ 
-                      borderBottom: i < employees.length - 1 ? `1px solid ${border}` : "none",
+                      borderRadius: "16px",
+                      borderBottom: i < employees.length - 1 ? `1px solid ${border}` : "1px solid transparent",
                       transformStyle: "preserve-3d",
-                      willChange: "transform, background",
+                      willChange: "transform, background, box-shadow",
+                      zIndex: selectedEmpDetail === emp.id ? 10 : 1,
                     }}>
                     {/* Hover internal glow */}
                     <div className="absolute inset-0 bg-gradient-to-r from-var(--tc-primary)/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
