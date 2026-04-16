@@ -232,8 +232,30 @@ export default function AdminBookingsPage() {
   }, []);
 
   const removeEmployee = useCallback((empId: string) => {
+    // Optimistic UI Update
     setEmployees(prev => prev.filter(e => e.id !== empId));
-  }, []);
+
+    // Extract active shift IDs for the current date
+    const shiftIds = shifts.map(s => s.id);
+    if (shiftIds.length === 0) return;
+
+    // Make the API Call to remove assignments
+    fetch("/api/admin/bookings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ employeeId: empId, shiftIds }),
+    })
+      .then(async (r) => {
+        if (!r.ok) {
+          const res = await r.json().catch(() => ({}));
+          throw new Error(res.error || "Failed to remove employee assignments");
+        }
+        toast.success("Employee removed successfully");
+      })
+      .catch((err) => {
+        toast.error("Failed to remove employee", { description: err.message });
+      });
+  }, [shifts]);
 
   const filteredAvailable = useMemo(() =>
     allAvailableEmployees.filter(e =>

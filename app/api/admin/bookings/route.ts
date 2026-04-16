@@ -116,3 +116,30 @@ export const POST = withAdmin(async (request: NextRequest, { userId }) => {
   if (error) { console.error("[Bookings POST]:", error); return serverError(); }
   return created({ assignment: data });
 });
+
+// DELETE: remove all assignments for an employee from a list of shifts
+export const DELETE = withAdmin(async (request: NextRequest) => {
+  let body: Record<string, unknown>;
+  try { body = await request.json(); } catch { return badRequest("Invalid JSON"); }
+
+  const { employeeId, shiftIds } = body as { employeeId: string; shiftIds: string[] };
+
+  if (!employeeId || !shiftIds || !Array.isArray(shiftIds) || shiftIds.length === 0) {
+    return badRequest("employeeId and shiftIds array are required");
+  }
+
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("shift_assignments")
+    .delete()
+    .eq("employee_id", employeeId)
+    .in("shift_id", shiftIds);
+
+  if (error) { 
+    console.error("[Bookings DELETE]:", error); 
+    return serverError(); 
+  }
+
+  return ok({ success: true, message: "Assignments removed successfully" });
+});
