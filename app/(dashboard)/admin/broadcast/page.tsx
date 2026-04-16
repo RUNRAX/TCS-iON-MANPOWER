@@ -7,6 +7,7 @@ import { useAdminShifts, QK } from "@/hooks/use-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { Send, Clock, ChevronDown, Check, Zap, Users, Radio, Mail, MessageCircle, Wallet, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import GlassCalendar from "@/components/ui/GlassCalendar";
 
 // ── Custom glass dropdown ─────────────────────────────────────────────────────
 function GlassSelect({
@@ -206,6 +207,7 @@ export default function AdminBroadcast() {
   const [sendingPayments, setSendingPayments] = useState<Record<string, boolean>>({});
   const [broadcastingAll, setBroadcastingAll] = useState(false);
   const [selectedPayrollShift, setSelectedPayrollShift] = useState("");
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const fetchPayrollData = async (date: string) => {
     if (!date) return;
@@ -462,18 +464,34 @@ export default function AdminBroadcast() {
             <label style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: textMuted, display: "block", marginBottom: isMobile ? 7 : 10 }}>
               Select Date
             </label>
-            <input
-              type="date"
-              value={payrollDate}
-              onChange={e => { setPayrollDate(e.target.value); fetchPayrollData(e.target.value); }}
-              style={{
-                ...inp,
-                cursor: "pointer",
-                colorScheme: dark ? "dark" : "light",
-              }}
-              onFocus={e => { e.target.style.borderColor = "var(--tc-primary)"; e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 18%, transparent)"; }}
-              onBlur={e => { e.target.style.borderColor = inputBorder; e.target.style.boxShadow = "none"; }}
-            />
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="admin-panel"
+                style={{
+                  ...inp,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  color: payrollDate ? textMain : textMuted,
+                  borderColor: showCalendar ? "var(--tc-primary)" : inputBorder,
+                  boxShadow: showCalendar ? "0 0 0 3px color-mix(in srgb, var(--tc-primary) 18%, transparent)" : "none",
+                }}
+              >
+                <span>{payrollDate ? new Date(payrollDate).toLocaleDateString("en-US", { year: "numeric", month: "2-digit", day: "2-digit" }) : "MM/DD/YYYY"}</span>
+                <CalendarIcon size={16} />
+              </button>
+              <AnimatePresence>
+                {showCalendar && (
+                  <GlassCalendar
+                    selectedDate={payrollDate}
+                    onSelect={(d) => { setPayrollDate(d); fetchPayrollData(d); }}
+                    onClose={() => setShowCalendar(false)}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Shift tabs */}

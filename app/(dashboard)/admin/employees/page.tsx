@@ -35,6 +35,7 @@ export default function AdminEmployees() {
   const [rejectReason, setRejectReason] = useState("");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   
+  const [hoveredEmpId, setHoveredEmpId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ fullName: "", phone: "", city: "" });
 
@@ -228,9 +229,17 @@ export default function AdminEmployees() {
                   <React.Fragment key={emp.id}>
                   <motion.div
                     key={emp.id}
+                    onHoverStart={() => setHoveredEmpId(emp.id)}
+                    onHoverEnd={() => setHoveredEmpId(null)}
                     initial={{ opacity: 0, x: -8, zIndex: 1 }}
-                    animate={{ opacity: 1, x: 0, zIndex: selectedEmpDetail === emp.id ? 10 : 1 }}
-                    transition={{ delay: i * 0.03, duration: 0.22 }}
+                    animate={{ 
+                      opacity: hoveredEmpId && hoveredEmpId !== emp.id ? 0.4 : 1, 
+                      scale: hoveredEmpId && hoveredEmpId !== emp.id ? 0.98 : 1,
+                      filter: hoveredEmpId && hoveredEmpId !== emp.id ? "blur(3px)" : "blur(0px)",
+                      x: 0, 
+                      zIndex: selectedEmpDetail === emp.id ? 10 : 1 
+                    }}
+                    transition={{ delay: i * 0.03, duration: 0.28, ease: "easeOut" }}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5, 
@@ -238,8 +247,8 @@ export default function AdminEmployees() {
                       zIndex: 50,
                       rotateX: 4,
                       rotateY: -2,
-                      background: dark ? "rgba(40, 30, 65, 0.75)" : "rgba(255, 255, 255, 0.95)",
-                      backdropFilter: "blur(16px)",
+                      background: dark ? "rgba(25, 25, 35, 0.75)" : "rgba(255, 255, 255, 0.85)",
+                      backdropFilter: "blur(24px) saturate(180%)",
                       border: dark ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(0,0,0,0.12)",
                       boxShadow: dark 
                         ? "inset 0 1px 2px rgba(255,255,255,0.3), 0 12px 24px rgba(0,0,0,0.8), 0 24px 48px rgba(0,0,0,0.6)" 
@@ -253,9 +262,6 @@ export default function AdminEmployees() {
                       transformStyle: "preserve-3d",
                       willChange: "transform, background, box-shadow, z-index",
                     }}>
-                    {/* Hover internal glow */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-var(--tc-primary)/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
                     {/* Avatar */}
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                       style={{ background: `linear-gradient(135deg, var(--tc-primary), var(--tc-accent))` }}>
