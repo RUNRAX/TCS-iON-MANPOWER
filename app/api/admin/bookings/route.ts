@@ -37,7 +37,7 @@ export const GET = withAdmin(async (request: NextRequest, { userId, userRole }) 
   let employeesQuery = supabase
     .from("employee_profiles")
     .select(`id, full_name, email, phone, user_id, status,
-             users(id, email, is_active)`)
+             users!user_id(id, email, is_active)`)
     .eq("status", "approved")
     .eq("is_deleted", false)
     .order("full_name");
@@ -47,7 +47,7 @@ export const GET = withAdmin(async (request: NextRequest, { userId, userRole }) 
   }
 
   const { data: employees, error: empErr } = await employeesQuery;
-  if (empErr) { console.error("[Bookings GET employees]:", empErr); return serverError(); }
+  if (empErr) { console.error("[Bookings GET employees]:", empErr); /* non-fatal: still return shifts */ }
 
   // 3. Existing assignments for these shifts
   const shiftIds = (shifts ?? []).map((s: Record<string,string>) => s.id);
