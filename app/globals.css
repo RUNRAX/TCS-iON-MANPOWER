@@ -1170,3 +1170,41 @@ html.tc-light .admin-panel::after {
     animation: 250ms ease both pageFadeIn;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   § 19  Landing Page Utilities (3D Redesign)
+───────────────────────────────────────────────────────────────────────────── */
+
+/* Scroll indicator bounce */
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+.scroll-indicator {
+  animation: scrollBounce 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Text glow for hero headlines */
+.text-glow-gold {
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.3),
+               0 0 60px rgba(212, 175, 55, 0.1);
+}
+
+html.tc-light .text-glow-gold {
+  text-shadow: 0 0 30px rgba(212, 175, 55, 0.4),
+               0 0 60px rgba(212, 175, 55, 0.2);
+}
+
+/* Base landing page full-bleed container */
+.landing-canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none; /* Let clicks pass through to UI underneath */
+  width: 100vw;
+  height: 100vh;
+}
+
+.landing-canvas-container canvas {
+  pointer-events: auto; /* Re-enable pointer events on the canvas itself for mouse hover dynamics */
+}

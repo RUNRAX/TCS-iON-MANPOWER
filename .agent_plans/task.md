@@ -1,8 +1,6 @@
-# Portal Fixes Task List
+# Task: Portal-wrap Shift Modals for Full-Page Coverage
 
-- [x] 1. Update `AdminSiteLayout.tsx`: Remove `max-w-[1600px]` cap.
-- [x] 2. Update `app/api/admin/employees/route.ts`: Implement `activate_all` and auto-heal for `is_active` in GET.
-- [x] 3. Update `app/(dashboard)/admin/employees/page.tsx`: Add "Fix Inactive Employees" admin action.
-- [x] 4. Update `app/employee/login/page.tsx`: Show success banner for verified emails, improve error display.
-- [x] 5. Update `globals.css`: Improve glassmorphism blur and transition physics.
-- [x] 6. Update `AdminSiteLayout.tsx`: Enhance frost effect on header.
+- `[x]` Add `createPortal` import and `mounted` state
+- `[x]` Portal-wrap the Shift Details Modal (z-index 9990/9991)
+- `[x]` Portal-wrap the Create Shift Modal (z-index 9990/9999)
+- `[x]` Verify build compiles without errors
