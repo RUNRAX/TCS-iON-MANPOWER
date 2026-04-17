@@ -166,6 +166,8 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
   }
 
   // ── Step 3: flatten + apply status filter ─────────────────────────────────
+  const employeesToHeal: string[] = [];
+
   const employees = (data ?? []).flatMap((u: Record<string, unknown>) => {
     const profiles = u.employee_profiles;
     const p = Array.isArray(profiles)
@@ -174,6 +176,12 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
     const profileStatus: string = (p?.status as string) ?? "no_profile";
 
     if (status !== "all" && profileStatus !== status) return [];
+
+    // ── Auto-heal: if approved but inactive, track to fix and correct in UI ──
+    if (u.is_active === false && profileStatus === "approved") {
+      employeesToHeal.push(u.id as string);
+      u.is_active = true;
+    }
 
     return [
       {
@@ -196,6 +204,11 @@ export const GET = withAdmin(async (request, { userId, userRole }) => {
       },
     ];
   });
+
+  if (employeesToHeal.length > 0) {
+    // Fire and forget self-healing
+    supabase.from("users").update({ is_active: true }).in("id", employeesToHeal).then();
+  }
 
   return ok({
     employees,
@@ -625,6 +638,20 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
     string
   >;
   const { employeeId, action, reason, fullName, phone, city, email } = body;
+
+  if (action === "activate_all") {
+    const { error } = await supabase
+      .from("users")
+      .update({ is_active: true })
+      .eq("role", "employee")
+      .eq("is_active", false);
+
+    if (error) {
+      console.error("[activate_all] error:", error);
+      return serverError();
+    }
+    return ok({ message: "Activated all inactive employees." });
+  }
 
   if (!employeeId) return badRequest("EMPLOYEE ID REQUIRED");
 

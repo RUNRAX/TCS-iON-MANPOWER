@@ -61,15 +61,15 @@
   /* shadcn compat */
 
   /* Spatial UI Glass material tokens — heavier blur + saturation */
-  --glass-blur-sm: blur(20px) saturate(150%) brightness(1.02);
-  --glass-blur-md: blur(32px) saturate(160%) brightness(1.04);
-  --glass-blur-lg: blur(48px) saturate(170%) brightness(1.05);
-  --glass-blur-xl: blur(64px) saturate(180%) brightness(1.06);
+  --glass-blur-sm: blur(24px) saturate(180%) brightness(1.02);
+  --glass-blur-md: blur(40px) saturate(200%) brightness(1.05);
+  --glass-blur-lg: blur(60px) saturate(220%) brightness(1.08);
+  --glass-blur-xl: blur(80px) saturate(240%) brightness(1.10);
 
   /* Spatial UI — primary glass properties */
-  --spatial-glass-bg: rgba(30, 30, 30, 0.28);
+  --spatial-glass-bg: rgba(20, 20, 25, 0.35);
   --spatial-glass-border: rgba(255, 255, 255, 0.12);
-  --spatial-glass-blur: blur(24px) saturate(160%);
+  --spatial-glass-blur: blur(40px) saturate(200%) brightness(1.05);
   --spatial-glass-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 24px 48px rgba(0, 0, 0, 0.4);
@@ -77,8 +77,8 @@
 
   /* Timing — Apple spring system */
   --spring-snappy: cubic-bezier(0.25, 1, 0.5, 1);
-  --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --spring-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --spring-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --spring-decel: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
@@ -503,11 +503,11 @@ html.tc-light .glossy-border {
    § 7  Page Transitions (Next.js view transitions)
 ───────────────────────────────────────────────────────────────────────────── */
 ::view-transition-old(root) {
-  animation: 220ms var(--spring-decel) both pageFadeOut;
+  animation: 300ms var(--spring-smooth) both pageFadeOut;
 }
 
 ::view-transition-new(root) {
-  animation: 320ms var(--spring-smooth) both pageFadeIn;
+  animation: 450ms var(--spring-smooth) both pageFadeIn;
 }
 
 @keyframes pageFadeOut {

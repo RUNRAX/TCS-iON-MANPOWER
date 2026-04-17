@@ -1,8 +1,8 @@
-# Task Plan: 6 Portal Fixes
+# Portal Fixes Task List
 
-- [x] 1. Fix employee tile hover layout shift & increase blur (`app/(dashboard)/admin/employees/page.tsx`)
-- [x] 2. Fix Verification Link Redirect (`app/api/admin/employees/route.ts`, `app/auth/verify/route.ts`)
-- [x] 3. Fix Admin Profile Fallback (`app/api/admin/profile/route.ts`)
-- [x] 4. Fix Shift Modal Centering (`app/(dashboard)/admin/shifts/page.tsx`)
-- [x] 5. Fix Employee Inactive default on create (`app/api/admin/employees/route.ts`)
-- [x] 6. Optimize animations and performance in Global CSS (`app/globals.css`, `app/(dashboard)/admin/employees/page.tsx`)
+- [x] 1. Update `AdminSiteLayout.tsx`: Remove `max-w-[1600px]` cap.
+- [x] 2. Update `app/api/admin/employees/route.ts`: Implement `activate_all` and auto-heal for `is_active` in GET.
+- [x] 3. Update `app/(dashboard)/admin/employees/page.tsx`: Add "Fix Inactive Employees" admin action.
+- [x] 4. Update `app/employee/login/page.tsx`: Show success banner for verified emails, improve error display.
+- [x] 5. Update `globals.css`: Improve glassmorphism blur and transition physics.
+- [x] 6. Update `AdminSiteLayout.tsx`: Enhance frost effect on header.

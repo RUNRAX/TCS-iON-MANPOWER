@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff, CheckCircle } from "lucide-react";
 
 export default function EmployeeLoginPage() {
   const router = useRouter();
@@ -14,6 +14,19 @@ export default function EmployeeLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  useEffect(() => {
+    // Safely read query params without requiring a Suspense wrapper
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("verified") === "true") {
+        setSuccessMsg("Email verified successfully! You can now log in.");
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +98,20 @@ export default function EmployeeLoginPage() {
                 {error}
               </motion.div>
             )}
+
+            <AnimatePresence>
+              {successMsg && !error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="mb-6 p-3 w-full rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs text-center relative z-10 flex flex-col items-center gap-1"
+                >
+                  <CheckCircle size={16} />
+                  <span>{successMsg}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <form onSubmit={handleLogin} className="space-y-4 w-full px-2 relative z-10">
               <motion.div whileHover={{ scale: 1.02 }} className="w-full">

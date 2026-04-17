@@ -341,7 +341,7 @@ export default function AdminSiteLayout({
   const BLUR_SIDEBAR = "none";
   // Header blur: ALWAYS enhanced frosted glass — stronger when scrolled
   // Math.max(0, ...) ensures blur never goes negative during Framer spring bounces
-  const headerBlurPx = Math.max(0, scrolled ? Math.max(actualBlur, 32) : Math.max(actualBlur, 18));
+  const headerBlurPx = Math.max(0, scrolled ? Math.max(actualBlur, 42) : Math.max(actualBlur, 24));
   const BLUR_HEADER = `blur(${headerBlurPx}px)`;
 
   return (
@@ -567,8 +567,8 @@ export default function AdminSiteLayout({
                     ? `rgba(255,255,255,${scrolled ? 0.12 : 0.08})` 
                     : `rgba(255,255,255,${scrolled ? 0.85 : 0.65})`}`,
                   borderRadius: 20,
-                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 260 : 220}%)`,
-                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 260 : 220}%)`,
+                  backdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 300 : 250}%)`,
+                  WebkitBackdropFilter: `blur(${headerBlurPx}px) saturate(${scrolled ? 300 : 250}%)`,
                   boxShadow: dark
                     ? `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.18 : 0.10}), inset 0 -1px 1px rgba(255,255,255,0.03), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 15 : 8}%, transparent), 0 8px 32px rgba(0,0,0,${scrolled ? 0.3 : 0.15})`
                     : `inset 0 1.5px 2px rgba(255,255,255,${scrolled ? 0.95 : 0.80}), inset 0 -1px 1px rgba(0,0,0,0.05), inset 0 0 32px color-mix(in srgb, var(--tc-primary) ${scrolled ? 12 : 6}%, transparent), 0 4px 16px rgba(0,0,0,${scrolled ? 0.08 : 0.04})`
@@ -637,7 +637,7 @@ export default function AdminSiteLayout({
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}
-          <div className="px-3 md:px-6 lg:px-8 max-w-[1600px] mx-auto" style={{ minHeight: "100%" }} suppressHydrationWarning>
+          <div className="px-3 md:px-6 lg:px-8 w-full" style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
               <div
                 key={pathname}

@@ -91,6 +91,23 @@ export default function AdminEmployees() {
     onError: () => toast.error("Failed to remove employee")
   });
 
+  const { mutate: fixInactive, isPending: fixingInactive } = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/employees", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "activate_all" }),
+      });
+      if (!res.ok) throw new Error("Failed to activate employees");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Successfully activated all employees!");
+      qc.invalidateQueries({ queryKey: ["admin", "employees"] });
+    },
+    onError: () => toast.error("Failed to activate employees")
+  });
+
   // Debounce search so we don't fire on every keystroke
   const search = useDebounce(rawSearch, 350);
 
@@ -147,7 +164,21 @@ export default function AdminEmployees() {
           <h1 className="text-2xl font-bold" style={{ color: textMain }}>Employees</h1>
           <p className="text-sm mt-1" style={{ color: textMuted }}>Manage and approve employee registrations</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <motion.button
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={() => fixInactive()}
+            disabled={fixingInactive}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "10px 16px", borderRadius: 14,
+              background: dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+              color: textMain, border: `1px solid ${border}`, fontSize: 13, fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            {fixingInactive ? "Fixing..." : "Fix Inactive"}
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
             onClick={() => setCreateModalOpen(true)}
