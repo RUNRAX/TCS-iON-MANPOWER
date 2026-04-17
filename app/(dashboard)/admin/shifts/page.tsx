@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminShifts, useCreateShift, usePatchShift } from "@/hooks/use-api";
@@ -84,6 +85,10 @@ export default function AdminShifts() {
 
   // ── Details Modal State ──────────────────────────────────────────────────
   const [shiftDetails, setShiftDetails] = useState<any>(null);
+
+  // ── Portal mount guard (SSR safety — same pattern as CreateEmployeeModal) ──
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   const { data, isLoading, refetch } = useAdminShifts({ status: statusFilter === "all" ? undefined : statusFilter });
   const { mutateAsync: createShiftAsync, isPending: creating } = useCreateShift();
@@ -457,237 +462,262 @@ export default function AdminShifts() {
         </div>
       ) : null}
 
-      {/* ── Shift Details Modal ────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {shiftDetails && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{ position: "fixed", inset: 0, zIndex: 60, backdropFilter: "blur(12px) saturate(120%)", background: dark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.3)" }}
-              onClick={() => setShiftDetails(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 30px)", scale: 0.95 }}
-              animate={{ opacity: 1, x: "-50%", y: "-50%", scale: 1 }}
-              exit={{ opacity: 0, x: "-50%", y: "calc(-50% + 20px)", scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              style={{
-                position: "fixed", top: "50%", left: "50%", zIndex: 61,
-                width: "100%", maxWidth: 440,
-                background: "var(--spatial-glass-bg)", border: "var(--spatial-glass-border)",
-                borderRadius: 24, padding: "0 0 24px", overflow: "hidden",
-                backdropFilter: "var(--spatial-glass-blur)", boxShadow: "var(--spatial-glass-shadow)"
-              }}>
-              <div style={{ height: 4, background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary))" }} />
-              <div style={{ padding: "20px 24px 16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: `1px solid ${borderCol}` }}>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 4 }}>{shiftDetails.title}</h3>
-                  <p style={{ fontSize: 13, color: textMuted }}>Shift {shiftDetails.shift_number} · {prettyDate(shiftDetails.exam_date)}</p>
-                </div>
-                <button onClick={() => setShiftDetails(null)} style={{ width: 30, height: 30, borderRadius: 10, background: "rgba(239,68,68,0.1)", border: "none", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <X size={14} />
-                </button>
-              </div>
-              
-              <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-                {[
-                  { label: "Status", value: <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 99, ...(statusColors[shiftDetails.status] ?? statusColors.draft) }}>{shiftDetails.status}</span> },
-                  { label: "Time", value: `${shiftDetails.start_time} – ${shiftDetails.end_time}` },
-                  { label: "Venue", value: shiftDetails.venue },
-                  { label: "Pay Amount", value: `₹${shiftDetails.pay_amount}` },
-                  { label: "Confirmed Staff", value: `${shiftDetails.confirmed_count} / ${shiftDetails.max_employees}`, highlight: shiftDetails.confirmed_count >= shiftDetails.min_employees }
-                ].map(row => (
-                  <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: row.highlight ? "#34d399" : textMain }}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ padding: "0 24px" }}>
-                <button onClick={() => setShiftDetails(null)} style={{ width: "100%", padding: "12px", borderRadius: 12, background: "var(--tc-primary)", color: "#fff", border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Close</button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ── iOS 26 Glass Create Shift Modal ─────────────────────────────────── */}
-      <AnimatePresence>
-        {showCreate && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-              style={{ position: "fixed", inset: 0, zIndex: 50, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)" }}
-              onClick={() => setShowCreate(false)}
-            />
-
-            {/* Modal panel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 24, filter: "blur(6px)" }}
-              animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(3px)" }}
-              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-              style={{
-                position: "fixed", inset: 0, zIndex: 51,
-                display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-                pointerEvents: "none",
-              }}>
-              <div
-                className="glass-panel-strong admin-panel"
+      {/* ── Shift Details Modal (portalled to body for full-page coverage) ──── */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {shiftDetails && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(12px) saturate(120%)", WebkitBackdropFilter: "blur(12px) saturate(120%)", background: dark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.3)" }}
+                onClick={() => setShiftDetails(null)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 24, filter: "blur(6px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(3px)" }}
+                transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
                 style={{
-                  pointerEvents: "all",
-                  width: "100%", maxWidth: 540,
-                  maxHeight: "88vh", overflowY: "auto",
-                  borderRadius: 28,
-                  background: "var(--spatial-glass-bg)",
-                  backdropFilter: "var(--spatial-glass-blur)",
-                  padding: "0 0 32px",
-                  position: "relative",
-                  display: "flex", flexDirection: "column", overflow: "hidden",
+                  position: "fixed", inset: 0, zIndex: 9991,
+                  display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+                  pointerEvents: "none",
                 }}>
-                {/* Gradient top bar */}
-                <div style={{ height: 3, borderRadius: "28px 28px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
-
-                {/* Header */}
-                <div style={{ padding: "22px 26px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${g.innerBorder}` }}>
-                  <div>
-                    <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 3 }}>New Shift</h3>
-                    <p style={{ fontSize: 12, color: "var(--tc-primary)", fontWeight: 600, letterSpacing: 0.2 }}>
-                      Manual Configuration
-                    </p>
+                <div
+                  className="glass-panel-strong admin-panel"
+                  style={{
+                    pointerEvents: "all",
+                    width: "100%", maxWidth: 440,
+                    borderRadius: 28,
+                    background: "var(--spatial-glass-bg)",
+                    backdropFilter: "var(--spatial-glass-blur)",
+                    padding: "0 0 24px",
+                    position: "relative",
+                    display: "flex", flexDirection: "column", overflow: "hidden",
+                  }}>
+                  <div style={{ height: 3, borderRadius: "28px 28px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
+                  <div style={{ padding: "20px 24px 16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: `1px solid ${borderCol}` }}>
+                    <div>
+                      <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 4 }}>{shiftDetails.title}</h3>
+                      <p style={{ fontSize: 13, color: textMuted }}>Shift {shiftDetails.shift_number} · {prettyDate(shiftDetails.exam_date)}</p>
+                    </div>
+                    <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
+                      onClick={() => setShiftDetails(null)}
+                      style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                      <X size={14} />
+                    </motion.button>
                   </div>
-                  <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowCreate(false)}
-                    style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                    <X size={14} />
-                  </motion.button>
-                </div>
-
-                {/* Form */}
-                <div style={{ padding: "20px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
-
-                  {/* Exam Date — shown & editable, defaults to selectedDate */}
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Exam Date</label>
-                    <input
-                      type="date"
-                      value={form.examDate}
-                      min={todayStr()}
-                      onChange={e => setForm(p => ({ ...p, examDate: e.target.value }))}
-                      style={{ ...inp, colorScheme: dark ? "dark" : "light" }}
-                      onFocus={inpFocus}
-                      onBlur={inpBlur}
-                    />
-                  </div>
-
-                  {/* Title */}
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Exam Title</label>
-                    <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. GATE 2026" style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                  </div>
-
-                  {/* Venue */}
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Venue</label>
-                    <input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} placeholder="e.g. CIT Bangalore" style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                  </div>
-
-                  {/* Multi-Shift Items */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                    {form.shifts.map((shift, idx) => (
-                      <div key={idx} style={{ padding: 16, borderRadius: 16, background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${g.inputBorder}`, position: "relative" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--tc-primary)", textTransform: "uppercase", letterSpacing: 1 }}>Shift {shift.shiftNumber} Configuration</span>
-                          {form.shifts.length > 1 && (
-                            <button onClick={() => setForm(p => ({ ...p, shifts: p.shifts.filter((_, i) => i !== idx) }))} style={{ border: "none", background: "none", cursor: "pointer", color: "#EF4444" }}>
-                              <X size={14} />
-                            </button>
-                          )}
-                        </div>
-                        
-                        {/* Shift number & Times */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
-                          <div>
-                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Shift Number</label>
-                            <input type="number" min={1} value={shift.shiftNumber} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].shiftNumber=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                          </div>
-                          <div>
-                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Start Time</label>
-                            <input type="time" value={shift.startTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].startTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                          </div>
-                          <div>
-                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>End Time</label>
-                            <input type="time" value={shift.endTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].endTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                          </div>
-                        </div>
-
-                        {/* Staff, Pay & Notes */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                          <div>
-                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Max Staff</label>
-                            <input type="number" min={1} value={shift.maxEmployees} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].maxEmployees=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                          </div>
-                          <div>
-                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Pay (₹)</label>
-                            <input type="number" min={0} value={shift.payAmount} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].payAmount=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
-                          </div>
-                        </div>
-                        <div>
-                          <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Notes (optional)</label>
-                          <textarea rows={1} value={shift.notes} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].notes=v; return {...p, shifts:s}; }) }} placeholder="Additional instructions…" style={{ ...inp, resize: "none", padding: "8px 12px", minHeight: 36 }} onFocus={inpFocus} onBlur={inpBlur} />
-                        </div>
+                  
+                  <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+                    {[
+                      { label: "Status", value: <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 99, ...(statusColors[shiftDetails.status] ?? statusColors.draft) }}>{shiftDetails.status}</span> },
+                      { label: "Time", value: `${shiftDetails.start_time} – ${shiftDetails.end_time}` },
+                      { label: "Venue", value: shiftDetails.venue },
+                      { label: "Pay Amount", value: `₹${shiftDetails.pay_amount}` },
+                      { label: "Confirmed Staff", value: `${shiftDetails.confirmed_count} / ${shiftDetails.max_employees}`, highlight: shiftDetails.confirmed_count >= shiftDetails.min_employees }
+                    ].map(row => (
+                      <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: textMuted, letterSpacing: 1, textTransform: "uppercase" }}>{row.label}</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: row.highlight ? "#34d399" : textMain }}>{row.value}</span>
                       </div>
                     ))}
-
-                    <button
-                      type="button"
-                      onClick={() => setForm(p => {
-                        const last = p.shifts.length > 0 ? p.shifts[p.shifts.length - 1] : EMPTY_SHIFT;
-                        const nextNum = last.shiftNumber + 1;
-                        let nextStart = last.endTime;
-                        if (!nextStart) nextStart = "14:00";
-                        return { ...p, shifts: [...p.shifts, { ...EMPTY_SHIFT, shiftNumber: nextNum, startTime: nextStart, endTime: "18:00" }] };
-                      })}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 12, background: dark ? "rgba(79,158,255,0.08)" : "rgba(79,158,255,0.1)", border: `1px dashed rgba(79,158,255,0.4)`, color: "var(--tc-primary)", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
-                    >
-                      <Plus size={14} /> Add Another Shift
-                    </button>
                   </div>
 
-                  {/* Submit from form was removed here, it is in the footer below */}
-                </div> {/* End of form scrollable area */}
-
-                {/* Footer Navigation */}
-                <div style={{ padding: "14px 26px 18px", borderTop: `1px solid ${g.innerBorder}`, display: "flex", gap: 10, flexShrink: 0 }}>
-                  <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={handleCreate}
-                    disabled={creating || !form.title || !form.venue}
-                    style={{
-                      width: "100%", padding: "14px 0", borderRadius: 16,
-                      background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
-                      border: "none", color: "#fff", cursor: creating || !form.title || !form.venue ? "not-allowed" : "pointer",
-                      fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
-                      opacity: creating || !form.title || !form.venue ? 0.55 : 1,
-                      boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                      transition: "opacity 0.2s, box-shadow 0.25s",
-                    }}>
-                    {creating
-                      ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} />Creating…</>
-                      : <><CheckCircle size={16} />Create Shift</>}
-                  </motion.button>
+                  <div style={{ padding: "0 24px" }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setShiftDetails(null)}
+                      style={{ width: "100%", padding: "14px 0", borderRadius: 16, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", gap: 9, transition: "box-shadow 0.25s" }}>
+                      <CheckCircle size={16} /> Close
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* ── iOS 26 Glass Create Shift Modal (portalled to body for full-page coverage) ── */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {showCreate && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)" }}
+                onClick={() => setShowCreate(false)}
+              />
+
+              {/* Modal panel */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 24, filter: "blur(6px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(3px)" }}
+                transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+                style={{
+                  position: "fixed", inset: 0, zIndex: 9999,
+                  display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+                  pointerEvents: "none",
+                }}>
+                <div
+                  className="glass-panel-strong admin-panel"
+                  style={{
+                    pointerEvents: "all",
+                    width: "100%", maxWidth: 540,
+                    maxHeight: "88vh", overflowY: "auto",
+                    borderRadius: 28,
+                    background: "var(--spatial-glass-bg)",
+                    backdropFilter: "var(--spatial-glass-blur)",
+                    padding: "0 0 32px",
+                    position: "relative",
+                    display: "flex", flexDirection: "column", overflow: "hidden",
+                  }}>
+                  {/* Gradient top bar */}
+                  <div style={{ height: 3, borderRadius: "28px 28px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite" }} />
+
+                  {/* Header */}
+                  <div style={{ padding: "22px 26px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${g.innerBorder}` }}>
+                    <div>
+                      <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 3 }}>New Shift</h3>
+                      <p style={{ fontSize: 12, color: "var(--tc-primary)", fontWeight: 600, letterSpacing: 0.2 }}>
+                        Manual Configuration
+                      </p>
+                    </div>
+                    <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowCreate(false)}
+                      style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                      <X size={14} />
+                    </motion.button>
+                  </div>
+
+                  {/* Form */}
+                  <div style={{ padding: "20px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+                    {/* Exam Date — shown & editable, defaults to selectedDate */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Exam Date</label>
+                      <input
+                        type="date"
+                        value={form.examDate}
+                        min={todayStr()}
+                        onChange={e => setForm(p => ({ ...p, examDate: e.target.value }))}
+                        style={{ ...inp, colorScheme: dark ? "dark" : "light" }}
+                        onFocus={inpFocus}
+                        onBlur={inpBlur}
+                      />
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Exam Title</label>
+                      <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. GATE 2026" style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                    </div>
+
+                    {/* Venue */}
+                    <div>
+                      <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Venue</label>
+                      <input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} placeholder="e.g. CIT Bangalore" style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                    </div>
+
+                    {/* Multi-Shift Items */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                      {form.shifts.map((shift, idx) => (
+                        <div key={idx} style={{ padding: 16, borderRadius: 16, background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${g.inputBorder}`, position: "relative" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--tc-primary)", textTransform: "uppercase", letterSpacing: 1 }}>Shift {shift.shiftNumber} Configuration</span>
+                            {form.shifts.length > 1 && (
+                              <button onClick={() => setForm(p => ({ ...p, shifts: p.shifts.filter((_, i) => i !== idx) }))} style={{ border: "none", background: "none", cursor: "pointer", color: "#EF4444" }}>
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                          
+                          {/* Shift number & Times */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Shift Number</label>
+                              <input type="number" min={1} value={shift.shiftNumber} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].shiftNumber=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Start Time</label>
+                              <input type="time" value={shift.startTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].startTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>End Time</label>
+                              <input type="time" value={shift.endTime} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].endTime=v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                            </div>
+                          </div>
+
+                          {/* Staff, Pay & Notes */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Max Staff</label>
+                              <input type="number" min={1} value={shift.maxEmployees} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].maxEmployees=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Pay (₹)</label>
+                              <input type="number" min={0} value={shift.payAmount} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].payAmount=+v; return {...p, shifts:s}; }) }} style={inp} onFocus={inpFocus} onBlur={inpBlur} />
+                            </div>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Notes (optional)</label>
+                            <textarea rows={1} value={shift.notes} onChange={e => { const v=e.target.value; setForm(p => { const s=[...p.shifts]; s[idx].notes=v; return {...p, shifts:s}; }) }} placeholder="Additional instructions…" style={{ ...inp, resize: "none", padding: "8px 12px", minHeight: 36 }} onFocus={inpFocus} onBlur={inpBlur} />
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={() => setForm(p => {
+                          const last = p.shifts.length > 0 ? p.shifts[p.shifts.length - 1] : EMPTY_SHIFT;
+                          const nextNum = last.shiftNumber + 1;
+                          let nextStart = last.endTime;
+                          if (!nextStart) nextStart = "14:00";
+                          return { ...p, shifts: [...p.shifts, { ...EMPTY_SHIFT, shiftNumber: nextNum, startTime: nextStart, endTime: "18:00" }] };
+                        })}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px", borderRadius: 12, background: dark ? "rgba(79,158,255,0.08)" : "rgba(79,158,255,0.1)", border: `1px dashed rgba(79,158,255,0.4)`, color: "var(--tc-primary)", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}
+                      >
+                        <Plus size={14} /> Add Another Shift
+                      </button>
+                    </div>
+
+                    {/* Submit from form was removed here, it is in the footer below */}
+                  </div> {/* End of form scrollable area */}
+
+                  {/* Footer Navigation */}
+                  <div style={{ padding: "14px 26px 18px", borderTop: `1px solid ${g.innerBorder}`, display: "flex", gap: 10, flexShrink: 0 }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleCreate}
+                      disabled={creating || !form.title || !form.venue}
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 16,
+                        background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                        border: "none", color: "#fff", cursor: creating || !form.title || !form.venue ? "not-allowed" : "pointer",
+                        fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
+                        opacity: creating || !form.title || !form.venue ? 0.55 : 1,
+                        boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                        transition: "opacity 0.2s, box-shadow 0.25s",
+                      }}>
+                      {creating
+                        ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin .7s linear infinite" }} />Creating…</>
+                        : <><CheckCircle size={16} />Create Shift</>}
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
