@@ -125,7 +125,7 @@ export default function SuperSettingsPage() {
   /* ── Slider component ─────────────────────────────────────────────────── */
   const Slider = ({ label, value, onChange, min = 0, max = 100, icon: Icon }: {
     label: string; value: number; onChange: (v: number) => void;
-    min?: number; max?: number; icon: React.ElementType;
+    min?: number; max?: number; icon: React.ComponentType<any>;
   }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
       <Icon size={14} color="var(--tc-primary)" style={{ flexShrink: 0 }} />

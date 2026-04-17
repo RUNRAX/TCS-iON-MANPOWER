@@ -97,7 +97,7 @@ const BG_CONFIGS = [
 
 /* ── NavItem ─────────────────────────────────────────────────────────────── */
 interface NavItemProps {
-  item: { label: string; icon: React.ElementType; href: string };
+  item: { label: string; icon: React.ComponentType<any>; href: string };
   active: boolean;
   textMuted: string;
 }

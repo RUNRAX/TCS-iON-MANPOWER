@@ -64,7 +64,7 @@ function SettingsCard({ children, dark }: { children: React.ReactNode; dark: boo
 
 /* ── Section Header ──────────────────────────────────────────────────────── */
 function SectionHeader({ icon: Icon, title, subtitle, dark }: {
-  icon: React.ElementType; title: string; subtitle?: string; dark: boolean;
+  icon: React.ComponentType<any>; title: string; subtitle?: string; dark: boolean;
 }) {
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.50)" : "rgba(30,20,80,0.44)";
