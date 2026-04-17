@@ -468,13 +468,13 @@ export default function AdminShifts() {
               onClick={() => setShiftDetails(null)}
             />
             <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, x: "-50%", y: "calc(-50% + 30px)", scale: 0.95 }}
+              animate={{ opacity: 1, x: "-50%", y: "-50%", scale: 1 }}
+              exit={{ opacity: 0, x: "-50%", y: "calc(-50% + 20px)", scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 28 }}
               style={{
                 position: "fixed", top: "50%", left: "50%", zIndex: 61,
-                transform: "translate(-50%, -50%)", width: "100%", maxWidth: 440,
+                width: "100%", maxWidth: 440,
                 background: "var(--spatial-glass-bg)", border: "var(--spatial-glass-border)",
                 borderRadius: 24, padding: "0 0 24px", overflow: "hidden",
                 backdropFilter: "var(--spatial-glass-blur)", boxShadow: "var(--spatial-glass-shadow)"

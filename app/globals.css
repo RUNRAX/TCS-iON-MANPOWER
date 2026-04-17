@@ -328,19 +328,19 @@ html.tc-light .glossy-border {
 }
 
 .orb-1 {
-  animation: orbFloat1 20s ease-in-out infinite;
+  animation: orbFloat1 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .orb-2 {
-  animation: orbFloat2 26s ease-in-out infinite;
+  animation: orbFloat2 26s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .orb-3 {
-  animation: orbFloat3 18s ease-in-out infinite;
+  animation: orbFloat3 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .orb-4 {
-  animation: orbFloat4 24s ease-in-out infinite;
+  animation: orbFloat4 24s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -540,11 +540,14 @@ header,
 nav,
 main {
   transition:
-    background 0.42s var(--spring-decel),
-    border-color 0.42s var(--spring-decel),
-    box-shadow 0.42s var(--spring-decel),
-    color 0.30s var(--spring-decel),
-    backdrop-filter 0.45s var(--spring-smooth);
+    background 0.32s var(--spring-decel),
+    border-color 0.32s var(--spring-decel),
+    box-shadow 0.32s var(--spring-decel),
+    color 0.25s var(--spring-decel);
+}
+
+main {
+  contain: layout style paint;
 }
 
 /* ── Glossy flash on theme switch ────────────────────────────────────────── */
@@ -1039,7 +1042,7 @@ html.tc-light .skeleton {
   border-radius: var(--spatial-glass-radius);
   box-shadow: var(--spatial-glass-shadow);
   /* Do NOT use backface-visibility here as it forces 3D rendering context and breaks backdrop-filter over siblings */
-  transition: background 0.4s var(--spring-smooth), border-color 0.4s var(--spring-smooth), box-shadow 0.4s var(--spring-smooth);
+  transition: background 0.32s var(--spring-smooth), border-color 0.32s var(--spring-smooth), box-shadow 0.32s var(--spring-smooth);
 }
 
 .admin-panel::after {

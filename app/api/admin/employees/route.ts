@@ -315,6 +315,7 @@ export const POST = withAdmin(async (request, { userId }) => {
         center_code: centerCode,
         role: "employee",
         created_by_admin: userId,
+        is_active: true,
       })
       .eq("id", authUser.user.id)
       .select("id");
@@ -508,6 +509,7 @@ export const POST = withAdmin(async (request, { userId }) => {
       center_code: centerCode,
       role: "employee",
       created_by_admin: userId,
+      is_active: true,
     })
     .eq("id", newUser.user.id)
     .select("id");
@@ -635,15 +637,18 @@ export const PATCH = withAdmin(async (request: NextRequest, { userId }) => {
       email: email,
     });
     
-    if (linkError || !linkData?.properties?.action_link) {
+    if (linkError || !linkData?.properties?.hashed_token) {
       console.error("[Resend Verification Error]", linkError);
       return serverError("Failed to generate verification link from Supabase.");
     }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const verificationUrl = `${appUrl}/auth/verify?token_hash=${linkData.properties.hashed_token}&type=magiclink`;
     
     try {
       const emailContent = verificationEmail({
         fullName: fullName || "Employee",
-        verificationUrl: linkData.properties.action_link,
+        verificationUrl,
       });
       await sendEmail({
         to: email,

@@ -247,13 +247,13 @@ export default function AdminEmployees() {
                     onHoverEnd={() => setHoveredEmpId(null)}
                     initial={{ opacity: 0, x: -8, zIndex: 1 }}
                     animate={{ 
-                      opacity: hoveredEmpId && hoveredEmpId !== emp.id ? 0.4 : 1, 
+                      opacity: hoveredEmpId && hoveredEmpId !== emp.id ? 0.35 : 1, 
                       scale: hoveredEmpId && hoveredEmpId !== emp.id ? 0.98 : 1,
-                      filter: hoveredEmpId && hoveredEmpId !== emp.id ? "blur(3px)" : "blur(0px)",
+                      filter: hoveredEmpId && hoveredEmpId !== emp.id ? "blur(6px)" : "blur(0px)",
                       x: 0, 
                       zIndex: selectedEmpDetail === emp.id ? 10 : 1 
                     }}
-                    transition={{ delay: i * 0.03, duration: 0.35, ease: "easeInOut" }}
+                    transition={{ delay: i * 0.03, duration: 0.25, type: "tween", ease: "easeInOut" }}
                     whileHover={{ 
                       scale: 1.02, 
                       y: -5, 
@@ -261,7 +261,7 @@ export default function AdminEmployees() {
                       zIndex: 50,
                       background: dark ? "rgba(25, 25, 35, 0.75)" : "rgba(255, 255, 255, 0.85)",
                       backdropFilter: "blur(24px) saturate(180%)",
-                      border: dark ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(0,0,0,0.12)",
+                      borderColor: dark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.12)",
                       boxShadow: dark 
                         ? "inset 0 1px 2px rgba(255,255,255,0.3), 0 12px 24px rgba(0,0,0,0.8), 0 24px 48px rgba(0,0,0,0.6)" 
                         : "inset 0 1px 2px rgba(255,255,255,1), 0 12px 24px rgba(0,0,0,0.15), 0 24px 48px rgba(0,0,0,0.1)"
@@ -270,9 +270,11 @@ export default function AdminEmployees() {
                     onClick={() => setSelectedEmpDetail(selectedEmpDetail === emp.id ? null : emp.id)}
                     style={{ 
                       borderRadius: "16px",
-                      borderBottom: i < employees.length - 1 ? `1px solid ${border}` : "1px solid transparent",
+                      border: "1px solid transparent",
+                      borderBottomColor: i < employees.length - 1 && (!hoveredEmpId || hoveredEmpId === emp.id) ? border : "transparent",
                       transformStyle: "preserve-3d",
-                      willChange: "transform, background, box-shadow, z-index",
+                      willChange: "transform, opacity, filter",
+                      transformOrigin: "center",
                     }}>
                     {/* Avatar */}
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"

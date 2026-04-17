@@ -11,23 +11,27 @@ export const GET = withAdmin(async (_request: NextRequest, { userId, userEmail, 
   try {
     const supabase = createAdminClient();
 
-    // Fetch from users table (center_code, email, phone) + employee_profiles join (full_name)
-    const { data: userData } = await supabase
-      .from("users")
-      .select("center_code, email, phone, employee_profiles(full_name)")
-      .eq("id", userId)
-      .single();
+    // Fetch from users table + employee_profiles join
+    const [{ data: userData }, { data: authData }] = await Promise.all([
+      supabase
+        .from("users")
+        .select("center_code, email, phone, employee_profiles(full_name)")
+        .eq("id", userId)
+        .single(),
+      supabase.auth.admin.getUserById(userId)
+    ]);
+
+    const authMeta = authData?.user?.user_metadata ?? {};
 
     if (!userData) {
-      // Return safe fallback for seeded admins without a profile row
       return ok({
         profile: {
           id:          userId,
           email:       userEmail,
           role:        userRole,
-          full_name:   null,
-          phone:       null,
-          center_code: null,
+          full_name:   authMeta.full_name ?? null,
+          phone:       authMeta.phone ?? null,
+          center_code: authMeta.center_code ?? null,
         },
       });
     }
@@ -41,9 +45,9 @@ export const GET = withAdmin(async (_request: NextRequest, { userId, userEmail, 
         id:          userId,
         email:       userData.email ?? userEmail,
         role:        userRole,
-        full_name:   (profileData as Record<string, unknown> | null)?.full_name ?? null,
-        phone:       userData.phone ?? null,
-        center_code: userData.center_code ?? null,
+        full_name:   (profileData as Record<string, unknown> | null)?.full_name ?? authMeta.full_name ?? null,
+        phone:       userData.phone ?? authMeta.phone ?? null,
+        center_code: userData.center_code ?? authMeta.center_code ?? null,
       },
     });
   } catch (err) {
