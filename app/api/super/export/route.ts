@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { withSuperAdmin } from "@/lib/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withSuperAdmin(async (_request: NextRequest) => {
   const supabase = createAdminClient();
 

@@ -7,6 +7,8 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { withSuperAdmin, ok, serverError } from "@/lib/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withSuperAdmin(async () => {
   const supabase = createAdminClient();
 

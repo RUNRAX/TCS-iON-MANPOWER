@@ -6,6 +6,8 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { withEmployee, ok, serverError } from "@/lib/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withEmployee(async (_req, { userId }) => {
   const supabase = createAdminClient();
 

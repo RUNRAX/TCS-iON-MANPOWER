@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { withAdmin, ok, serverError } from "@/lib/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 export const GET = withAdmin(async (request, { userId, userRole }) => {
   const supabase = createAdminClient();
   const today = new Date().toISOString().split("T")[0];

@@ -1,6 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { withAdmin, ok, serverError } from "@/lib/utils/api";
 
+export const dynamic = 'force-dynamic';
+
 const ACTION_META: Record<string, { icon: string; label: string }> = {
   "employee.create":        { icon: "👤", label: "Employee added" },
   "shift.create":           { icon: "📅", label: "Shift created" },

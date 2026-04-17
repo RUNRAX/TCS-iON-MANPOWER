@@ -16,10 +16,11 @@ import ThemePanel from "@/components/ThemePanel";
 import dynamic from "next/dynamic";
 import ScrollSection from "@/components/landing/ScrollSection";
 
-// Dynamically import 3D heavy components to prevent SSR hydration issues and blocking
-const MolecularScene = dynamic(() => import("@/components/landing/MolecularScene"), { ssr: false });
-const Hero3DElements = dynamic(() => import("@/components/landing/Hero3DElements"), { ssr: false });
-import { Canvas } from "@react-three/fiber";
+// Dynamically import 3D engine to prevent any SSR evaluation of Canvas/Three.js
+const LandingCanvas = dynamic(() => import("@/components/landing/LandingCanvas"), { 
+  ssr: false,
+  loading: () => <div className="landing-canvas-container" />
+});
 
 const features = [
   { icon: CalendarDays, title: "Smart Scheduling", desc: "Post exam shifts instantly. Employees self-select based on their availability with zero friction." },
@@ -51,15 +52,7 @@ export default function Home() {
     <div style={{ minHeight: "100vh", overflowX: "hidden", color: textMain }}>
       
       {/* 3D Background Canvas */}
-      <div className="landing-canvas-container">
-        <Suspense fallback={null}>
-          <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 8], fov: 50 }} gl={{ antialias: true, alpha: true }}>
-            <MolecularScene />
-            {/* Overlay the interactive hero shapes on the same canvas for performance, or use separate Canvas. We use one: */}
-            <Hero3DElements scrollProgress={scrollProp} />
-          </Canvas>
-        </Suspense>
-      </div>
+      <LandingCanvas scrollProgress={scrollProp} />
 
       {/* NAVBAR */}
       <nav className="relative z-30 px-6 md:px-16 py-4 flex items-center justify-between sticky top-0"
