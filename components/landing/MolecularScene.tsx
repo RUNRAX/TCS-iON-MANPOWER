@@ -2,7 +2,7 @@
 
 import React, { useRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Environment, MeshTransmissionMaterial, Sparkles } from "@react-three/drei";
+import { MeshTransmissionMaterial, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 import { useTheme } from "@/lib/context/ThemeContext";
 
@@ -151,11 +151,24 @@ export default function MolecularScene() {
 
   return (
     <group ref={groupRef}>
-      {/* Dynamic Environment Lighting */}
-      <Environment preset={dark ? "city" : "studio"} environmentIntensity={dark ? 0.3 : 0.8} />
-      <ambientLight intensity={dark ? 0.2 : 0.8} />
+      {/* Procedural Environment Lighting (no external HDRI fetch) */}
+      <hemisphereLight
+        args={[
+          dark ? "#1a1a2e" : "#f0e6d2",   // sky color
+          dark ? "#0d0d1a" : "#d4a574",    // ground color
+          dark ? 0.4 : 0.9,                // intensity
+        ]}
+      />
+      <directionalLight
+        position={[5, 8, 5]}
+        intensity={dark ? 0.6 : 1.2}
+        color={dark ? "#8b9dc3" : "#fff8e7"}
+        castShadow={false}
+      />
+      <ambientLight intensity={dark ? 0.15 : 0.5} />
       <pointLight position={[10, 10, 10]} intensity={dark ? 0.8 : 1.5} color={primaryGold} />
       <pointLight position={[-10, -10, -5]} intensity={0.5} color="#e0550b" />
+      <pointLight position={[-5, 5, 8]} intensity={dark ? 0.3 : 0.6} color="#fbbf24" />
 
       {/* Nodes (Molecules) */}
       <instancedMesh ref={nodesRef} args={[undefined, undefined, NODE_COUNT]}>
