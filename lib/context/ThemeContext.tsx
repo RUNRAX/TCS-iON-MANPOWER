@@ -242,7 +242,6 @@ export function ThemeProvider({
     // Public routes → force orange, ignore all stored preferences
     if (isPublic) {
       setKey("orange");
-      setDarkRaw(DEFAULT_DARK);
       return;
     }
 
@@ -329,7 +328,6 @@ export function ThemeProvider({
     setKey(k);
   };
   const setDark = (fn: boolean | ((p: boolean) => boolean)) => {
-    if (isPublic) return;
     setDarkRaw(p => typeof fn === "function" ? fn(p) : fn);
   };
   const setCustomTheme = (p: Partial<CustomTheme>) => {
