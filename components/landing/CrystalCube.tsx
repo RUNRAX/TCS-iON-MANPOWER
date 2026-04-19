@@ -74,7 +74,7 @@ export default function CrystalCube() {
         style={{ pointerEvents: 'auto' }}
       >
         <ambientLight intensity={0.2} />
-        <Environment preset="night" />
+        <Environment files="/dikhololo_night_1k.hdr" />
         
         <GlassCube />
         

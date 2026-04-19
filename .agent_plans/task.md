@@ -4,3 +4,4 @@
 - [x] Modify `app/page.tsx`
 - [x] Update `app/globals.css`
 - [x] Verify functionality in browser
+- [x] Sentry: Self-host dikhololo_night_1k.hdr to resolve CSP failure
