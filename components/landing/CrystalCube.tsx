@@ -91,7 +91,7 @@ export default function CrystalCube() {
           frames={1}
         />
 
-        <EffectComposer disableNormalPass>
+        <EffectComposer>
           <Bloom luminanceThreshold={0.4} mipmapBlur={false} intensity={1.2} />
         </EffectComposer>
       </Canvas>
