@@ -1,6 +1,11 @@
-# Task: Portal-wrap Shift Modals for Full-Page Coverage
-
-- `[x]` Add `createPortal` import and `mounted` state
-- `[x]` Portal-wrap the Shift Details Modal (z-index 9990/9991)
-- `[x]` Portal-wrap the Create Shift Modal (z-index 9990/9999)
-- `[x]` Verify build compiles without errors
+- [x] Install `@sentry/nextjs` package
+- [x] Create `sentry.client.config.ts` at root
+- [x] Create `sentry.server.config.ts` at root
+- [x] Create `sentry.edge.config.ts` at root
+- [x] Update `next.config.js` with Sentry wrapper
+- [x] Update `app/error.tsx` to call Sentry
+- [x] Update `lib/utils/api.ts` to call Sentry
+- [x] Add Sentry vars to `.env.example`
+- [x] Create custom `app/not-found.tsx` matching error.tsx aesthetic
+- [x] Enhance `app/api/health/route.ts` with region, uptime_ms, and env check
+- [x] Verify `sentry.edge.config.ts` exists for Edge Runtime

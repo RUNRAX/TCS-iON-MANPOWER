@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema, ZodError } from "zod";
 import { createAdminClient, getUser, createClient } from "@/lib/supabase/server";
+import * as Sentry from "@sentry/nextjs";
 
 // ── Response helpers
 
@@ -193,6 +194,9 @@ export function withAuth(
 
       return handler(request, { userId, userRole, userEmail }, params);
     } catch (error) {
+      Sentry.captureException(error, {
+        tags: { layer: "api", route: request.nextUrl.pathname },
+      });
       console.error("[API] Unhandled error:", error);
       return serverError();
     }
@@ -238,6 +242,9 @@ export function withSuperAdmin(handler: RouteHandler) {
         userEmail: user.email ?? "",
       }, params);
     } catch (err) {
+      Sentry.captureException(err, {
+        tags: { layer: "api", route: request.nextUrl.pathname },
+      });
       console.error("[Super Admin Guard]:", err);
       return serverError();
     }

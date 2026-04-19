@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, RefreshCcw, Home, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * app/error.tsx — Global Next.js Error Boundary
@@ -19,6 +20,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     // In a real MNC environment, we would log this to Sentry/Axiom here
     console.error("Critical Application Error:", error);
   }, [error]);

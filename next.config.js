@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const { withSentryConfig } = require("@sentry/nextjs");
 
 // ── Resolve the App URL dynamically across all Vercel environments ──
 const APP_URL =
@@ -96,4 +97,13 @@ const nextConfig = {
   compress: true,
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: true,           // suppress Sentry CLI output during builds
+  widenClientFileUpload: true,
+  hideSourceMaps: true,   // don't expose source maps to the browser
+  disableLogger: true,
+  tunnelRoute: "/monitoring-tunnel", // avoids ad-blockers
+  automaticVercelMonitors: true,
+});
