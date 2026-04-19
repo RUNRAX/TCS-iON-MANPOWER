@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("notifications")
-    .select("id,type,title,message,read,created_at")
+    .select("id,type,title,message,is_read,created_at")
     .eq("employee_id", employeeId)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return serverError("Failed to fetch notifications", error);
   }
 
-  const unread = (data ?? []).filter(n => !n.read).length;
+  const unread = (data ?? []).filter(n => !n.is_read).length;
   return ok({ notifications: data ?? [], unread });
 }
 
@@ -37,7 +37,7 @@ export async function PATCH(request: NextRequest) {
 
   let q = supabase
     .from("notifications")
-    .update({ read: true })
+    .update({ is_read: true })
     .eq("employee_id", employeeId);
 
   if (ids && Array.isArray(ids) && ids.length > 0) q = q.in("id", ids);
