@@ -1,10 +1,62 @@
 "use client";
 
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, ContactShadows, Float, Box, Sphere } from '@react-three/drei';
+import { ContactShadows, Float, Sphere } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
+
+/**
+ * Programmatic cube-map environment — no external HDRI fetch needed.
+ * This avoids all CSP / network issues while still providing a rich
+ * reflective environment for the glass material.
+ */
+function LocalEnvironment() {
+  const cubeMap = useMemo(() => {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+
+    const faces: THREE.Texture[] = [];
+    const faceColors: [string, string][] = [
+      ['#0a0018', '#1a0030'], // +X
+      ['#050010', '#120028'], // -X
+      ['#0d001a', '#1f0040'], // +Y (top — slightly brighter)
+      ['#030008', '#080015'], // -Y (bottom — dark)
+      ['#08001a', '#150030'], // +Z
+      ['#060012', '#100025'], // -Z
+    ];
+
+    for (const [c1, c2] of faceColors) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, size);
+      gradient.addColorStop(0, c1);
+      gradient.addColorStop(1, c2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      // Add subtle noise dots for realism
+      for (let i = 0; i < 30; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const a = Math.random() * 0.15 + 0.03;
+        ctx.fillStyle = `rgba(180,140,255,${a})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      faces.push(tex.clone());
+    }
+
+    const cubeTexture = new THREE.CubeTexture(faces.map(t => t.image as HTMLCanvasElement));
+    cubeTexture.needsUpdate = true;
+    return cubeTexture;
+  }, []);
+
+  return <primitive object={cubeMap} attach="environment" />;
+}
 
 function InnerSphere() {
   return (
@@ -75,8 +127,13 @@ export default function CrystalCube() {
         style={{ pointerEvents: 'auto' }}
       >
         <ambientLight intensity={0.2} />
-        {/* Fallback to remote preset to avoid local 404 when server hasn't restarted yet */}
-        <Environment preset="night" />
+        
+        {/* Programmatic local env map — no external HDRI fetch, no CSP issues */}
+        <LocalEnvironment />
+        
+        {/* Key + fill lights to compensate for no HDRI */}
+        <directionalLight position={[5, 5, 5]} intensity={0.8} color="#c8b0ff" />
+        <directionalLight position={[-3, 2, -4]} intensity={0.4} color="#4488ff" />
         
         <GlassCube />
         
