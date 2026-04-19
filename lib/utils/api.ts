@@ -62,7 +62,8 @@ export function conflict(message: string): NextResponse {
   );
 }
 
-export function serverError(message = "Internal server error"): NextResponse {
+export function serverError(message = "Internal server error", err?: unknown): NextResponse {
+  if (err) Sentry.captureException(err);
   return NextResponse.json(
     { error: "server_error", message },
     { status: 500 }

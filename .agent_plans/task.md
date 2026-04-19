@@ -1,4 +1,7 @@
-- [x] Add `createPortal` import and `mounted` state to `app/(dashboard)/admin/payments/page.tsx`
-- [x] Add `glass` helpers and `inp` styles/handlers
-- [x] Replace `<AnimatePresence>` block for "Add Employee" modal with the new `createPortal` structure
-- [x] Test/Verify visually
+- [x] Part 1: Update `instrumentation.ts`
+- [x] Part 1: Update `instrumentation-client.ts`
+- [x] Part 1: Delete `sentry.server.config.ts`, `sentry.edge.config.ts`, `sentry.client.config.ts`
+- [x] Part 2: Update `lib/utils/api.ts` (add Sentry capture to `serverError`)
+- [x] Part 3: Update `app/api/employee/notifications/route.ts`
+- [x] Part 3: Create `supabase/migrations/[timestamp]_create_notifications_table.sql`
+- [ ] Part 7: Commit and push via `git`

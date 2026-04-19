@@ -146,3 +146,47 @@ This cycle repeats automatically on every session start and "x".
 - Do not call any MCP tools unless they are genuinely needed
 - When receiving "x" or "continue" — NEVER re-read full chat history, always load from checkpoint_latest first
 - **Domain Skills Protocol:** When generating, animating, or modifying frontend UI components, you must scan the `.agents/skills/` directory. If a relevant `SKILL.md` exists (e.g., gsap-react), read it and strictly follow its documented patterns before writing the implementation.
+
+## Sentry Error Monitoring
+
+### File Structure (Do Not Change)
+- `instrumentation.ts`        ← server + edge SDK init
+- `instrumentation-client.ts` ← browser SDK init
+- `app/global-error.tsx`      ← required error boundary
+- `next.config.js`            ← wrapped with withSentryConfig
+
+These four files are the complete Sentry setup. Never add `sentry.*.config.ts` files back. Never modify these files unless explicitly instructed by the user.
+
+### When to Query
+**Do NOT query Sentry automatically on session start.**
+Only query Sentry when the user explicitly says phrases like:
+- "check Sentry"
+- "scan Sentry"
+- "what errors are in Sentry"
+- "check production errors"
+
+### When Asked, Run This:
+```bash
+# Step 1 — list all unresolved issues
+curl -s -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  "https://sentry.io/api/0/projects/tcs-ion-manco/javascript-nextjs-pt/issues/?query=is:unresolved&limit=10" \
+  | jq '.[] | {
+      id: .id,
+      title: .title,
+      culprit: .culprit,
+      events: .count,
+      last_seen: .lastSeen,
+      first_seen: .firstSeen
+    }'
+
+# Step 2 — for each issue ID found above, get full stack trace
+curl -s -H "Authorization: Bearer $SENTRY_AUTH_TOKEN" \
+  "https://sentry.io/api/0/issues/ISSUE_ID/events/latest/" \
+  | jq '.entries[] | select(.type == "exception") | .data.values[].stacktrace.frames[-3:]'
+```
+
+### After Scanning:
+1. List all unresolved issues with their culprit file
+2. Sort by event count (highest = most impactful)
+3. Ask user which issue to fix before touching any code
+4. Never fix Sentry issues silently — always confirm with user first
