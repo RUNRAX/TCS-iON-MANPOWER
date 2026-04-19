@@ -52,6 +52,7 @@ function GlassCube() {
           clearcoatRoughness={0.1}
           color="#ffffff"
           envMapIntensity={1.5}
+          transparent={true}
         />
         <InnerSphere />
         
@@ -74,10 +75,12 @@ export default function CrystalCube() {
         style={{ pointerEvents: 'auto' }}
       >
         <ambientLight intensity={0.2} />
-        <Environment files="/dikhololo_night_1k.hdr" />
+        {/* Fallback to remote preset to avoid local 404 when server hasn't restarted yet */}
+        <Environment preset="night" />
         
         <GlassCube />
         
+        {/* Render shadows only once to avoid massive GPU overhead that causes Context Lost */}
         <ContactShadows 
           position={[0, -2.5, 0]} 
           opacity={0.5} 
@@ -85,10 +88,11 @@ export default function CrystalCube() {
           blur={3} 
           far={5} 
           color="#000000"
+          frames={1}
         />
 
-        <EffectComposer>
-          <Bloom luminanceThreshold={0.4} mipmapBlur intensity={1.2} />
+        <EffectComposer disableNormalPass>
+          <Bloom luminanceThreshold={0.4} mipmapBlur={false} intensity={1.2} />
         </EffectComposer>
       </Canvas>
     </div>

@@ -5,3 +5,5 @@
 - [x] Update `app/globals.css`
 - [x] Verify functionality in browser
 - [x] Sentry: Self-host dikhololo_night_1k.hdr to resolve CSP failure
+- [x] Fix Context Lost errors by optimizing `EffectComposer`, `ContactShadows` GPU usage
+- [x] Fix CSP to allow `rawcdn.githack.com` for remote HDR fallback
