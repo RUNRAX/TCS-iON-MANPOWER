@@ -7,6 +7,7 @@
  *  3. Export to Excel
  */
 import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/lib/context/ThemeContext";
 import { useAdminPayments, useClearPayment } from "@/hooks/use-api";
@@ -16,6 +17,32 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+
+// ── iOS 26 Glassmorphism helpers ─────────────────────────────────────────────
+const glass = {
+  dark: {
+    bg:          "rgba(12, 9, 30, 0.78)",
+    border:      "rgba(255,255,255,0.13)",
+    innerBorder: "rgba(255,255,255,0.07)",
+    shadow:      "0 48px 120px rgba(0,0,0,0.65), 0 16px 48px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.20)",
+    inputBg:     "rgba(255,255,255,0.06)",
+    inputBorder: "rgba(255,255,255,0.11)",
+    blur:        "blur(80px) saturate(220%) brightness(1.06)",
+    cardBorder:  "rgba(255,255,255,0.11)",
+    cardShadow:  "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.09)",
+  },
+  light: {
+    bg:          "rgba(255,255,255,0.82)",
+    border:      "rgba(255,255,255,0.92)",
+    innerBorder: "rgba(0,0,0,0.05)",
+    shadow:      "0 48px 120px rgba(0,0,0,0.14), 0 16px 48px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(0,0,0,0.04)",
+    inputBg:     "rgba(0,0,0,0.03)",
+    inputBorder: "rgba(0,0,0,0.09)",
+    blur:        "blur(80px) saturate(200%) brightness(1.02)",
+    cardBorder:  "rgba(255,255,255,0.85)",
+    cardShadow:  "0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95)",
+  },
+};
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ShiftMeta { id: string; title: string; shift_number: number; start_time: string; end_time: string; venue: string; status: string; }
@@ -150,6 +177,7 @@ const EmployeeRow = memo(function EmployeeRow({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminBookingsPage() {
   const { theme: t, dark } = useTheme();
+  const g = dark ? glass.dark : glass.light;
 
   const textMain  = dark ? "#f0eeff" : "#0f0a2e";
   const textMuted = dark ? "rgba(200,195,240,0.5)" : "rgba(30,20,80,0.45)";
@@ -162,6 +190,29 @@ export default function AdminBookingsPage() {
   const cardShadow = dark
     ? "0 12px 40px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12)"
     : "0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95)";
+
+  // ── Portal mount guard (SSR safety) ──
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const inp: React.CSSProperties = {
+    width: "100%", padding: "12px 15px", borderRadius: 14, fontSize: 13,
+    background: g.inputBg, border: `1px solid ${g.inputBorder}`,
+    color: textMain, outline: "none", fontFamily: "var(--font-outfit,'Outfit',sans-serif)",
+    transition: "border-color 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s cubic-bezier(0.4,0,0.2,1), background 0.22s cubic-bezier(0.4,0,0.2,1)",
+    boxSizing: "border-box",
+    boxShadow: dark ? "inset 0 1px 0 rgba(255,255,255,0.05)" : "inset 0 1px 0 rgba(255,255,255,0.80)",
+  };
+  const inpFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = "var(--tc-primary)";
+    e.target.style.boxShadow = "0 0 0 3px color-mix(in srgb, var(--tc-primary) 20%, transparent)";
+    e.target.style.background = dark ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.95)";
+  };
+  const inpBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = g.inputBorder;
+    e.target.style.boxShadow = "none";
+    e.target.style.background = g.inputBg;
+  };
 
   // Calendar state
   const today = new Date();
@@ -739,47 +790,129 @@ export default function AdminBookingsPage() {
         )}
       </AnimatePresence>
 
-      {/* Add Employee Modal — rendered outside AnimatePresence so it's always in the portal */}
-      <AnimatePresence>
-        {showAddEmployee && (
-          <>
-            <div style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(28px) saturate(160%)", WebkitBackdropFilter: "blur(28px) saturate(160%)", background: "rgba(0,0,0,0.45)" }}
-              onClick={() => { setShowAddEmployee(false); setEmpSearch(""); }} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 16 }}
-              transition={{ type: "spring", stiffness: 440, damping: 32 }}
-              style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 9999, width: "min(440px, 92vw)", maxHeight: "70vh", borderRadius: 28, background: dark ? "rgba(10,8,24,0.88)" : "rgba(255,255,255,0.92)", backdropFilter: "blur(80px) saturate(220%)", WebkitBackdropFilter: "blur(80px) saturate(220%)", border: `1px solid ${dark ? "rgba(255,255,255,0.13)" : "rgba(255,255,255,0.92)"}`, boxShadow: dark ? "0 40px 100px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.14)" : "0 24px 70px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.95)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-              <div style={{ padding: "18px 20px 12px", borderBottom: `1px solid ${border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                <div><p style={{ fontSize: 15, fontWeight: 700, color: textMain }}>Add Employee</p><p style={{ fontSize: 11, color: textMuted }}>{filteredAvailable.length} available</p></div>
-                <button onClick={() => { setShowAddEmployee(false); setEmpSearch(""); }} style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "none", cursor: "pointer", color: "#f87171", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={13} /></button>
-              </div>
-              <div style={{ padding: "12px 16px", flexShrink: 0, borderBottom: `1px solid ${border}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 12px", borderRadius: 10, background: dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)", border: `1px solid ${border}` }}>
-                  <Search size={13} style={{ color: textMuted, flexShrink: 0 }} />
-                  <input autoFocus value={empSearch} onChange={e => setEmpSearch(e.target.value)} placeholder="Search by name, email or phone…" style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: textMain, fontSize: 13 }} />
+      {/* Add Employee Modal — iOS 26 Glassmorphism portalled to document.body */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {showAddEmployee && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+                style={{ position: "fixed", inset: 0, zIndex: 9990, backdropFilter: "blur(8px) saturate(120%)", WebkitBackdropFilter: "blur(8px) saturate(120%)", background: "rgba(0,0,0,0.40)" }}
+                onClick={() => { setShowAddEmployee(false); setEmpSearch(""); }}
+              />
+
+              {/* Modal panel */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 24, filter: "blur(6px)" }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.96, y: 12, filter: "blur(3px)" }}
+                transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+                style={{
+                  position: "fixed", inset: 0, zIndex: 9999,
+                  display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+                  pointerEvents: "none",
+                }}>
+                <div
+                  className="glass-panel-strong admin-panel"
+                  style={{
+                    pointerEvents: "all",
+                    width: "100%", maxWidth: 540,
+                    maxHeight: "88vh", overflowY: "auto",
+                    borderRadius: 28,
+                    background: "var(--spatial-glass-bg)",
+                    backdropFilter: "var(--spatial-glass-blur)",
+                    padding: "0 0 32px",
+                    position: "relative",
+                    display: "flex", flexDirection: "column", overflow: "hidden",
+                  }}>
+                  {/* Gradient top bar */}
+                  <div style={{ height: 3, borderRadius: "28px 28px 0 0", background: "linear-gradient(90deg, var(--tc-primary), var(--tc-secondary), var(--tc-accent), var(--tc-secondary), var(--tc-primary))", backgroundSize: "200% 100%", animation: "gradientSlide 4s linear infinite", flexShrink: 0 }} />
+
+                  {/* Header */}
+                  <div style={{ padding: "22px 26px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${g.innerBorder}`, flexShrink: 0 }}>
+                    <div>
+                      <h3 style={{ fontSize: 18, fontWeight: 700, color: textMain, marginBottom: 3 }}>Add Employee</h3>
+                      <p style={{ fontSize: 12, color: "var(--tc-primary)", fontWeight: 600, letterSpacing: 0.2 }}>
+                        {filteredAvailable.length} available
+                      </p>
+                    </div>
+                    <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
+                      onClick={() => { setShowAddEmployee(false); setEmpSearch(""); }}
+                      style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                      <X size={14} />
+                    </motion.button>
+                  </div>
+
+                  {/* Search Input */}
+                  <div style={{ padding: "20px 26px 12px", flexShrink: 0 }}>
+                    <label style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: 2, textTransform: "uppercase", display: "block", marginBottom: 7 }}>Search Employees</label>
+                    <div style={{ position: "relative" }}>
+                      <Search size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: textMuted, pointerEvents: "none" }} />
+                      <input
+                        autoFocus
+                        value={empSearch}
+                        onChange={e => setEmpSearch(e.target.value)}
+                        placeholder="Search by name, email or phone…"
+                        style={{ ...inp, paddingLeft: 40, colorScheme: dark ? "dark" : "light" }}
+                        onFocus={inpFocus}
+                        onBlur={inpBlur}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Employee list */}
+                  <div style={{ overflowY: "auto", flex: 1, padding: "0 26px 20px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {filteredAvailable.length === 0 ? (
+                        <div style={{ padding: 40, textAlign: "center", color: textMuted, fontSize: 13, background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", borderRadius: 16, border: `1px solid ${g.inputBorder}` }}>
+                          {empSearch ? "No employees match your search" : "All employees already added"}
+                        </div>
+                      ) : filteredAvailable.map((emp, i) => (
+                        <motion.div key={emp.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
+                          onClick={() => addEmployee(emp)}
+                          style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", cursor: "pointer", borderRadius: 16, background: dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${g.inputBorder}`, transition: "all 0.2s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"; e.currentTarget.style.borderColor = "var(--tc-primary)"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = dark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)"; e.currentTarget.style.borderColor = g.inputBorder; }}>
+                          <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14, flexShrink: 0, boxShadow: "0 4px 12px color-mix(in srgb, var(--tc-primary) 30%, transparent)" }}>{(emp.full_name ?? "?")[0]?.toUpperCase()}</div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: textMain, marginBottom: 2 }}>{emp.full_name}</p>
+                            <p style={{ fontSize: 12, color: textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{emp.email} · {emp.phone}</p>
+                          </div>
+                          <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--tc-primary) 15%, transparent)", color: "var(--tc-primary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <UserPlus size={16} />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Footer Navigation */}
+                  <div style={{ padding: "18px 26px 0", borderTop: `1px solid ${g.innerBorder}`, display: "flex", gap: 10, flexShrink: 0 }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02, boxShadow: "0 12px 36px color-mix(in srgb, var(--tc-primary) 45%, transparent)" }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => { setShowAddEmployee(false); setEmpSearch(""); }}
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 16,
+                        background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))",
+                        border: "none", color: "#fff", cursor: "pointer",
+                        fontSize: 15, fontWeight: 700, letterSpacing: 0.3,
+                        boxShadow: "0 6px 24px color-mix(in srgb, var(--tc-primary) 35%, transparent)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
+                        transition: "box-shadow 0.25s",
+                      }}>
+                      <Check size={18} /> Done
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-              <div style={{ overflowY: "auto", flex: 1 }}>
-                {filteredAvailable.length === 0 ? (
-                  <div style={{ padding: 32, textAlign: "center", color: textMuted, fontSize: 13 }}>{empSearch ? "No employees match your search" : "All employees already added"}</div>
-                ) : filteredAvailable.map((emp, i) => (
-                  <motion.div key={emp.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-                    onClick={() => addEmployee(emp)}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", cursor: "pointer", borderBottom: `1px solid ${border}`, transition: "background 0.15s" }}
-                    onMouseEnter={e => (e.currentTarget.style.background = dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, var(--tc-primary), var(--tc-secondary))", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{(emp.full_name ?? "?")[0]?.toUpperCase()}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}><p style={{ fontWeight: 600, fontSize: 13, color: textMain, marginBottom: 2 }}>{emp.full_name}</p><p style={{ fontSize: 11, color: textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{emp.email} · {emp.phone}</p></div>
-                    <UserPlus size={14} style={{ color: "var(--tc-primary)", flexShrink: 0 }} />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

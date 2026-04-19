@@ -1,11 +1,4 @@
-- [x] Install `@sentry/nextjs` package
-- [x] Create `sentry.client.config.ts` at root
-- [x] Create `sentry.server.config.ts` at root
-- [x] Create `sentry.edge.config.ts` at root
-- [x] Update `next.config.js` with Sentry wrapper
-- [x] Update `app/error.tsx` to call Sentry
-- [x] Update `lib/utils/api.ts` to call Sentry
-- [x] Add Sentry vars to `.env.example`
-- [x] Create custom `app/not-found.tsx` matching error.tsx aesthetic
-- [x] Enhance `app/api/health/route.ts` with region, uptime_ms, and env check
-- [x] Verify `sentry.edge.config.ts` exists for Edge Runtime
+- [x] Add `createPortal` import and `mounted` state to `app/(dashboard)/admin/payments/page.tsx`
+- [x] Add `glass` helpers and `inp` styles/handlers
+- [x] Replace `<AnimatePresence>` block for "Add Employee" modal with the new `createPortal` structure
+- [x] Test/Verify visually
