@@ -15,6 +15,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
 import { LiveClock } from "@/components/ui/LiveClock";
+import FeedbackHelpButton from "@/components/FeedbackHelpButton";
 
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList,
@@ -653,8 +654,18 @@ export default function AdminSiteLayout({
               </div>
             )}
           </div>
+
+          {/* ── Neon Bottom Glow — breathes & brightens on scroll ── */}
+          <div
+            aria-hidden
+            className="neon-bottom-glow"
+            style={{ opacity: scrolled ? 1 : 0.55 }}
+          />
         </main>
       </div>
+
+      {/* ── Feedback / Help FAB ── */}
+      {mounted && <FeedbackHelpButton role={role} />}
     </div>
   );
 

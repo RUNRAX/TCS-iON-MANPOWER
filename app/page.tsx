@@ -339,10 +339,27 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <footer className="relative z-10 px-6 md:px-16 py-6 flex items-center justify-between group"
+      <footer className="relative z-10 px-6 md:px-16 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 group"
         style={{ borderTop: `1px solid color-mix(in srgb, var(--tc-primary) 7%, transparent)`, color: textMuted, fontSize: 11 }}>
         <span>TCS iON Staff Portal © 2026</span>
         <div className="flex items-center gap-4">
+          <Link
+            href="/privacy-policy"
+            target="_blank"
+            style={{ color: textMuted, transition: "color 0.2s ease" }}
+            className="hover:text-[var(--tc-primary)] transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <span style={{ opacity: 0.3 }}>·</span>
+          <a
+            href="mailto:rakshitawati11@gmail.com?subject=Issue%20Report%20%E2%80%94%20TCS%20iON%20Staff%20Portal&body=Please%20describe%20your%20issue%20below%3A%0A%0A----%0APortal%3A%20Landing%20Page%0A"
+            style={{ color: textMuted, transition: "color 0.2s ease" }}
+            className="hover:text-[var(--tc-primary)] transition-colors"
+          >
+            Report an Issue
+          </a>
+          <span style={{ opacity: 0.3 }}>·</span>
           <Link href="/super/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 tc-gradient-text font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
             Super Admin
           </Link>

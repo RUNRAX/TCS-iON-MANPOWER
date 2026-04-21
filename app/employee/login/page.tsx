@@ -165,9 +165,27 @@ export default function EmployeeLoginPage() {
           </motion.div>
         </div>
         
-        <p className="text-center text-xs text-white/20 mt-8">
-          TCS iON Staff Portal © 2026
-        </p>
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <p className="text-center text-xs text-white/20">
+            TCS iON Staff Portal © 2026
+          </p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/privacy-policy"
+              target="_blank"
+              className="text-[11px] text-emerald-400/60 hover:text-emerald-400 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <span className="text-white/10 text-[11px]">·</span>
+            <a
+              href={`mailto:rakshitawati11@gmail.com?subject=Issue%20Report%20%E2%80%94%20TCS%20iON%20Staff%20Portal&body=Please%20describe%20your%20issue%20below%3A%0A%0A----%0APortal%3A%20Employee%20Login%0A`}
+              className="text-[11px] text-emerald-400/60 hover:text-emerald-400 transition-colors"
+            >
+              Report an Issue
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

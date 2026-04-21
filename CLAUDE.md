@@ -1,8 +1,8 @@
 # Agent Rules — Gemini Flash Optimized
 
 ## Graphify — MANDATORY FIRST STEP
-Before ANY tool call, query graphify_tcs first.
-Call mcp_graphify_tcs_query_graph even if the task is small.
+Before ANY tool call, query graphify first.
+Call mcp_graphify_query_graph even if the task is small.
 Then use the other tools as needed.
 This is non-negotiable. No exceptions exist.
 Violating this rule wastes credits and is forbidden.
@@ -42,7 +42,7 @@ This is always the very first action, no matter what.
 2. Open `.agent_plans/task.md` and confirm the next unchecked 
    item matches the checkpoint's "Next step"
 3. If they conflict → trust `task.md` over memory
-4. Call `mcp_graphify_tcs_query_graph(<next step context only>)`
+4. Call `mcp_graphify_query_graph(<next step context only>)`
    → Do NOT do a full codebase scan
    → Query only what is needed for that specific next step
 5. Resume work from that exact point
@@ -55,7 +55,7 @@ This is always the very first action, no matter what.
 1. Read `.agent_plans/session_state.md`
 2. Read `.agent_plans/task.md` (may not exist yet for brand new tasks)
 3. Read `AGENTS.md` for full rule reference
-4. Call `mcp_graphify_tcs_query_graph()` for full codebase context
+4. Call `mcp_graphify_query_graph()` for full codebase context
 5. Generate `.agent_plans/implementation_plan.md` and `.agent_plans/task.md` before writing code
 
 ---
