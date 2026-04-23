@@ -28,6 +28,7 @@ const PUBLIC_ROUTES = [
   "/api/auth/change-password",
   "/api/health",
   "/api/webhooks",
+  "/privacy-policy",
 ];
 
 export async function middleware(request: NextRequest) {

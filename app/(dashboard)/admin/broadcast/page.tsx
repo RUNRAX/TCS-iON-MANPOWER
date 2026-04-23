@@ -301,14 +301,6 @@ export default function AdminBroadcast() {
   return (
     <div style={{ padding: isMobile ? "12px 12px" : "24px 28px", minHeight: "100%", position: "relative" }}>
 
-      {/* Ambient orbs — hidden on mobile for performance */}
-      {!isMobile && (
-        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "-10%", right: "5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-primary) 12%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat1 20s ease-in-out infinite" }} />
-          <div style={{ position: "absolute", bottom: "10%", left: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, color-mix(in srgb, var(--tc-secondary) 10%, transparent) 0%, transparent 70%)", filter: "blur(60px)", animation: "orbFloat2 25s ease-in-out infinite" }} />
-        </div>
-      )}
-
       {/* Header */}
       <div
         style={{ marginBottom: isMobile ? 16 : 32, position: "relative", zIndex: 1 }}

@@ -475,12 +475,12 @@ html.tc-light .glossy-border {
 /* ── Neon Bottom Glow — Scroll indicator ── */
 @keyframes neonPulse {
   0%, 100% {
-    opacity: 0.45;
+    opacity: 0.5;
     filter: blur(18px) saturate(180%);
   }
   50% {
-    opacity: 0.75;
-    filter: blur(22px) saturate(220%);
+    opacity: 1.0;
+    filter: blur(24px) saturate(240%);
   }
 }
 
@@ -489,15 +489,16 @@ html.tc-light .glossy-border {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: 80px;
   pointer-events: none;
   z-index: 20;
   background: linear-gradient(
     to top,
-    color-mix(in srgb, var(--tc-primary) 30%, transparent) 0%,
-    color-mix(in srgb, var(--tc-primary) 14%, transparent) 40%,
+    color-mix(in srgb, var(--tc-primary) 55%, transparent) 0%,
+    color-mix(in srgb, var(--tc-primary) 30%, transparent) 50%,
     transparent 100%
   );
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--tc-primary) 40%, transparent);
   animation: neonPulse 3.2s ease-in-out infinite;
   transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -569,11 +570,11 @@ aside,
 header,
 nav,
 main {
+  will-change: auto;
   transition:
-    background 0.32s var(--spring-decel),
-    border-color 0.32s var(--spring-decel),
-    box-shadow 0.32s var(--spring-decel),
-    color 0.25s var(--spring-decel);
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 main {

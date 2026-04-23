@@ -574,7 +574,7 @@ export default function SuperSiteLayout({
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ scrollBehavior: "smooth" }} suppressHydrationWarning>
+        <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ contain: "content" }} suppressHydrationWarning>
           {/* Header — Floating frosted glass pill */}
           <div className="z-50 px-5 md:px-8 lg:px-10" style={{
             position: "sticky", top: 0, zIndex: 50,
@@ -686,7 +686,7 @@ export default function SuperSiteLayout({
           <div
             aria-hidden
             className="neon-bottom-glow"
-            style={{ opacity: scrolled ? 1 : 0.55 }}
+            style={{ opacity: scrolled ? 1 : 0.7 }}
           />
         </main>
       </div>
