@@ -684,14 +684,14 @@ export default function SuperSiteLayout({
             )}
           </div>
 
-          {/* ── Neon Bottom Glow — breathes & brightens on scroll ── */}
-          <div
-            aria-hidden
-            className="neon-bottom-glow"
-            style={{ opacity: scrolled ? 1 : 0.7 }}
-          />
           </div>
         </main>
+        {/* ── Neon Bottom Glow — breathes & brightens on scroll ── */}
+        <div
+          aria-hidden
+          className="neon-bottom-glow"
+          style={{ opacity: scrolled ? 1 : 0.7 }}
+        />
       </div>
 
       {/* ── Feedback / Help FAB ── */}

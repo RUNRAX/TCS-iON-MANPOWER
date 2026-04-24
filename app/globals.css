@@ -492,10 +492,11 @@ html.tc-light .glossy-border {
   z-index: 20;
   background: radial-gradient(
     ellipse 80% 100% at 50% 100%,
-    color-mix(in srgb, var(--tc-primary) 65%, transparent) 0%,
-    color-mix(in srgb, var(--tc-secondary) 30%, transparent) 45%,
+    color-mix(in srgb, var(--tc-primary) 90%, transparent) 0%,
+    color-mix(in srgb, var(--tc-secondary) 50%, transparent) 45%,
     rgba(0, 0, 0, 0) 80%
   );
+  filter: saturate(200%) brightness(1.2);
   animation: neonPulse 3.2s ease-in-out infinite;
   transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
