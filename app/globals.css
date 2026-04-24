@@ -487,23 +487,17 @@ html.tc-light .glossy-border {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 120px;
+  height: 65px;
   pointer-events: none;
   z-index: 20;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--tc-primary) 85%, transparent) 0%,
-    color-mix(in srgb, var(--tc-secondary) 60%, transparent) 40%,
-    transparent 100%
+  background: radial-gradient(
+    ellipse 80% 100% at 50% 100%,
+    color-mix(in srgb, var(--tc-primary) 65%, transparent) 0%,
+    color-mix(in srgb, var(--tc-secondary) 30%, transparent) 45%,
+    rgba(0, 0, 0, 0) 80%
   );
-  box-shadow: 
-    0 15px 45px color-mix(in srgb, var(--tc-primary) 60%, transparent),
-    inset 0 -5px 15px color-mix(in srgb, var(--tc-secondary) 40%, transparent);
   animation: neonPulse 3.2s ease-in-out infinite;
   transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
-  filter: blur(8px);
 }
 
 @keyframes fetchPulse {
