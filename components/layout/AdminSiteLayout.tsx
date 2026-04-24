@@ -479,7 +479,7 @@ export default function AdminSiteLayout({
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2.5 py-2 space-y-0.5 overflow-y-auto relative z-10" style={{ scrollbarWidth: "none" }}>
+        <nav data-lenis-prevent="true" className="flex-1 px-2.5 py-2 space-y-0.5 overflow-y-auto relative z-10" style={{ scrollbarWidth: "none" }}>
           {navItems.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase())).map(item => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
