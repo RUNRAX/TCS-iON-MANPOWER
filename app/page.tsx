@@ -12,8 +12,8 @@
  *  - Pixel-perfect design preserved: FloatingOrb, Card3D, FloatingCube, ThemePanel
  */
 
-import React, { useRef, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useRef, useCallback, useState, useEffect } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll, useMotionValueEvent } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/context/ThemeContext";
@@ -21,6 +21,7 @@ import {
   CalendarDays, Users, Zap, Shield, ArrowRight, ChevronRight, LogIn,
 } from "lucide-react";
 import ThemePanel from "@/components/ThemePanel";
+import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 
 const features = [
   { icon: CalendarDays, title: "Smart Scheduling", desc: "Post exam shifts instantly. Employees self-select based on their availability with zero friction." },
@@ -93,6 +94,28 @@ export default function Home() {
   const { dark, theme: t } = useTheme();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 10);
+    // Calculate if at bottom
+    if (typeof window !== 'undefined') {
+      const isBottom = window.innerHeight + latest >= document.body.offsetHeight - 50;
+      setIsAtBottom(isBottom);
+    }
+  });
+
+  // Check initial scroll position
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsScrolled(window.scrollY > 10);
+      setIsAtBottom(window.innerHeight + window.scrollY >= document.body.offsetHeight - 50);
+    }
+  }, []);
+
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     mouseX.set(e.clientX / window.innerWidth);
     mouseY.set(e.clientY / window.innerHeight);
@@ -111,6 +134,36 @@ export default function Home() {
       onMouseMove={onMouseMove}
       style={{ minHeight: "100vh", overflowX: "hidden", background: bgMain, color: textMain, transition: "background 0.6s ease, color 0.4s ease" }}
     >
+      <PrivacyPolicyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
+
+      {/* Top Fading Environment (Dissolve Mask) */}
+      <motion.div 
+        className="fixed inset-x-0 top-0 h-32 pointer-events-none z-40"
+        style={{ 
+          opacity: isScrolled ? 1 : 0,
+          background: `linear-gradient(to bottom, color-mix(in srgb, var(--tc-primary) 8%, var(--theme-bg-color)) 0%, transparent 100%)`,
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          maskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+          transition: "opacity 0.4s ease"
+        }} 
+      />
+
+      {/* Bottom Fading Environment (Dissolve Mask) */}
+      <motion.div 
+        className="fixed inset-x-0 bottom-0 h-40 pointer-events-none z-40"
+        style={{ 
+          opacity: isAtBottom ? 0 : 1,
+          background: `linear-gradient(to top, color-mix(in srgb, var(--tc-secondary) 8%, var(--theme-bg-color)) 0%, transparent 100%)`,
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          maskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+          transition: "opacity 0.4s ease"
+        }} 
+      />
+
       {/* Animated background orbs */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="orb-1 absolute rounded-full gpu"
@@ -343,22 +396,47 @@ export default function Home() {
         style={{ borderTop: `1px solid color-mix(in srgb, var(--tc-primary) 7%, transparent)`, color: textMuted, fontSize: 11 }}>
         <span>TCS iON Staff Portal © 2026</span>
         <div className="flex items-center gap-4">
-          <Link
-            href="/privacy-policy"
-            target="_blank"
+          <button
+            onClick={() => setShowPrivacyModal(true)}
             style={{ color: textMuted, transition: "color 0.2s ease" }}
             className="hover:text-[var(--tc-primary)] transition-colors"
           >
             Privacy Policy
-          </Link>
+          </button>
           <span style={{ opacity: 0.3 }}>·</span>
-          <a
-            href="mailto:rakshitawati11@gmail.com?subject=Issue%20Report%20%E2%80%94%20TCS%20iON%20Staff%20Portal&body=Please%20describe%20your%20issue%20below%3A%0A%0A----%0APortal%3A%20Landing%20Page%0A"
+          <button
+            onClick={() => {
+              const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" });
+              const mailto =
+                `mailto:rakshitawati11@gmail.com` +
+                `?subject=${encodeURIComponent(`Issue Report — TCS iON Staff Portal — Guest — ${new Date().toLocaleDateString("en-IN")}`)}` +
+                `&body=${encodeURIComponent(
+                  `Hi Super Admin,\n\n` +
+                  `I'd like to report the following issue:\n\n` +
+                  `Issue Description:\n[Please describe the issue you encountered]\n\n` +
+                  `Steps to Reproduce:\n1. \n2. \n3. \n\n` +
+                  `Expected Behavior:\n[What did you expect to happen?]\n\n` +
+                  `────────────────────────\n` +
+                  `Auto-captured Details (Do Not Edit)\n` +
+                  `────────────────────────\n` +
+                  `Page:        ${typeof window !== "undefined" ? window.location.href : "Landing Page"}\n` +
+                  `Role:        Guest\n` +
+                  `Timestamp:   ${now}\n` +
+                  `Browser:     ${typeof window !== "undefined" ? navigator.userAgent : "Unknown"}\n` +
+                  `Portal:      TCS iON Staff Portal\n`
+                )}`;
+              try {
+                window.location.href = mailto;
+              } catch (e) {
+                navigator.clipboard.writeText("rakshitawati11@gmail.com");
+                alert("Copied support email to clipboard.");
+              }
+            }}
             style={{ color: textMuted, transition: "color 0.2s ease" }}
             className="hover:text-[var(--tc-primary)] transition-colors"
           >
             Report an Issue
-          </a>
+          </button>
           <span style={{ opacity: 0.3 }}>·</span>
           <Link href="/super/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 tc-gradient-text font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)' }}>
             Super Admin
@@ -366,6 +444,8 @@ export default function Home() {
           <span style={{ color: "var(--tc-primary)" }}>● ONLINE</span>
         </div>
       </footer>
+
+      <ThemePanel />
     </div>
   );
 }

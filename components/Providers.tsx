@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/lib/context/ThemeContext";
 import { Toaster } from "sonner";
 import NavigationProgress from "@/components/NavigationProgress";
+import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,20 +66,22 @@ export function Providers({
   return (
     <ThemeProvider userId={userId} userRole={userRole}>
       <HydrationTransitionGuard />
-      <QueryClientProvider client={queryClient}>
-        {children}
-        <NavigationProgress />
-        <Toaster
-          position="top-right"
-          richColors
-          toastOptions={{
-            style: {
-              fontFamily: "var(--font-outfit), sans-serif",
-              fontSize: 13,
-            },
-          }}
-        />
-      </QueryClientProvider>
+      <SmoothScrollProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <NavigationProgress />
+          <Toaster
+            position="top-right"
+            richColors
+            toastOptions={{
+              style: {
+                fontFamily: "var(--font-outfit), sans-serif",
+                fontSize: 13,
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </SmoothScrollProvider>
     </ThemeProvider>
   );
 }

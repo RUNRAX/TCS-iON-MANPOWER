@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 
 export default function EmployeeLoginPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function EmployeeLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     // Safely read query params without requiring a Suspense wrapper
@@ -61,6 +63,7 @@ export default function EmployeeLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 overflow-hidden relative">
+      <PrivacyPolicyModal isOpen={showPrivacyModal} onClose={() => setShowPrivacyModal(false)} />
       <motion.div 
         animate={{ y: [-150, 150, -150], x: [-100, 100, -100] }}
         transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
@@ -170,20 +173,26 @@ export default function EmployeeLoginPage() {
             TCS iON Staff Portal © 2026
           </p>
           <div className="flex items-center gap-4">
-            <Link
-              href="/privacy-policy"
-              target="_blank"
+            <button
+              onClick={() => setShowPrivacyModal(true)}
               className="text-[11px] text-emerald-400/60 hover:text-emerald-400 transition-colors"
             >
               Privacy Policy
-            </Link>
+            </button>
             <span className="text-white/10 text-[11px]">·</span>
-            <a
-              href={`mailto:rakshitawati11@gmail.com?subject=Issue%20Report%20%E2%80%94%20TCS%20iON%20Staff%20Portal&body=Please%20describe%20your%20issue%20below%3A%0A%0A----%0APortal%3A%20Employee%20Login%0A`}
+            <button
+              onClick={() => {
+                const mailto = "mailto:rakshitawati11@gmail.com?subject=Issue%20Report%20%E2%80%94%20TCS%20iON%20Staff%20Portal&body=Please%20describe%20your%20issue%20below%3A%0A%0A----%0APortal%3A%20Employee%20Login%0A";
+                const newWin = window.open(mailto, '_blank');
+                if (!newWin) {
+                  navigator.clipboard.writeText("rakshitawati11@gmail.com");
+                  alert("Copied support email to clipboard.");
+                }
+              }}
               className="text-[11px] text-emerald-400/60 hover:text-emerald-400 transition-colors"
             >
               Report an Issue
-            </a>
+            </button>
           </div>
         </div>
       </div>

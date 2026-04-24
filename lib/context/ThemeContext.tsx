@@ -61,7 +61,7 @@ const DEFAULT_AUTO_BG      = true;
 
 /* ── Route helpers ─────────────────────────────────────────────────────────── */
 const PUBLIC_ROUTES = new Set([
-  "/", "/login", "/register", "/forgot-password", "/reset-password", "/super/login",
+  "/login", "/register", "/forgot-password", "/reset-password", "/super/login",
 ]);
 const SUPER_ADMIN_PREFIXES = ["/super"];
 

@@ -16,6 +16,7 @@ import ThemePanel from "@/components/ThemePanel";
 import NotificationPanel from "@/components/NotificationPanel";
 import { LiveClock } from "@/components/ui/LiveClock";
 import FeedbackHelpButton from "@/components/FeedbackHelpButton";
+import { useLocalLenis } from "@/components/SmoothScrollProvider";
 
 
 import {
@@ -305,7 +306,7 @@ export default function EmployeeSiteLayout({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-
+  useLocalLenis(mainRef);
 
   /* Design tokens 
      Read dynamic opacity directly from the ThemeContext integers 
@@ -551,6 +552,7 @@ export default function EmployeeSiteLayout({
       <div className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }} suppressHydrationWarning>
         {/* Single scroll container — header is sticky inside so content scrolls behind it */}
         <main ref={mainRef} className="flex-1 overflow-y-auto relative" style={{ contain: "content" }} suppressHydrationWarning>
+          <div className="lenis-content-wrapper flex flex-col min-h-max relative">
           {/* Header — Floating frosted glass pill */}
           <div className="z-50 px-5 md:px-8 lg:px-10" style={{
             position: "sticky", top: 0, zIndex: 50,
@@ -664,6 +666,7 @@ export default function EmployeeSiteLayout({
             className="neon-bottom-glow"
             style={{ opacity: scrolled ? 1 : 0.7 }}
           />
+          </div>
         </main>
       </div>
 
