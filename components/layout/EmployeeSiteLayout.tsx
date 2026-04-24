@@ -643,7 +643,7 @@ export default function EmployeeSiteLayout({
           </div>
 
           {/* Page content — always render same DOM structure to avoid hydration mismatch */}
-          <div className="px-3 md:px-6 lg:px-8 max-w-[1600px] mx-auto" style={{ minHeight: "100%" }} suppressHydrationWarning>
+          <div className="px-3 md:px-6 lg:px-8 w-full" style={{ minHeight: "100%" }} suppressHydrationWarning>
             {mounted ? (
               <div
                 key={pathname}

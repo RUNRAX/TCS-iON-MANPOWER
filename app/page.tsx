@@ -138,28 +138,28 @@ export default function Home() {
 
       {/* Top Fading Environment (Dissolve Mask) */}
       <motion.div 
-        className="fixed inset-x-0 top-0 h-32 pointer-events-none z-40"
+        className="fixed inset-x-0 top-0 h-24 pointer-events-none z-40"
         style={{ 
           opacity: isScrolled ? 1 : 0,
-          background: `linear-gradient(to bottom, color-mix(in srgb, var(--tc-primary) 8%, var(--theme-bg-color)) 0%, transparent 100%)`,
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          maskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+          background: `linear-gradient(to bottom, color-mix(in srgb, var(--tc-primary) 4%, var(--theme-bg-color)) 0%, transparent 100%)`,
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
           transition: "opacity 0.4s ease"
         }} 
       />
 
       {/* Bottom Fading Environment (Dissolve Mask) */}
       <motion.div 
-        className="fixed inset-x-0 bottom-0 h-40 pointer-events-none z-40"
+        className="fixed inset-x-0 bottom-0 h-28 pointer-events-none z-40"
         style={{ 
           opacity: isAtBottom ? 0 : 1,
-          background: `linear-gradient(to top, color-mix(in srgb, var(--tc-secondary) 8%, var(--theme-bg-color)) 0%, transparent 100%)`,
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          maskImage: "linear-gradient(to top, black 20%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+          background: `linear-gradient(to top, color-mix(in srgb, var(--tc-secondary) 4%, var(--theme-bg-color)) 0%, transparent 100%)`,
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          maskImage: "linear-gradient(to top, black 0%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 100%)",
           transition: "opacity 0.4s ease"
         }} 
       />
@@ -445,7 +445,7 @@ export default function Home() {
         </div>
       </footer>
 
-      <ThemePanel />
+
     </div>
   );
 }
